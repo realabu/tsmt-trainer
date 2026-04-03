@@ -1,0 +1,277 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PARENT
+  TRAINER
+  ADMIN
+}
+
+enum TrainerAssignmentStatus {
+  PENDING
+  ACTIVE
+  REVOKED
+}
+
+enum SessionStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+enum BadgeTriggerType {
+  FIRST_SESSION
+  TOTAL_SESSION_COUNT
+  WEEKLY_GOAL_COMPLETED
+  CONSECUTIVE_WEEKS_COMPLETED
+  ROUTINE_RECORD
+  TASK_COMPLETION_COUNT
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+}
+
+enum SubscriptionStatus {
+  FREE
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum MediaKind {
+  IMAGE
+  AUDIO
+  VIDEO
+  EXTERNAL_LINK
+}
+
+model User {
+  id                String               @id @default(cuid())
+  email             String               @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  emailVerifiedAt   DateTime?
+  role              UserRole             @default(PARENT)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  refreshTokens     RefreshToken[]
+  ownedChildren     Child[]              @relation("OwnerChildren")
+  trainerAssignments RoutineAssignment[] @relation("AssignedTrainer")
+  subscriptions     Subscription[]
+  auditEvents       AuditEvent[]         @relation("ActorAuditEvents")
+}
+
+model RefreshToken {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Child {
+  id                String               @id @default(cuid())
+  ownerId           String
+  firstName         String
+  lastName          String
+  birthDate         DateTime?
+  notes             String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  owner             User                 @relation("OwnerChildren", fields: [ownerId], references: [id], onDelete: Cascade)
+  routines          Routine[]
+  sessions          Session[]
+  badgeAwards       BadgeAward[]
+  trainerAssignments RoutineAssignment[]
+}
+
+model Routine {
+  id                String               @id @default(cuid())
+  childId           String
+  name              String
+  description       String?
+  isArchived        Boolean              @default(false)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  child             Child                @relation(fields: [childId], references: [id], onDelete: Cascade)
+  tasks             RoutineTask[]
+  periods           RoutinePeriod[]
+  sessions          Session[]
+  trainerAssignments RoutineAssignment[]
+  badgeAwards       BadgeAward[]
+}
+
+model RoutineTask {
+  id                String         @id @default(cuid())
+  routineId         String
+  sortOrder         Int
+  title             String
+  details           String?
+  repetitionsLabel  String?
+  expectedSeconds   Int?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  routine           Routine        @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  sessionTimings    SessionTaskTiming[]
+  mediaLinks        TaskMediaLink[]
+
+  @@unique([routineId, sortOrder])
+}
+
+model RoutinePeriod {
+  id                String       @id @default(cuid())
+  routineId         String
+  name              String?
+  startsOn          DateTime
+  endsOn            DateTime
+  weeklyTargetCount Int
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  routine           Routine      @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  badgeAwards       BadgeAward[]
+}
+
+model RoutineAssignment {
+  id          String                  @id @default(cuid())
+  childId     String
+  routineId   String
+  trainerId   String
+  status      TrainerAssignmentStatus @default(PENDING)
+  assignedAt  DateTime                @default(now())
+  revokedAt   DateTime?
+  child       Child                   @relation(fields: [childId], references: [id], onDelete: Cascade)
+  routine     Routine                 @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  trainer     User                    @relation("AssignedTrainer", fields: [trainerId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id                  String              @id @default(cuid())
+  childId             String
+  routineId           String
+  status              SessionStatus       @default(DRAFT)
+  startedAt           DateTime?
+  completedAt         DateTime?
+  totalSeconds        Int?
+  completedTaskCount  Int                 @default(0)
+  notes               String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  child               Child               @relation(fields: [childId], references: [id], onDelete: Cascade)
+  routine             Routine             @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  taskTimings         SessionTaskTiming[]
+}
+
+model SessionTaskTiming {
+  id             String      @id @default(cuid())
+  sessionId      String
+  taskId         String
+  sortOrder      Int
+  secondsSpent   Int
+  startedAt      DateTime?
+  completedAt    DateTime?
+  session        Session     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  task           RoutineTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model BadgeDefinition {
+  id            String           @id @default(cuid())
+  code          String           @unique
+  title         String
+  description   String
+  iconUrl       String?
+  triggerType   BadgeTriggerType
+  triggerConfig Json?
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  awards        BadgeAward[]
+}
+
+model BadgeAward {
+  id                String          @id @default(cuid())
+  childId           String
+  routineId         String?
+  periodId          String?
+  badgeDefinitionId String
+  awardedAt         DateTime        @default(now())
+  reason            String?
+  child             Child           @relation(fields: [childId], references: [id], onDelete: Cascade)
+  routine           Routine?        @relation(fields: [routineId], references: [id], onDelete: SetNull)
+  period            RoutinePeriod?  @relation(fields: [periodId], references: [id], onDelete: SetNull)
+  badgeDefinition   BadgeDefinition @relation(fields: [badgeDefinitionId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                 String             @id @default(cuid())
+  userId             String
+  plan               SubscriptionPlan   @default(FREE)
+  status             SubscriptionStatus @default(FREE)
+  provider           String?
+  providerCustomerId String?
+  providerSubId      String?
+  trialEndsAt        DateTime?
+  currentPeriodEndsAt DateTime?
+  cancelAtPeriodEnd  Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events             SubscriptionEvent[]
+}
+
+model SubscriptionEvent {
+  id              String       @id @default(cuid())
+  subscriptionId  String
+  providerEventId String?
+  eventType       String
+  payload         Json?
+  createdAt       DateTime     @default(now())
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+}
+
+model MediaAsset {
+  id            String          @id @default(cuid())
+  ownerId       String?
+  kind          MediaKind
+  storageKey    String?
+  externalUrl   String?
+  fileName      String?
+  mimeType      String?
+  fileSizeBytes Int?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  taskLinks     TaskMediaLink[]
+}
+
+model TaskMediaLink {
+  id          String      @id @default(cuid())
+  taskId      String
+  mediaAssetId String
+  label       String?
+  sortOrder   Int         @default(0)
+  task        RoutineTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  mediaAsset  MediaAsset  @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+}
+
+model AuditEvent {
+  id           String   @id @default(cuid())
+  actorUserId  String?
+  entityType   String
+  entityId     String
+  action       String
+  payload      Json?
+  createdAt    DateTime @default(now())
+  actor        User?    @relation("ActorAuditEvents", fields: [actorUserId], references: [id], onDelete: SetNull)
+}
