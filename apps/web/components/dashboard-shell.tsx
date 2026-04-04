@@ -24,65 +24,39 @@ export function DashboardShell() {
 
   if (!user) {
     return (
-      <div className="shell">
-        <section className="hero">
-          <div className="hero-card">
-            <span className="eyebrow">TSMT Trainer</span>
-            <h1>Letisztult TSMT kísérő rendszer szülőknek és trainereknek.</h1>
-            <p>
-              Egy account alatt több gyerek, több feladatsor, heti célkövetés, session history, badge-ek és
-              trainer megosztás egy közös webes és később mobilból is használható backenddel.
-            </p>
-            <AuthPanel embedded />
-          </div>
+      <div className="landing-shell">
+        <section className="landing-hero">
+          <div className="landing-hero-overlay">
+            <div className="landing-left-stack">
+              <div className="landing-copy">
+                <span className="eyebrow">Otthoni TSMT kísérő</span>
+                <h1>Gyermekbarát keret az otthoni TSMT gyakorlásokhoz.</h1>
+                <p>
+                  Segít, hogy a gyerek értse, mi történik, lássa hol tart a folyamatban, és motiválóbb legyen
+                  végigcsinálni a feladatsort. A szülő közben nyugodtabban, átláthatóbban tudja kísérni az
+                  alkalmat.
+                </p>
+              </div>
 
-          <aside className="panel">
-            <h2>Mit tud mar most</h2>
-            <div className="list" style={{ marginTop: 12 }}>
-              <div className="list-item">
-                <strong>Edzes vegigvezetese</strong>
-                <span className="muted">Aktualis feladat, reszidok, kovetkezo feladat, session befejezes.</span>
-              </div>
-              <div className="list-item">
-                <strong>Heti celkovetes</strong>
-                <span className="muted">Idoszakokhoz rendelt heti darabszam es teljesites kovetese.</span>
-              </div>
-              <div className="list-item">
-                <strong>Trainer megosztas</strong>
-                <span className="muted">A szulo megoszthatja a rutint egy regisztralt trainerrel.</span>
+              <div className="landing-auth-card" id="auth">
+                <AuthPanel embedded />
               </div>
             </div>
-          </aside>
-        </section>
-
-        <section className="nav-row">
-          <div className="panel">
-            <h2>Szuloknek</h2>
-            <p className="muted">Gyerekek, rutinok, heti celok, session eredmenyek es trainer megosztas egy helyen.</p>
-          </div>
-          <div className="panel">
-            <h2>Trainereknek</h2>
-            <p className="muted">Read-only betekintes a megosztott gyerekek, rutinok es session eredmenyek adataiba.</p>
           </div>
         </section>
 
-        <section className="list-grid">
-          <div className="list-card">
-            <h2>Hogyan indulj el</h2>
-            <div className="list">
-              <div className="list-item">
-                <strong>1. Regisztralj szerepkorrel</strong>
-                <span className="muted">Szulo vagy trainer fiokkent tudsz belépni. Admin csak seedelt userkent letezik.</span>
-              </div>
-              <div className="list-item">
-                <strong>2. Szulokent epits rutint</strong>
-                <span className="muted">Gyereket, feladatsort, feladatokat es periodusokat hozhatsz letre.</span>
-              </div>
-              <div className="list-item">
-                <strong>3. Trainernel megjelenik a megosztas</strong>
-                <span className="muted">A megosztott rutinok a trainer dashboardon jelennek meg read-only formaban.</span>
-              </div>
-            </div>
+        <section className="landing-values">
+          <div className="landing-value-card">
+            <strong>A gyerek látja a haladást</strong>
+            <span className="muted">Az aktuális feladat, a következő lépés és az előrehaladás vizuálisan is követhető.</span>
+          </div>
+          <div className="landing-value-card">
+            <strong>Motiválóbb végigcsinálni</strong>
+            <span className="muted">A kiszámítható keret és a látható haladás sikerélményt ad az otthoni gyakorlásban.</span>
+          </div>
+          <div className="landing-value-card">
+            <strong>A trainer is követheti</strong>
+            <span className="muted">Másodlagos extra, hogy a megosztott rutinok előrehaladása a trainer számára is látható.</span>
           </div>
         </section>
       </div>

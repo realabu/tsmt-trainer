@@ -1,7 +1,11 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export function getApiUrl(path: string) {
   return `${API_URL}${path}`;
+}
+
+export function getApiDocsUrl() {
+  return getApiUrl("/api/docs");
 }
 
 export async function apiFetch<T>(

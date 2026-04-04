@@ -31,6 +31,7 @@ export function AuthPanel({ embedded = false }: { embedded?: boolean }) {
     "Jelentkezz be vagy hozz letre egy uj fiokot a folytatashoz.",
   );
   const [busy, setBusy] = useState(false);
+  const description = "Jelentkezz be vagy hozz letre egy uj fiokot a motivalt otthoni TSMT gyakorlashoz.";
 
   async function submit() {
     setBusy(true);
@@ -72,8 +73,23 @@ export function AuthPanel({ embedded = false }: { embedded?: boolean }) {
 
   return (
     <div className={embedded ? undefined : "list-card"} style={embedded ? { marginTop: 24 } : undefined}>
-      <h2>Belepes</h2>
-      <p className="muted">Szulo es trainer fiokkal is ugyanazt a kozos rendszert hasznalod, eltero jogosultsagokkal.</p>
+      <div className="auth-tabs">
+        <button
+          className={`auth-tab ${mode === "login" ? "active" : ""}`}
+          onClick={() => setMode("login")}
+          type="button"
+        >
+          Bejelentkezes
+        </button>
+        <button
+          className={`auth-tab ${mode === "register" ? "active" : ""}`}
+          onClick={() => setMode("register")}
+          type="button"
+        >
+          Regisztracio
+        </button>
+      </div>
+      <p className="muted">{description}</p>
       {user ? (
         <div className="list-item" style={{ marginTop: 12 }}>
           <strong>
@@ -87,14 +103,6 @@ export function AuthPanel({ embedded = false }: { embedded?: boolean }) {
           </button>
         </div>
       ) : null}
-      <div className="cta-row" style={{ marginTop: 12 }}>
-        <button className="button secondary" onClick={() => setMode("login")} type="button">
-          Bejelentkezes
-        </button>
-        <button className="button secondary" onClick={() => setMode("register")} type="button">
-          Regisztracio
-        </button>
-      </div>
       <div className="list" style={{ marginTop: 16, opacity: user ? 0.72 : 1 }}>
         <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email" />
         <input
@@ -124,7 +132,7 @@ export function AuthPanel({ embedded = false }: { embedded?: boolean }) {
         <button className="button primary" disabled={busy} onClick={submit} type="button">
           {busy ? "Dolgozom..." : mode === "login" ? "Bejelentkezes" : "Regisztracio"}
         </button>
-        <p className="muted">{status}</p>
+        {user ? <p className="muted">{status}</p> : null}
       </div>
     </div>
   );
