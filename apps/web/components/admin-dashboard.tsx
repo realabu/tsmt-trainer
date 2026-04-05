@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
+import { AdminCatalogManager } from "./admin-catalog-manager";
 
 interface UserRecord {
   id: string;
@@ -316,6 +317,8 @@ export function AdminDashboard() {
           <p className="muted">{status}</p>
         </div>
       </section>
+
+      <AdminCatalogManager />
 
       <section className="list-grid" style={{ marginTop: 24 }}>
         <div className="list-card">

@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from "@nestjs/common";
@@ -12,7 +13,15 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { AuthGuard } from "../auth/auth.guard";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { CurrentUser } from "../auth/current-user.decorator";
-import { UpdateUserDto } from "./dto";
+import {
+  CreateEquipmentCatalogDto,
+  CreateSongCatalogDto,
+  CreateTaskCatalogDto,
+  UpdateEquipmentCatalogDto,
+  UpdateSongCatalogDto,
+  UpdateTaskCatalogDto,
+  UpdateUserDto,
+} from "./dto";
 import { AdminService } from "./admin.service";
 
 @ApiTags("admin")
@@ -25,6 +34,96 @@ export class AdminController {
   @Get("users")
   listUsers(@CurrentUser() currentUser: AuthenticatedUser) {
     return this.adminService.listUsers(currentUser);
+  }
+
+  @Get("task-catalog")
+  listTaskCatalog(@CurrentUser() currentUser: AuthenticatedUser) {
+    return this.adminService.listTaskCatalog(currentUser);
+  }
+
+  @Post("task-catalog")
+  createTaskCatalog(@CurrentUser() currentUser: AuthenticatedUser, @Body() input: CreateTaskCatalogDto) {
+    return this.adminService.createTaskCatalog(currentUser, input);
+  }
+
+  @Get("task-catalog/:id")
+  getTaskCatalog(@CurrentUser() currentUser: AuthenticatedUser, @Param("id") taskCatalogId: string) {
+    return this.adminService.getTaskCatalogDetail(currentUser, taskCatalogId);
+  }
+
+  @Patch("task-catalog/:id")
+  updateTaskCatalog(
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Param("id") taskCatalogId: string,
+    @Body() input: UpdateTaskCatalogDto,
+  ) {
+    return this.adminService.updateTaskCatalog(currentUser, taskCatalogId, input);
+  }
+
+  @Delete("task-catalog/:id")
+  deleteTaskCatalog(@CurrentUser() currentUser: AuthenticatedUser, @Param("id") taskCatalogId: string) {
+    return this.adminService.deleteTaskCatalog(currentUser, taskCatalogId);
+  }
+
+  @Get("song-catalog")
+  listSongCatalog(@CurrentUser() currentUser: AuthenticatedUser) {
+    return this.adminService.listSongCatalog(currentUser);
+  }
+
+  @Post("song-catalog")
+  createSongCatalog(@CurrentUser() currentUser: AuthenticatedUser, @Body() input: CreateSongCatalogDto) {
+    return this.adminService.createSongCatalog(currentUser, input);
+  }
+
+  @Get("song-catalog/:id")
+  getSongCatalog(@CurrentUser() currentUser: AuthenticatedUser, @Param("id") songId: string) {
+    return this.adminService.getSongCatalogDetail(currentUser, songId);
+  }
+
+  @Patch("song-catalog/:id")
+  updateSongCatalog(
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Param("id") songId: string,
+    @Body() input: UpdateSongCatalogDto,
+  ) {
+    return this.adminService.updateSongCatalog(currentUser, songId, input);
+  }
+
+  @Delete("song-catalog/:id")
+  deleteSongCatalog(@CurrentUser() currentUser: AuthenticatedUser, @Param("id") songId: string) {
+    return this.adminService.deleteSongCatalog(currentUser, songId);
+  }
+
+  @Get("equipment-catalog")
+  listEquipmentCatalog(@CurrentUser() currentUser: AuthenticatedUser) {
+    return this.adminService.listEquipmentCatalog(currentUser);
+  }
+
+  @Post("equipment-catalog")
+  createEquipmentCatalog(
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Body() input: CreateEquipmentCatalogDto,
+  ) {
+    return this.adminService.createEquipmentCatalog(currentUser, input);
+  }
+
+  @Get("equipment-catalog/:id")
+  getEquipmentCatalog(@CurrentUser() currentUser: AuthenticatedUser, @Param("id") equipmentId: string) {
+    return this.adminService.getEquipmentCatalogDetail(currentUser, equipmentId);
+  }
+
+  @Patch("equipment-catalog/:id")
+  updateEquipmentCatalog(
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Param("id") equipmentId: string,
+    @Body() input: UpdateEquipmentCatalogDto,
+  ) {
+    return this.adminService.updateEquipmentCatalog(currentUser, equipmentId, input);
+  }
+
+  @Delete("equipment-catalog/:id")
+  deleteEquipmentCatalog(@CurrentUser() currentUser: AuthenticatedUser, @Param("id") equipmentId: string) {
+    return this.adminService.deleteEquipmentCatalog(currentUser, equipmentId);
   }
 
   @Patch("users/:id")

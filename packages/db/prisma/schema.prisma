@@ -117,14 +117,26 @@ model Routine {
 model RoutineTask {
   id                String         @id @default(cuid())
   routineId         String
+  catalogTaskId     String?
+  catalogDifficultyLevelId String?
+  songId            String?
   sortOrder         Int
   title             String
   details           String?
+  coachText         String?
   repetitionsLabel  String?
+  repetitionSchemeRaw String?
+  repetitionCount   Int?
+  repetitionUnitCount Int?
   expectedSeconds   Int?
+  customImageMediaId String?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   routine           Routine        @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  catalogTask       TaskCatalogItem? @relation(fields: [catalogTaskId], references: [id], onDelete: SetNull)
+  catalogDifficultyLevel TaskCatalogDifficultyLevel? @relation(fields: [catalogDifficultyLevelId], references: [id], onDelete: SetNull)
+  song              SongCatalogItem? @relation(fields: [songId], references: [id], onDelete: SetNull)
+  customImageMedia  MediaAsset?    @relation("RoutineTaskCustomImage", fields: [customImageMediaId], references: [id], onDelete: SetNull)
   sessionTimings    SessionTaskTiming[]
   mediaLinks        TaskMediaLink[]
 
@@ -200,6 +212,83 @@ model BadgeDefinition {
   awards        BadgeAward[]
 }
 
+model TaskCatalogItem {
+  id            String               @id @default(cuid())
+  title         String
+  summary       String?
+  instructions  String?
+  focusPoints   String?
+  demoVideoUrl  String?
+  defaultSongId String?
+  isActive      Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  defaultSong   SongCatalogItem?     @relation("TaskCatalogDefaultSong", fields: [defaultSongId], references: [id], onDelete: SetNull)
+  mediaLinks    TaskCatalogMediaLink[]
+  equipmentLinks TaskCatalogEquipment[]
+  difficultyLevels TaskCatalogDifficultyLevel[]
+  routineTasks  RoutineTask[]
+}
+
+model SongCatalogItem {
+  id             String           @id @default(cuid())
+  title          String
+  lyrics         String?
+  audioMediaId   String?
+  videoMediaId   String?
+  notes          String?
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  audioMedia     MediaAsset?      @relation("SongAudioMedia", fields: [audioMediaId], references: [id], onDelete: SetNull)
+  videoMedia     MediaAsset?      @relation("SongVideoMedia", fields: [videoMediaId], references: [id], onDelete: SetNull)
+  defaultForTasks TaskCatalogItem[] @relation("TaskCatalogDefaultSong")
+  routineTasks   RoutineTask[]
+}
+
+model TaskCatalogDifficultyLevel {
+  id               String          @id @default(cuid())
+  taskCatalogItemId String
+  name             String
+  description      String?
+  sortOrder        Int             @default(0)
+  taskCatalogItem  TaskCatalogItem @relation(fields: [taskCatalogItemId], references: [id], onDelete: Cascade)
+  routineTasks     RoutineTask[]
+
+  @@index([taskCatalogItemId, sortOrder])
+}
+
+model EquipmentCatalogItem {
+  id           String                @id @default(cuid())
+  name         String
+  description  String?
+  iconMediaId  String?
+  isActive     Boolean               @default(true)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  iconMedia    MediaAsset?           @relation("EquipmentIconMedia", fields: [iconMediaId], references: [id], onDelete: SetNull)
+  taskLinks    TaskCatalogEquipment[]
+}
+
+model TaskCatalogMediaLink {
+  id               String          @id @default(cuid())
+  taskCatalogItemId String
+  mediaAssetId     String
+  label            String?
+  sortOrder        Int             @default(0)
+  taskCatalogItem  TaskCatalogItem @relation(fields: [taskCatalogItemId], references: [id], onDelete: Cascade)
+  mediaAsset       MediaAsset      @relation("TaskCatalogMediaAsset", fields: [mediaAssetId], references: [id], onDelete: Cascade)
+}
+
+model TaskCatalogEquipment {
+  taskCatalogItemId    String
+  equipmentCatalogItemId String
+  taskCatalogItem      TaskCatalogItem     @relation(fields: [taskCatalogItemId], references: [id], onDelete: Cascade)
+  equipmentCatalogItem EquipmentCatalogItem @relation(fields: [equipmentCatalogItemId], references: [id], onDelete: Cascade)
+
+  @@id([taskCatalogItemId, equipmentCatalogItemId])
+}
+
 model BadgeAward {
   id                String          @id @default(cuid())
   childId           String
@@ -253,6 +342,11 @@ model MediaAsset {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   taskLinks     TaskMediaLink[]
+  taskCatalogLinks TaskCatalogMediaLink[] @relation("TaskCatalogMediaAsset")
+  songAudioFor  SongCatalogItem[] @relation("SongAudioMedia")
+  songVideoFor  SongCatalogItem[] @relation("SongVideoMedia")
+  equipmentIcons EquipmentCatalogItem[] @relation("EquipmentIconMedia")
+  routineTaskCustomImages RoutineTask[] @relation("RoutineTaskCustomImage")
 }
 
 model TaskMediaLink {

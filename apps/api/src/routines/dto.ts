@@ -6,17 +6,35 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUrl,
   Min,
   ValidateNested,
 } from "class-validator";
 
 export class CreateRoutineTaskDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  catalogTaskId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  catalogDifficultyLevelId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  songId?: string;
+
   @ApiProperty()
+  @IsOptional()
   @IsInt()
   @Min(1)
   sortOrder!: number;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   title!: string;
 
@@ -28,7 +46,34 @@ export class CreateRoutineTaskDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  coachText?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   repetitionsLabel?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  repetitionSchemeRaw?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  repetitionCount?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  repetitionUnitCount?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUrl()
+  customImageExternalUrl?: string;
 
   @ApiPropertyOptional({
     type: [Object],
@@ -44,6 +89,8 @@ export class CreateRoutineTaskDto {
     externalUrl: string;
   }>;
 }
+
+export class UpdateRoutineTaskDto extends CreateRoutineTaskDto {}
 
 export class CreateRoutinePeriodDto {
   @ApiPropertyOptional()
@@ -64,6 +111,8 @@ export class CreateRoutinePeriodDto {
   @Min(1)
   weeklyTargetCount!: number;
 }
+
+export class UpdateRoutinePeriodDto extends CreateRoutinePeriodDto {}
 
 export class CreateRoutineDto {
   @ApiProperty()

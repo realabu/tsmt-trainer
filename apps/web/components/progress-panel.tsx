@@ -35,6 +35,14 @@ interface BadgeRecord {
   } | null;
 }
 
+function formatTargetSessions(value: number) {
+  if (Number.isInteger(value)) {
+    return String(value);
+  }
+
+  return value.toFixed(2).replace(/\.?0+$/, "");
+}
+
 export function ProgressPanel({
   childId,
   routineId,
@@ -100,7 +108,7 @@ export function ProgressPanel({
                         {week.weekStart.slice(0, 10)} - {week.weekEnd.slice(0, 10)}
                       </strong>
                       <span className="muted">
-                        {week.completedSessions} / {week.targetSessions} alkalom
+                        {week.completedSessions} / {formatTargetSessions(week.targetSessions)} alkalom
                       </span>
                       <span className="muted">
                         {week.targetMet ? "A heti cel teljesult." : "A heti cel meg nincs meg."}
@@ -109,7 +117,10 @@ export function ProgressPanel({
                         <div
                           className="progress-fill"
                           style={{
-                            width: `${Math.min(100, Math.round((week.completedSessions / week.targetSessions) * 100))}%`,
+                            width: `${Math.min(
+                              100,
+                              Math.round((week.completedSessions / Math.max(week.targetSessions, 0.01)) * 100),
+                            )}%`,
                           }}
                         />
                       </div>

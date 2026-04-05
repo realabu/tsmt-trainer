@@ -3,11 +3,19 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { UserRole } from "@prisma/client";
+import { MediaKind, UserRole } from "@prisma/client";
 import { hash } from "bcryptjs";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../common/prisma.service";
-import { UpdateUserDto } from "./dto";
+import {
+  CreateEquipmentCatalogDto,
+  CreateSongCatalogDto,
+  CreateTaskCatalogDto,
+  UpdateEquipmentCatalogDto,
+  UpdateSongCatalogDto,
+  UpdateTaskCatalogDto,
+  UpdateUserDto,
+} from "./dto";
 
 @Injectable()
 export class AdminService {
@@ -305,6 +313,443 @@ export class AdminService {
     }
 
     return session;
+  }
+
+  async listTaskCatalog(currentUser: AuthenticatedUser) {
+    this.assertAdmin(currentUser);
+
+    return this.prisma.taskCatalogItem.findMany({
+      orderBy: [{ isActive: "desc" }, { title: "asc" }],
+      include: this.taskCatalogInclude(),
+    });
+  }
+
+  async getTaskCatalogDetail(currentUser: AuthenticatedUser, taskCatalogId: string) {
+    this.assertAdmin(currentUser);
+
+    const task = await this.prisma.taskCatalogItem.findUnique({
+      where: { id: taskCatalogId },
+      include: this.taskCatalogInclude(),
+    });
+
+    if (!task) {
+      throw new NotFoundException("Katalogus feladat nem talalhato.");
+    }
+
+    return task;
+  }
+
+  async createTaskCatalog(currentUser: AuthenticatedUser, input: CreateTaskCatalogDto) {
+    this.assertAdmin(currentUser);
+
+    await this.assertSongExistsIfProvided(input.defaultSongId);
+    await this.assertEquipmentIdsExist(input.equipmentIds);
+
+    return this.prisma.taskCatalogItem.create({
+      data: {
+        title: input.title,
+        summary: input.summary,
+        instructions: input.instructions,
+        focusPoints: input.focusPoints,
+        demoVideoUrl: input.demoVideoUrl,
+        defaultSongId: input.defaultSongId,
+        isActive: input.isActive ?? true,
+        mediaLinks: {
+          create: (input.mediaLinks ?? []).map((media, index) => ({
+            label: media.label,
+            sortOrder: index,
+            mediaAsset: {
+              create: {
+                kind: MediaKind[media.kind],
+                externalUrl: media.externalUrl,
+              },
+            },
+          })),
+        },
+        equipmentLinks: {
+          create: (input.equipmentIds ?? []).map((equipmentCatalogItemId) => ({
+            equipmentCatalogItemId,
+          })),
+        },
+        difficultyLevels: {
+          create: (input.difficultyLevels ?? []).map((level, index) => ({
+            name: level.name,
+            description: level.description,
+            sortOrder: level.sortOrder ?? index,
+          })),
+        },
+      },
+      include: this.taskCatalogInclude(),
+    });
+  }
+
+  async updateTaskCatalog(
+    currentUser: AuthenticatedUser,
+    taskCatalogId: string,
+    input: UpdateTaskCatalogDto,
+  ) {
+    this.assertAdmin(currentUser);
+    await this.getTaskCatalogDetail(currentUser, taskCatalogId);
+    await this.assertSongExistsIfProvided(input.defaultSongId);
+    await this.assertEquipmentIdsExist(input.equipmentIds);
+
+    await this.prisma.taskCatalogItem.update({
+      where: { id: taskCatalogId },
+      data: {
+        title: input.title,
+        summary: input.summary,
+        instructions: input.instructions,
+        focusPoints: input.focusPoints,
+        demoVideoUrl: input.demoVideoUrl,
+        defaultSongId:
+          input.defaultSongId === undefined ? undefined : input.defaultSongId || null,
+        isActive: input.isActive,
+      },
+    });
+
+    if (input.mediaLinks) {
+      await this.prisma.taskCatalogMediaLink.deleteMany({
+        where: { taskCatalogItemId: taskCatalogId },
+      });
+      await this.prisma.taskCatalogItem.update({
+        where: { id: taskCatalogId },
+        data: {
+          mediaLinks: {
+            create: input.mediaLinks.map((media, index) => ({
+              label: media.label,
+              sortOrder: index,
+              mediaAsset: {
+                create: {
+                  kind: MediaKind[media.kind],
+                  externalUrl: media.externalUrl,
+                },
+              },
+            })),
+          },
+        },
+      });
+    }
+
+    if (input.equipmentIds) {
+      await this.prisma.taskCatalogEquipment.deleteMany({
+        where: { taskCatalogItemId: taskCatalogId },
+      });
+      await this.prisma.taskCatalogItem.update({
+        where: { id: taskCatalogId },
+        data: {
+          equipmentLinks: {
+            create: input.equipmentIds.map((equipmentCatalogItemId) => ({
+              equipmentCatalogItemId,
+            })),
+          },
+        },
+      });
+    }
+
+    if (input.difficultyLevels) {
+      await this.prisma.taskCatalogDifficultyLevel.deleteMany({
+        where: { taskCatalogItemId: taskCatalogId },
+      });
+      await this.prisma.taskCatalogItem.update({
+        where: { id: taskCatalogId },
+        data: {
+          difficultyLevels: {
+            create: input.difficultyLevels.map((level, index) => ({
+              name: level.name,
+              description: level.description,
+              sortOrder: level.sortOrder ?? index,
+            })),
+          },
+        },
+      });
+    }
+
+    return this.getTaskCatalogDetail(currentUser, taskCatalogId);
+  }
+
+  async deleteTaskCatalog(currentUser: AuthenticatedUser, taskCatalogId: string) {
+    this.assertAdmin(currentUser);
+    await this.getTaskCatalogDetail(currentUser, taskCatalogId);
+    await this.prisma.taskCatalogItem.delete({ where: { id: taskCatalogId } });
+    return { success: true };
+  }
+
+  async listSongCatalog(currentUser: AuthenticatedUser) {
+    this.assertAdmin(currentUser);
+
+    return this.prisma.songCatalogItem.findMany({
+      orderBy: [{ isActive: "desc" }, { title: "asc" }],
+      include: {
+        audioMedia: true,
+        videoMedia: true,
+      },
+    });
+  }
+
+  async getSongCatalogDetail(currentUser: AuthenticatedUser, songId: string) {
+    this.assertAdmin(currentUser);
+
+    const song = await this.prisma.songCatalogItem.findUnique({
+      where: { id: songId },
+      include: {
+        audioMedia: true,
+        videoMedia: true,
+      },
+    });
+
+    if (!song) {
+      throw new NotFoundException("Dal vagy mondoka nem talalhato.");
+    }
+
+    return song;
+  }
+
+  async createSongCatalog(currentUser: AuthenticatedUser, input: CreateSongCatalogDto) {
+    this.assertAdmin(currentUser);
+
+    return this.prisma.songCatalogItem.create({
+      data: {
+        title: input.title,
+        lyrics: input.lyrics,
+        notes: input.notes,
+        isActive: input.isActive ?? true,
+        audioMedia: input.audioExternalUrl
+          ? {
+              create: {
+                kind: MediaKind.AUDIO,
+                externalUrl: input.audioExternalUrl,
+              },
+            }
+          : undefined,
+        videoMedia: input.videoExternalUrl
+          ? {
+              create: {
+                kind: MediaKind.VIDEO,
+                externalUrl: input.videoExternalUrl,
+              },
+            }
+          : undefined,
+      },
+      include: {
+        audioMedia: true,
+        videoMedia: true,
+      },
+    });
+  }
+
+  async updateSongCatalog(currentUser: AuthenticatedUser, songId: string, input: UpdateSongCatalogDto) {
+    this.assertAdmin(currentUser);
+    await this.getSongCatalogDetail(currentUser, songId);
+
+    return this.prisma.songCatalogItem.update({
+      where: { id: songId },
+      data: {
+        title: input.title,
+        lyrics: input.lyrics,
+        notes: input.notes,
+        isActive: input.isActive,
+        audioMedia:
+          input.audioExternalUrl === undefined
+            ? undefined
+            : input.audioExternalUrl
+              ? {
+                  create: {
+                    kind: MediaKind.AUDIO,
+                    externalUrl: input.audioExternalUrl,
+                  },
+                }
+              : { disconnect: true },
+        videoMedia:
+          input.videoExternalUrl === undefined
+            ? undefined
+            : input.videoExternalUrl
+              ? {
+                  create: {
+                    kind: MediaKind.VIDEO,
+                    externalUrl: input.videoExternalUrl,
+                  },
+                }
+              : { disconnect: true },
+      },
+      include: {
+        audioMedia: true,
+        videoMedia: true,
+      },
+    });
+  }
+
+  async deleteSongCatalog(currentUser: AuthenticatedUser, songId: string) {
+    this.assertAdmin(currentUser);
+    await this.getSongCatalogDetail(currentUser, songId);
+    await this.prisma.songCatalogItem.delete({ where: { id: songId } });
+    return { success: true };
+  }
+
+  async listEquipmentCatalog(currentUser: AuthenticatedUser) {
+    this.assertAdmin(currentUser);
+
+    return this.prisma.equipmentCatalogItem.findMany({
+      orderBy: [{ isActive: "desc" }, { name: "asc" }],
+      include: {
+        iconMedia: true,
+        _count: {
+          select: {
+            taskLinks: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getEquipmentCatalogDetail(currentUser: AuthenticatedUser, equipmentId: string) {
+    this.assertAdmin(currentUser);
+
+    const equipment = await this.prisma.equipmentCatalogItem.findUnique({
+      where: { id: equipmentId },
+      include: {
+        iconMedia: true,
+        _count: {
+          select: {
+            taskLinks: true,
+          },
+        },
+      },
+    });
+
+    if (!equipment) {
+      throw new NotFoundException("Segedeszkoz nem talalhato.");
+    }
+
+    return equipment;
+  }
+
+  async createEquipmentCatalog(currentUser: AuthenticatedUser, input: CreateEquipmentCatalogDto) {
+    this.assertAdmin(currentUser);
+
+    return this.prisma.equipmentCatalogItem.create({
+      data: {
+        name: input.name,
+        description: input.description,
+        isActive: input.isActive ?? true,
+        iconMedia: input.iconExternalUrl
+          ? {
+              create: {
+                kind: MediaKind.IMAGE,
+                externalUrl: input.iconExternalUrl,
+              },
+            }
+          : undefined,
+      },
+      include: {
+        iconMedia: true,
+      },
+    });
+  }
+
+  async updateEquipmentCatalog(
+    currentUser: AuthenticatedUser,
+    equipmentId: string,
+    input: UpdateEquipmentCatalogDto,
+  ) {
+    this.assertAdmin(currentUser);
+    await this.getEquipmentCatalogDetail(currentUser, equipmentId);
+
+    return this.prisma.equipmentCatalogItem.update({
+      where: { id: equipmentId },
+      data: {
+        name: input.name,
+        description: input.description,
+        isActive: input.isActive,
+        iconMedia:
+          input.iconExternalUrl === undefined
+            ? undefined
+            : input.iconExternalUrl
+              ? {
+                  create: {
+                    kind: MediaKind.IMAGE,
+                    externalUrl: input.iconExternalUrl,
+                  },
+                }
+              : { disconnect: true },
+      },
+      include: {
+        iconMedia: true,
+      },
+    });
+  }
+
+  async deleteEquipmentCatalog(currentUser: AuthenticatedUser, equipmentId: string) {
+    this.assertAdmin(currentUser);
+    await this.getEquipmentCatalogDetail(currentUser, equipmentId);
+    await this.prisma.equipmentCatalogItem.delete({ where: { id: equipmentId } });
+    return { success: true };
+  }
+
+  private taskCatalogInclude() {
+    return {
+      defaultSong: {
+        include: {
+          audioMedia: true,
+          videoMedia: true,
+        },
+      },
+      mediaLinks: {
+        orderBy: { sortOrder: "asc" as const },
+        include: {
+          mediaAsset: true,
+        },
+      },
+      equipmentLinks: {
+        include: {
+          equipmentCatalogItem: {
+            include: {
+              iconMedia: true,
+            },
+          },
+        },
+      },
+      difficultyLevels: {
+        orderBy: { sortOrder: "asc" as const },
+      },
+      _count: {
+        select: {
+          routineTasks: true,
+        },
+      },
+    };
+  }
+
+  private async assertSongExistsIfProvided(songId?: string) {
+    if (!songId) {
+      return;
+    }
+
+    const song = await this.prisma.songCatalogItem.findUnique({
+      where: { id: songId },
+      select: { id: true },
+    });
+
+    if (!song) {
+      throw new NotFoundException("A megadott dal vagy mondoka nem talalhato.");
+    }
+  }
+
+  private async assertEquipmentIdsExist(equipmentIds?: string[]) {
+    if (!equipmentIds?.length) {
+      return;
+    }
+
+    const count = await this.prisma.equipmentCatalogItem.count({
+      where: {
+        id: {
+          in: equipmentIds,
+        },
+      },
+    });
+
+    if (count !== new Set(equipmentIds).size) {
+      throw new NotFoundException("Az egyik megadott segedeszkoz nem talalhato.");
+    }
   }
 
   private assertAdmin(currentUser: AuthenticatedUser) {

@@ -19,8 +19,38 @@ interface RoutineRecord {
   childId: string;
   tasks: Array<{
     id: string;
+    catalogTaskId?: string | null;
     title: string;
+    details?: string | null;
+    coachText?: string | null;
     sortOrder: number;
+    repetitionsLabel?: string | null;
+    repetitionSchemeRaw?: string | null;
+    repetitionCount?: number | null;
+    repetitionUnitCount?: number | null;
+    song?: {
+      id: string;
+      title: string;
+    } | null;
+    catalogTask?: {
+      id: string;
+      title: string;
+      defaultSong?: {
+        id: string;
+        title: string;
+      } | null;
+      difficultyLevels?: Array<{
+        id: string;
+        name: string;
+        description?: string | null;
+      }>;
+    } | null;
+    catalogDifficultyLevel?: {
+      id: string;
+    } | null;
+    customImageMedia?: {
+      externalUrl?: string | null;
+    } | null;
     mediaLinks?: Array<{
       id: string;
       label?: string | null;
@@ -30,13 +60,31 @@ interface RoutineRecord {
       };
     }>;
   }>;
-  periods: Array<{ id: string; weeklyTargetCount: number; startsOn: string; endsOn: string }>;
+  periods: Array<{ id: string; name?: string | null; weeklyTargetCount: number; startsOn: string; endsOn: string }>;
   _count?: { sessions: number };
+}
+
+interface PeriodDraft {
+  id?: string;
+  name: string;
+  startsOn: string;
+  endsOn: string;
+  weeklyTargetCount: string;
 }
 
 const defaultPeriods = [
   { name: "Indulo szakasz", startsOn: "2026-04-01", endsOn: "2026-04-21", weeklyTargetCount: 3 },
 ];
+
+function parseOptionalInt(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const parsed = Number.parseInt(trimmed, 10);
+  return Number.isNaN(parsed) ? undefined : parsed;
+}
 
 export function RoutinesManager() {
   const user = useAuthUser();
@@ -46,26 +94,14 @@ export function RoutinesManager() {
   const [childId, setChildId] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [tasks, setTasks] = useState<TaskDraft[]>([
-    {
-      sortOrder: 1,
-      title: "Hintaztatas",
-      details: "Leiras",
-      repetitionsLabel: "2x",
-      mediaImageUrl: "",
-      mediaAudioUrl: "",
-      mediaVideoUrl: "",
-    },
-    {
-      sortOrder: 2,
-      title: "Ugras",
-      details: "Leiras",
-      repetitionsLabel: "4x",
-      mediaImageUrl: "",
-      mediaAudioUrl: "",
-      mediaVideoUrl: "",
-    },
-  ]);
+  const [tasks, setTasks] = useState<TaskDraft[]>([]);
+  const [editingRoutineId, setEditingRoutineId] = useState("");
+  const [editingName, setEditingName] = useState("");
+  const [editingDescription, setEditingDescription] = useState("");
+  const [editingTasks, setEditingTasks] = useState<TaskDraft[]>([]);
+  const [editingPeriods, setEditingPeriods] = useState<PeriodDraft[]>([]);
+  const [originalTaskIds, setOriginalTaskIds] = useState<string[]>([]);
+  const [originalPeriodIds, setOriginalPeriodIds] = useState<string[]>([]);
   const [status, setStatus] = useState("Jelentkezz be, majd toltsd be a sajat rutinlistat.");
 
   async function loadInitial() {
@@ -98,6 +134,11 @@ export function RoutinesManager() {
     [children],
   );
 
+  const selectedRoutine = useMemo(
+    () => routines.find((routine) => routine.id === editingRoutineId) ?? null,
+    [routines, editingRoutineId],
+  );
+
   async function createRoutine() {
     const accessToken = window.localStorage.getItem("tsmt.accessToken");
     if (!accessToken) {
@@ -106,6 +147,16 @@ export function RoutinesManager() {
     }
 
     try {
+      if (!childId || !name.trim()) {
+        setStatus("Valassz gyereket es adj nevet a feladatsornak.");
+        return;
+      }
+
+      if (tasks.length === 0) {
+        setStatus("Adj legalabb egy taskot a feladatsorhoz.");
+        return;
+      }
+
       await apiFetch<RoutineRecord>(
         "/api/routines",
         {
@@ -116,13 +167,21 @@ export function RoutinesManager() {
             description,
             tasks: tasks.map((task, index) => ({
               sortOrder: index + 1,
-              title: task.title,
-              details: task.details,
-              repetitionsLabel: task.repetitionsLabel,
+              catalogTaskId: task.catalogTaskId || undefined,
+              catalogDifficultyLevelId: task.catalogDifficultyLevelId || undefined,
+              songId:
+                task.songSelection === "__DEFAULT__"
+                  ? undefined
+                  : task.songSelection,
+              title: task.title || undefined,
+              details: task.details || undefined,
+              coachText: task.coachText || undefined,
+              repetitionsLabel: task.repetitionsLabel || undefined,
+              repetitionSchemeRaw: task.repetitionSchemeRaw || undefined,
+              repetitionCount: parseOptionalInt(task.repetitionCount),
+              repetitionUnitCount: parseOptionalInt(task.repetitionUnitCount),
+              customImageExternalUrl: task.mediaImageUrl || undefined,
               mediaLinks: [
-                task.mediaImageUrl
-                  ? { kind: "IMAGE", label: "Feladat kep", externalUrl: task.mediaImageUrl }
-                  : null,
                 task.mediaAudioUrl
                   ? { kind: "AUDIO", label: "Feladat hang", externalUrl: task.mediaAudioUrl }
                   : null,
@@ -138,21 +197,206 @@ export function RoutinesManager() {
       );
       setName("");
       setDescription("");
-      setTasks((current) =>
-        current.map((task, index) => ({
-          ...task,
-          sortOrder: index + 1,
-          title: "",
-          details: "",
-          repetitionsLabel: "",
-          mediaImageUrl: "",
-          mediaAudioUrl: "",
-          mediaVideoUrl: "",
-        })),
-      );
+      setTasks([]);
       await loadInitial();
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Letrehozasi hiba");
+    }
+  }
+
+  function routineTaskToDraft(task: RoutineRecord["tasks"][number], index: number): TaskDraft {
+    const imageLink =
+      task.customImageMedia?.externalUrl ??
+      task.mediaLinks?.find((mediaLink) => mediaLink.mediaAsset.kind === "IMAGE")?.mediaAsset.externalUrl ??
+      "";
+    const audioLink =
+      task.mediaLinks?.find((mediaLink) => mediaLink.mediaAsset.kind === "AUDIO")?.mediaAsset.externalUrl ?? "";
+    const videoLink =
+      task.mediaLinks?.find((mediaLink) => mediaLink.mediaAsset.kind === "VIDEO")?.mediaAsset.externalUrl ?? "";
+    const catalogDefaultSongId = task.catalogTask?.defaultSong?.id;
+    const selectedSongId = task.song?.id;
+
+    return {
+      id: task.id,
+      sortOrder: task.sortOrder ?? index + 1,
+      catalogTaskId: task.catalogTaskId ?? undefined,
+      catalogTaskTitle: task.catalogTask?.title ?? undefined,
+      catalogDifficultyLevelId: task.catalogDifficultyLevel?.id ?? undefined,
+      catalogDifficultyLevels: task.catalogTask?.difficultyLevels ?? [],
+      catalogDefaultSongId: catalogDefaultSongId ?? undefined,
+      catalogDefaultSongTitle: task.catalogTask?.defaultSong?.title ?? undefined,
+      songSelection:
+        selectedSongId && catalogDefaultSongId && selectedSongId === catalogDefaultSongId
+          ? "__DEFAULT__"
+          : selectedSongId ?? "",
+      title: task.title,
+      details: task.details ?? "",
+      coachText: task.coachText ?? "",
+      repetitionsLabel: task.repetitionsLabel ?? "",
+      repetitionSchemeRaw: task.repetitionSchemeRaw ?? "",
+      repetitionCount: task.repetitionCount?.toString() ?? "",
+      repetitionUnitCount: task.repetitionUnitCount?.toString() ?? "",
+      mediaImageUrl: imageLink ?? "",
+      mediaAudioUrl: audioLink ?? "",
+      mediaVideoUrl: videoLink ?? "",
+    };
+  }
+
+  function routinePeriodToDraft(period: RoutineRecord["periods"][number]): PeriodDraft {
+    return {
+      id: period.id,
+      name: period.name ?? "",
+      startsOn: period.startsOn.slice(0, 10),
+      endsOn: period.endsOn.slice(0, 10),
+      weeklyTargetCount: period.weeklyTargetCount.toString(),
+    };
+  }
+
+  function openRoutineEditor(routine: RoutineRecord) {
+    setEditingRoutineId(routine.id);
+    setEditingName(routine.name);
+    setEditingDescription(routine.description ?? "");
+    setEditingTasks(routine.tasks.map(routineTaskToDraft));
+    setEditingPeriods(routine.periods.map(routinePeriodToDraft));
+    setOriginalTaskIds(routine.tasks.map((task) => task.id));
+    setOriginalPeriodIds(routine.periods.map((period) => period.id));
+  }
+
+  function addPeriodDraft() {
+    setEditingPeriods((current) => [
+      ...current,
+      {
+        name: "",
+        startsOn: "2026-04-01",
+        endsOn: "2026-04-21",
+        weeklyTargetCount: "3",
+      },
+    ]);
+  }
+
+  function updatePeriodDraft(index: number, patch: Partial<PeriodDraft>) {
+    setEditingPeriods((current) =>
+      current.map((period, periodIndex) => (periodIndex === index ? { ...period, ...patch } : period)),
+    );
+  }
+
+  function removePeriodDraft(index: number) {
+    setEditingPeriods((current) => current.filter((_, periodIndex) => periodIndex !== index));
+  }
+
+  async function saveRoutineEditor() {
+    const accessToken = window.localStorage.getItem("tsmt.accessToken");
+    if (!accessToken || !selectedRoutine) {
+      return;
+    }
+
+    try {
+      await apiFetch(
+        `/api/routines/${selectedRoutine.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            name: editingName,
+            description: editingDescription,
+          }),
+        },
+        accessToken,
+      );
+
+      const currentTaskIds = editingTasks.map((task) => task.id).filter((value): value is string => Boolean(value));
+      const removedTaskIds = originalTaskIds.filter((id) => !currentTaskIds.includes(id));
+
+      for (const removedTaskId of removedTaskIds) {
+        await apiFetch(`/api/routines/tasks/${removedTaskId}`, { method: "DELETE" }, accessToken);
+      }
+
+      for (const [index, task] of editingTasks.entries()) {
+        const payload = {
+          sortOrder: index + 1,
+          catalogTaskId: task.catalogTaskId || undefined,
+          catalogDifficultyLevelId: task.catalogDifficultyLevelId || undefined,
+          songId: task.songSelection === "__DEFAULT__" ? undefined : task.songSelection,
+          title: task.title || undefined,
+          details: task.details || undefined,
+          coachText: task.coachText || undefined,
+          repetitionsLabel: task.repetitionsLabel || undefined,
+          repetitionSchemeRaw: task.repetitionSchemeRaw || undefined,
+          repetitionCount: parseOptionalInt(task.repetitionCount),
+          repetitionUnitCount: parseOptionalInt(task.repetitionUnitCount),
+          customImageExternalUrl: task.mediaImageUrl || undefined,
+          mediaLinks: [
+            task.mediaAudioUrl
+              ? { kind: "AUDIO", label: "Feladat hang", externalUrl: task.mediaAudioUrl }
+              : null,
+            task.mediaVideoUrl
+              ? { kind: "VIDEO", label: "Feladat video", externalUrl: task.mediaVideoUrl }
+              : null,
+          ].filter(Boolean),
+        };
+
+        if (task.id) {
+          await apiFetch(
+            `/api/routines/tasks/${task.id}`,
+            {
+              method: "PATCH",
+              body: JSON.stringify(payload),
+            },
+            accessToken,
+          );
+        } else {
+          await apiFetch(
+            `/api/routines/${selectedRoutine.id}/tasks`,
+            {
+              method: "POST",
+              body: JSON.stringify(payload),
+            },
+            accessToken,
+          );
+        }
+      }
+
+      const currentPeriodIds = editingPeriods
+        .map((period) => period.id)
+        .filter((value): value is string => Boolean(value));
+      const removedPeriodIds = originalPeriodIds.filter((id) => !currentPeriodIds.includes(id));
+
+      for (const removedPeriodId of removedPeriodIds) {
+        await apiFetch(`/api/routines/periods/${removedPeriodId}`, { method: "DELETE" }, accessToken);
+      }
+
+      for (const period of editingPeriods) {
+        const payload = {
+          name: period.name || undefined,
+          startsOn: period.startsOn,
+          endsOn: period.endsOn,
+          weeklyTargetCount: parseOptionalInt(period.weeklyTargetCount) ?? 1,
+        };
+
+        if (period.id) {
+          await apiFetch(
+            `/api/routines/periods/${period.id}`,
+            {
+              method: "PATCH",
+              body: JSON.stringify(payload),
+            },
+            accessToken,
+          );
+        } else {
+          await apiFetch(
+            `/api/routines/${selectedRoutine.id}/periods`,
+            {
+              method: "POST",
+              body: JSON.stringify(payload),
+            },
+            accessToken,
+          );
+        }
+      }
+
+      setStatus("Feladatsor frissitve.");
+      await loadInitial();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Nem sikerult menteni a feladatsort.");
     }
   }
 
@@ -213,7 +457,89 @@ export function RoutinesManager() {
                 <Link className="button secondary" href={`/routines/${routine.id}/train`}>
                   Edzes inditasa
                 </Link>
+                <button
+                  className="button secondary"
+                  onClick={() => openRoutineEditor(routine)}
+                  style={{ marginLeft: 8 }}
+                  type="button"
+                >
+                  Szerkesztes
+                </button>
               </div>
+              {editingRoutineId === routine.id ? (
+                <div className="list" style={{ marginTop: 16 }}>
+                  <input
+                    value={editingName}
+                    onChange={(event) => setEditingName(event.target.value)}
+                    placeholder="Feladatsor neve"
+                  />
+                  <textarea
+                    value={editingDescription}
+                    onChange={(event) => setEditingDescription(event.target.value)}
+                    placeholder="Rovid leiras"
+                  />
+                  <TaskBuilder tasks={editingTasks} onChange={setEditingTasks} />
+                  <div className="list-item">
+                    <div className="split-row">
+                      <strong>Idoszakok</strong>
+                      <button className="button secondary" onClick={addPeriodDraft} type="button">
+                        Uj idoszak
+                      </button>
+                    </div>
+                    <div className="list" style={{ marginTop: 12 }}>
+                      {editingPeriods.map((period, index) => (
+                        <div className="list-item" key={period.id ?? `new-period-${index}`}>
+                          <div className="list">
+                            <input
+                              value={period.name}
+                              onChange={(event) => updatePeriodDraft(index, { name: event.target.value })}
+                              placeholder="Idoszak neve"
+                            />
+                            <div className="list-grid" style={{ marginTop: 0 }}>
+                              <input
+                                type="date"
+                                value={period.startsOn}
+                                onChange={(event) => updatePeriodDraft(index, { startsOn: event.target.value })}
+                              />
+                              <input
+                                type="date"
+                                value={period.endsOn}
+                                onChange={(event) => updatePeriodDraft(index, { endsOn: event.target.value })}
+                              />
+                            </div>
+                            <input
+                              value={period.weeklyTargetCount}
+                              onChange={(event) =>
+                                updatePeriodDraft(index, { weeklyTargetCount: event.target.value })
+                              }
+                              placeholder="Heti alkalomszam"
+                            />
+                            <button
+                              className="button secondary"
+                              onClick={() => removePeriodDraft(index)}
+                              type="button"
+                            >
+                              Idoszak torlese
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cta-row">
+                    <button className="button primary" onClick={saveRoutineEditor} type="button">
+                      Valtozasok mentese
+                    </button>
+                    <button
+                      className="button secondary"
+                      onClick={() => setEditingRoutineId("")}
+                      type="button"
+                    >
+                      Szerkesztes bezarasa
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </div>
           ))}
           {routines.length === 0 ? <p className="muted">Meg nincs sajat feladatsor.</p> : null}

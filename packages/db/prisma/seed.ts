@@ -180,6 +180,97 @@ async function main() {
     ],
     skipDuplicates: true,
   });
+
+  const mondoka = await prisma.songCatalogItem.upsert({
+    where: { id: "seed-song-hinta-palinta" },
+    update: {},
+    create: {
+      id: "seed-song-hinta-palinta",
+      title: "Hinta, palinta",
+      lyrics: "Hinta, palinta, régi dunna...",
+      isActive: true,
+    },
+  });
+
+  const labdaEszkoz = await prisma.equipmentCatalogItem.upsert({
+    where: { id: "seed-equipment-ball" },
+    update: {},
+    create: {
+      id: "seed-equipment-ball",
+      name: "Labda",
+      description: "Feldobashoz es elkapashoz hasznalt puha labda.",
+      isActive: true,
+    },
+  });
+
+  const hintaEszkoz = await prisma.equipmentCatalogItem.upsert({
+    where: { id: "seed-equipment-swing" },
+    update: {},
+    create: {
+      id: "seed-equipment-swing",
+      name: "Hinta",
+      description: "Hintaztatos feladatokhoz hasznalt eszkoz.",
+      isActive: true,
+    },
+  });
+
+  await prisma.taskCatalogItem.upsert({
+    where: { id: "seed-catalog-hinta" },
+    update: {},
+    create: {
+      id: "seed-catalog-hinta",
+      title: "Hintaztatas mondokaval",
+      summary: "Hintaztatas mondokaval, egyenletes ritmusban.",
+      instructions: "A gyereket egyenletes ritmusban hintaztasd, kozben mondjatok a kapcsolt mondokat.",
+      focusPoints: "Stabil testhelyzet, ritmus, figyelem a gyerek reakcioira.",
+      demoVideoUrl: "https://example.com/demo/hintaztatas",
+      defaultSongId: mondoka.id,
+      isActive: true,
+      equipmentLinks: {
+        create: [{ equipmentCatalogItemId: hintaEszkoz.id }],
+      },
+      difficultyLevels: {
+        create: [
+          {
+            name: "Alap szint",
+            description: "Tamaszkodas konyokon, lassabb ritmusban.",
+            sortOrder: 0,
+          },
+          {
+            name: "Halado szint",
+            description: "Tamaszkodas tenyeren, stabilabb testtartassal.",
+            sortOrder: 1,
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.taskCatalogItem.upsert({
+    where: { id: "seed-catalog-labdadobas" },
+    update: {},
+    create: {
+      id: "seed-catalog-labdadobas",
+      title: "Labda feldobas es elkapas",
+      summary: "A gyerek feldobja es elkapja a labdat szamolassal.",
+      instructions: "Jo testtartassal, szemmel kovetve dobja fel a labdat es kapja el vissza.",
+      focusPoints: "Szem-kez koordinacio, ritmus, pontos szamolas.",
+      demoVideoUrl: "https://example.com/demo/labda-feldobas",
+      isActive: true,
+      equipmentLinks: {
+        create: [{ equipmentCatalogItemId: labdaEszkoz.id }],
+      },
+      difficultyLevels: {
+        create: [
+          {
+            name: "Alap szint",
+            description: "Kisebb magassagba dobva, kozelrol elkapva.",
+            sortOrder: 0,
+          },
+        ],
+      },
+    },
+  });
 }
 
 main()

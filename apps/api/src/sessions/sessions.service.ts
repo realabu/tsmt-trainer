@@ -386,8 +386,13 @@ export class SessionsService {
               },
             },
           });
+          const proratedTarget = getProRatedWeeklyTarget(
+            matchingPeriod.weeklyTargetCount,
+            new Date(Math.max(weekStart.getTime(), matchingPeriod.startsOn.getTime())),
+            new Date(Math.min(weekEnd.getTime(), matchingPeriod.endsOn.getTime())),
+          );
 
-          if (completedInWeek >= matchingPeriod.weeklyTargetCount) {
+          if (completedInWeek >= proratedTarget) {
             await this.createBadgeAwardIfMissing({
               childId,
               routineId,
@@ -443,4 +448,20 @@ function endOfWeek(date: Date) {
   start.setDate(start.getDate() + 6);
   start.setHours(23, 59, 59, 999);
   return start;
+}
+
+function getProRatedWeeklyTarget(weeklyTargetCount: number, weekStart: Date, weekEnd: Date) {
+  const coveredDays = getInclusiveDayCount(weekStart, weekEnd);
+  const rawTarget = (weeklyTargetCount * coveredDays) / 7;
+  return Math.round(rawTarget);
+}
+
+function getInclusiveDayCount(start: Date, end: Date) {
+  const normalizedStart = new Date(start);
+  const normalizedEnd = new Date(end);
+  normalizedStart.setHours(0, 0, 0, 0);
+  normalizedEnd.setHours(0, 0, 0, 0);
+
+  const diffMs = normalizedEnd.getTime() - normalizedStart.getTime();
+  return Math.max(1, Math.floor(diffMs / 86_400_000) + 1);
 }
