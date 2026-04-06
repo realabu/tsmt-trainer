@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiFetch } from "../lib/api";
+import { BadgeGallery } from "./badge-gallery";
 
 interface ProgressWeek {
   weekStart: string;
@@ -23,16 +24,22 @@ interface ProgressPeriod {
 
 interface BadgeRecord {
   id: string;
-  reason?: string | null;
-  awardedAt: string;
-  badgeDefinition: {
-    title: string;
-    description: string;
-  };
-  routine?: {
-    id: string;
-    name: string;
-  } | null;
+  code: string;
+  title: string;
+  description: string;
+  iconUrl?: string | null;
+  scope: "child" | "routine" | "period";
+  earned: boolean;
+  awardCount: number;
+  lastAwardedAt?: string | null;
+  awardBreakdown: Array<{
+    routineId: string | null;
+    routineName: string | null;
+    periodId: string | null;
+    periodName: string | null;
+    count: number;
+    lastAwardedAt: string;
+  }>;
 }
 
 function formatTargetSessions(value: number) {
@@ -67,10 +74,10 @@ export function ProgressPanel({
       try {
         const [progressResult, badgesResult] = await Promise.all([
           apiFetch<{ periods: ProgressPeriod[] }>(`/api/routines/${routineId}/progress`, undefined, accessToken),
-          apiFetch<BadgeRecord[]>(`/api/children/${childId}/badges`, undefined, accessToken),
+          apiFetch<BadgeRecord[]>(`/api/children/${childId}/badges?routineId=${routineId}`, undefined, accessToken),
         ]);
         setPeriods(progressResult.periods);
-        setBadges(badgesResult.filter((badge) => !badge.routine || badge.routine.id === routineId));
+        setBadges(badgesResult);
         setStatus("Progress es badge adatok betoltve.");
       } catch (error) {
         setStatus(error instanceof Error ? error.message : "Betoltesi hiba");
@@ -136,15 +143,8 @@ export function ProgressPanel({
 
       <div className="list-card">
         <h2>Badge-ek</h2>
-        <div className="list">
-          {badges.map((badge) => (
-            <div className="list-item" key={badge.id}>
-              <strong>{badge.badgeDefinition.title}</strong>
-              <span className="muted">{badge.badgeDefinition.description}</span>
-              <span className="muted">Megszerezve: {badge.awardedAt.slice(0, 10)}</span>
-            </div>
-          ))}
-          {badges.length === 0 ? <p className="muted">Meg nincs elert badge ehhez a rutinhoz.</p> : null}
+        <div style={{ marginTop: 16 }}>
+          <BadgeGallery badges={badges} emptyLabel="Meg nincs elerheto badge ehhez a feladatsorhoz." />
         </div>
         <p className="muted" style={{ marginTop: 16 }}>{status}</p>
       </div>

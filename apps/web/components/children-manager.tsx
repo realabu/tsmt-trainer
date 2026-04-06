@@ -109,7 +109,7 @@ export function ChildrenManager() {
                 {child.firstName} {child.lastName}
               </strong>
               <span className="muted">
-                Rutinok: {child._count?.routines ?? 0}, sessionok: {child._count?.sessions ?? 0}
+                Feladatsorok: {child._count?.routines ?? 0}, tornak: {child._count?.sessions ?? 0}
               </span>
             </div>
           ))}

@@ -405,7 +405,7 @@ export function RoutinesManager() {
       <section className="list-card" style={{ marginTop: 24 }}>
         <h2>Trainer olvaso mod</h2>
         <p className="muted">
-          A trainer fiokoknal a rutin letrehozas es szerkesztes rejtve van. A hozzad rendelt rutinokat a
+          A trainer fiokoknal a feladatsor letrehozas es szerkesztes rejtve van. A hozzad rendelt feladatsorokat a
           trainer dashboardon tudod megnyitni.
         </p>
         <div style={{ marginTop: 12 }}>
@@ -448,7 +448,7 @@ export function RoutinesManager() {
               <strong>{routine.name}</strong>
               <span className="muted">{childLabel[routine.childId] ?? routine.childId}</span>
               <span className="muted">
-                {routine.tasks.length} feladat, {routine.periods.length} idoszak, {routine._count?.sessions ?? 0} session
+                {routine.tasks.length} feladat, {routine.periods.length} idoszak, {routine._count?.sessions ?? 0} torna
               </span>
               {routine.tasks.some((task) => (task.mediaLinks?.length ?? 0) > 0) ? (
                 <span className="muted">Media csatolva a feladatokhoz.</span>

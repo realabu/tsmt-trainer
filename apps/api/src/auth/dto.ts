@@ -39,3 +39,27 @@ export class RefreshTokenDto {
   @IsString()
   refreshToken!: string;
 }
+
+export class UpdateProfileDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @ApiPropertyOptional({
+    description: "Uj jelszo. Ha nincs megadva, a jelenlegi jelszo valtozatlan marad.",
+  })
+  @IsOptional()
+  @MinLength(8)
+  password?: string;
+}

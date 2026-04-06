@@ -151,7 +151,7 @@ export function TrainerAssignmentDetail({ assignmentId }: { assignmentId: string
             </div>
 
             <div className="list-card">
-              <h2>Legutobbi sessionok</h2>
+              <h2>Legutobbi tornak</h2>
               <div className="list">
                 {assignment.routine.sessions.map((session) => (
                   <div className="list-item" key={session.id}>

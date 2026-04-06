@@ -231,7 +231,7 @@ export function AdminDashboard() {
       <div className="panel">
         <h1>Admin</h1>
         <p className="muted">
-          Felhasznalok kezelese, es parent-child szuressel az osszes rutin es session attekintese.
+          Felhasznalok kezelese, es parent-child szuressel az osszes feladatsor es torna attekintese.
         </p>
       </div>
 
@@ -333,7 +333,7 @@ export function AdminDashboard() {
                 <span className="muted">
                   Gyerek: {routine.child.lastName} {routine.child.firstName}
                 </span>
-                <span className="muted">Sessionök: {routine._count.sessions}</span>
+                <span className="muted">Tornak: {routine._count.sessions}</span>
                 <div style={{ marginTop: 12 }}>
                   <Link className="button secondary" href={`/admin/routines/${routine.id}`}>
                     Adatlap
@@ -341,12 +341,12 @@ export function AdminDashboard() {
                 </div>
               </div>
             ))}
-            {routines.length === 0 ? <p className="muted">Nincs rutin a jelenlegi szuresre.</p> : null}
+            {routines.length === 0 ? <p className="muted">Nincs feladatsor a jelenlegi szuresre.</p> : null}
           </div>
         </div>
 
         <div className="list-card">
-          <h2>Sessionok</h2>
+          <h2>Tornak</h2>
           <div className="list">
             {sessions.map((session) => (
               <div className="list-item" key={session.id}>
@@ -368,7 +368,7 @@ export function AdminDashboard() {
                 </div>
               </div>
             ))}
-            {sessions.length === 0 ? <p className="muted">Nincs session a jelenlegi szuresre.</p> : null}
+            {sessions.length === 0 ? <p className="muted">Nincs torna a jelenlegi szuresre.</p> : null}
           </div>
         </div>
       </section>

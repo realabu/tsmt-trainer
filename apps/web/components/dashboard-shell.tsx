@@ -2,25 +2,14 @@
 
 import Link from "next/link";
 import { AuthPanel } from "./auth-panel";
-import { demoChildren, demoRoutines, demoWeeklyProgress } from "../lib/demo-data";
 import { useAuthUser } from "../lib/use-auth-user";
+import { ParentDashboard } from "./parent-dashboard";
 
 export function DashboardShell() {
   const user = useAuthUser();
   const isTrainer = user?.role === "TRAINER";
   const isAdmin = user?.role === "ADMIN";
   const isParent = user?.role === "PARENT";
-  const completed = demoWeeklyProgress.reduce((sum, item) => sum + item.completedSessions, 0);
-  const target = demoWeeklyProgress.reduce((sum, item) => sum + item.targetSessions, 0);
-  const progressPercent = target === 0 ? 0 : Math.round((completed / target) * 100);
-
-  function logout() {
-    window.localStorage.removeItem("tsmt.accessToken");
-    window.localStorage.removeItem("tsmt.refreshToken");
-    window.localStorage.removeItem("tsmt.user");
-    window.dispatchEvent(new Event("tsmt-auth-changed"));
-    window.location.reload();
-  }
 
   if (!user) {
     return (
@@ -56,11 +45,15 @@ export function DashboardShell() {
           </div>
           <div className="landing-value-card">
             <strong>A trainer is követheti</strong>
-            <span className="muted">Másodlagos extra, hogy a megosztott rutinok előrehaladása a trainer számára is látható.</span>
+            <span className="muted">Másodlagos extra, hogy a megosztott feladatsorok elorehaladasa a trainer szamara is lathato.</span>
           </div>
         </section>
       </div>
     );
+  }
+
+  if (isParent) {
+    return <ParentDashboard />;
   }
 
   return (
@@ -98,65 +91,36 @@ export function DashboardShell() {
         </div>
 
         <aside className="panel">
-          <h2>Heti celkovetes</h2>
+          <h2>Szerepkor alapu attekintes</h2>
           <p className="muted">
-            Az MVP egyik fo funkcioja, hogy az idoszakon beluli heti elvart darabszam es a tenyleges
-            teljesites elso rangu adat legyen.
+            Ezen a role-specifikus home nezeten a trainer es az admin gyors belépőfelületet kap a saját moduljaihoz.
           </p>
-          <div className="badge">Osszesitett heti allas: {completed} / {target}</div>
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
-          </div>
-          <p className="muted">Teljesitesi arany: {progressPercent}%</p>
         </aside>
-      </section>
-
-      <section className="metric-grid">
-        <div className="metric">
-          <div className="label">Kezelt gyerekek</div>
-          <div className="value">{demoChildren.length}</div>
-        </div>
-        <div className="metric">
-          <div className="label">Aktiv feladatsorok</div>
-          <div className="value">{demoRoutines.length}</div>
-        </div>
-        <div className="metric">
-          <div className="label">Badge szabalyok</div>
-          <div className="value">6</div>
-        </div>
-        <div className="metric">
-          <div className="label">API vegpontok elso kore</div>
-          <div className="value">7</div>
-        </div>
       </section>
 
       <section className="nav-row">
         {!isTrainer ? (
           <>
-            <Link href="/children" className="panel">
-              <h2>Children domain</h2>
-              <p className="muted">Tobb gyerek egy fiok alatt, sajat feladatsorokkal es statistikakkal.</p>
-            </Link>
             <Link href="/routines" className="panel">
-              <h2>Routine domain</h2>
-              <p className="muted">Feladatok, periodusok, heti celok es kesobbi media hozzarendeles.</p>
+              <h2>Feladatsor domain</h2>
+              <p className="muted">Feladatok, periodusok, heti celok es a trainer-megosztas adminisztracioja.</p>
             </Link>
           </>
         ) : null}
         {isTrainer ? (
           <Link href="/trainer" className="panel">
             <h2>Trainer domain</h2>
-            <p className="muted">Read-only terapeuta nezet a hozzarendelt gyerekekhez, rutinokhoz es eredmenyekhez.</p>
+            <p className="muted">Read-only terapeuta nezet a hozzarendelt gyerekekhez, feladatsorokhoz es eredmenyekhez.</p>
           </Link>
         ) : isAdmin ? (
           <Link href="/admin" className="panel">
             <h2>Admin domain</h2>
-            <p className="muted">Felhasznalok, rutinok es sessionok kozponti kezelese admin szerepkorrel.</p>
+            <p className="muted">Felhasznalok, feladatsorok es tornak kozponti kezelese admin szerepkorrel.</p>
           </Link>
         ) : (
           <div className="panel">
             <h2>Megosztas trainerrel</h2>
-            <p className="muted">A rutinokat a trening oldalon tudod egy trainer emaillel megosztani.</p>
+            <p className="muted">A feladatsorokat a trening oldalon tudod egy trainer emaillel megosztani.</p>
           </div>
         )}
       </section>
@@ -169,7 +133,7 @@ export function DashboardShell() {
         {!isTrainer ? (
           <div className="panel">
             <h2>Szuloi flow</h2>
-            <p className="muted">Gyerek letrehozasa, rutin szerkesztes, session inditas, trainer megosztas.</p>
+            <p className="muted">Gyerek letrehozasa, feladatsor szerkesztes, torna inditas, trainer megosztas.</p>
           </div>
         ) : null}
         {isTrainer ? (
@@ -180,19 +144,14 @@ export function DashboardShell() {
         ) : isAdmin ? (
           <div className="panel">
             <h2>Admin flow</h2>
-            <p className="muted">Admin szerepkorrel a /admin oldalon kezelheted a usereket, rutinokat es sessionoket.</p>
+            <p className="muted">Admin szerepkorrel a /admin oldalon kezelheted a usereket, feladatsorokat es tornakat.</p>
           </div>
-        ) : (
-          <div className="panel">
-            <h2>Szuloi flow</h2>
-            <p className="muted">Szülőként gyereket és rutint kezelsz, sessiont indítasz, és igény esetén trainerrel osztod meg a rutint.</p>
-          </div>
-        )}
+        ) : null}
       </section>
 
       <section className="list-grid">
         <div className="list-card">
-          <h2>Bejelentkezve</h2>
+          <h2>Sajat fiok</h2>
           <div className="list" style={{ marginTop: 12 }}>
             <div className="list-item">
               <strong>
@@ -202,46 +161,10 @@ export function DashboardShell() {
               <span className="muted">
                 Szerepkor: {user.role === "PARENT" ? "Szulo" : user.role === "TRAINER" ? "Trainer" : "Admin"}
               </span>
-              <button className="button secondary" onClick={logout} type="button">
-                Kijelentkezes
-              </button>
+              <Link href="/profile" className="button secondary">
+                Profil szerkesztese
+              </Link>
             </div>
-          </div>
-        </div>
-        {!isTrainer ? (
-          <div className="list-card">
-            <h2>Gyerekek</h2>
-            <div className="list">
-              {demoChildren.map((child) => (
-                <div key={child.id} className="list-item">
-                  <strong>
-                    {child.firstName} {child.lastName}
-                  </strong>
-                  <span className="muted">Sajat rutinokkal es badge progressionnel.</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-        <div className="list-card">
-          <h2>Heti haladas minta</h2>
-          <div className="list">
-            {demoWeeklyProgress.map((entry) => {
-              const entryProgress = Math.round((entry.completedSessions / entry.targetSessions) * 100);
-              return (
-                <div key={entry.weekStart} className="list-item">
-                  <strong>
-                    {entry.weekStart} - {entry.weekEnd}
-                  </strong>
-                  <span className="muted">
-                    {entry.completedSessions} / {entry.targetSessions} alkalom
-                  </span>
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${entryProgress}%` }} />
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
         {isTrainer ? (
@@ -254,7 +177,7 @@ export function DashboardShell() {
               </div>
               <div className="list-item">
                 <strong>2. Trainer dashboard</strong>
-                <span className="muted">A hozzarendelt rutinok a /trainer oldalon jelennek meg.</span>
+                <span className="muted">A hozzarendelt feladatsorok a /trainer oldalon jelennek meg.</span>
               </div>
             </div>
           </div>
@@ -272,25 +195,7 @@ export function DashboardShell() {
               </div>
               <div className="list-item">
                 <strong>3. Parent-child szures</strong>
-                <span className="muted">Feladatsorok es sessionok logikus szuloi/gyerek szurovel nezhetok.</span>
-              </div>
-            </div>
-          </div>
-        ) : isParent ? (
-          <div className="list-card">
-            <h2>Szuloi kovetkezo lepesek</h2>
-            <div className="list">
-              <div className="list-item">
-                <strong>1. Gyerek letrehozasa</strong>
-                <span className="muted">A Gyerekek oldalon hozhatsz letre uj gyereket.</span>
-              </div>
-              <div className="list-item">
-                <strong>2. Rutin es media beallitasa</strong>
-                <span className="muted">A Feladatsorok oldalon epithetsz rutinokat taskokkal es media linkekkel.</span>
-              </div>
-              <div className="list-item">
-                <strong>3. Trainer megosztas</strong>
-                <span className="muted">A trening oldalon email alapjan megoszthatod a rutint egy trainerrel.</span>
+                <span className="muted">Feladatsorok es tornak logikus szuloi/gyerek szurovel nezhetok.</span>
               </div>
             </div>
           </div>

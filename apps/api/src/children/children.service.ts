@@ -86,33 +86,108 @@ export class ChildrenService {
     return { success: true };
   }
 
-  async listBadges(currentUser: AuthenticatedUser, childId: string) {
+  async listBadges(currentUser: AuthenticatedUser, childId: string, routineId?: string) {
     await this.getById(currentUser, childId);
 
-    return this.prisma.badgeAward.findMany({
-      where: {
-        childId,
-      },
-      orderBy: {
-        awardedAt: "desc",
-      },
-      include: {
-        badgeDefinition: true,
-        routine: {
-          select: {
-            id: true,
-            name: true,
+    const [definitions, awards] = await Promise.all([
+      this.prisma.badgeDefinition.findMany({
+        where: {
+          isActive: true,
+        },
+        orderBy: [{ createdAt: "asc" }, { title: "asc" }],
+      }),
+      this.prisma.badgeAward.findMany({
+        where: {
+          childId,
+          ...(routineId
+            ? {
+                OR: [{ routineId }, { routineId: null }],
+              }
+            : {}),
+        },
+        orderBy: {
+          awardedAt: "desc",
+        },
+        include: {
+          badgeDefinition: true,
+          routine: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          period: {
+            select: {
+              id: true,
+              name: true,
+              startsOn: true,
+              endsOn: true,
+            },
           },
         },
-        period: {
-          select: {
-            id: true,
-            name: true,
-            startsOn: true,
-            endsOn: true,
-          },
-        },
-      },
+      }),
+    ]);
+
+    return definitions.map((definition) => {
+      const matchingAwards = awards.filter((award) => award.badgeDefinitionId === definition.id);
+      const latestAward = matchingAwards[0] ?? null;
+      const scope =
+        definition.triggerType === "ROUTINE_RECORD"
+          || definition.triggerType === "ROUTINE_SESSION_COUNT"
+          ? "routine"
+          : definition.triggerType === "WEEKLY_GOAL_COMPLETED" || definition.triggerType === "PERIOD_TARGET_COMPLETED"
+            ? "period"
+            : "child";
+      const breakdownMap = new Map<
+        string,
+        {
+          routineId: string | null;
+          routineName: string | null;
+          periodId: string | null;
+          periodName: string | null;
+          count: number;
+          lastAwardedAt: Date;
+        }
+      >();
+
+      for (const award of matchingAwards) {
+        const key = `${award.routineId ?? "child"}::${award.periodId ?? "none"}`;
+        const existing = breakdownMap.get(key);
+
+        if (existing) {
+          existing.count += 1;
+          if (award.awardedAt > existing.lastAwardedAt) {
+            existing.lastAwardedAt = award.awardedAt;
+          }
+          continue;
+        }
+
+        breakdownMap.set(key, {
+          routineId: award.routineId ?? null,
+          routineName: award.routine?.name ?? null,
+          periodId: award.periodId ?? null,
+          periodName: award.period?.name ?? null,
+          count: 1,
+          lastAwardedAt: award.awardedAt,
+        });
+      }
+
+      return {
+        id: definition.id,
+        code: definition.code,
+        title: definition.title,
+        description: definition.description,
+        iconUrl: definition.iconUrl,
+        scope,
+        triggerType: definition.triggerType,
+        earned: matchingAwards.length > 0,
+        awardCount: matchingAwards.length,
+        lastAwardedAt: latestAward?.awardedAt ?? null,
+        lastAwardReason: latestAward?.reason ?? null,
+        latestRoutine: latestAward?.routine ?? null,
+        latestPeriod: latestAward?.period ?? null,
+        awardBreakdown: [...breakdownMap.values()].sort((a, b) => b.lastAwardedAt.getTime() - a.lastAwardedAt.getTime()),
+      };
     });
   }
 }

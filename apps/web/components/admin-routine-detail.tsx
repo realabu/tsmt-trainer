@@ -127,7 +127,7 @@ export function AdminRoutineDetail({ routineId }: { routineId: string }) {
               </div>
             </div>
             <div className="list-card">
-              <h2>Idoszakok es sessionok</h2>
+              <h2>Idoszakok es tornak</h2>
               <div className="list">
                 {routine.periods.map((period) => (
                   <div className="list-item" key={period.id}>

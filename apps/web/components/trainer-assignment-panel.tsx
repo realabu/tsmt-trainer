@@ -23,7 +23,7 @@ export function TrainerAssignmentPanel({
   routineId: string;
 }) {
   const [trainerEmail, setTrainerEmail] = useState("");
-  const [status, setStatus] = useState("Trainer email alapjan oszthatod meg ezt a rutint.");
+  const [status, setStatus] = useState("Trainer email alapjan oszthatod meg ezt a feladatsort.");
   const [assignments, setAssignments] = useState<AssignmentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -142,7 +142,7 @@ export function TrainerAssignmentPanel({
               </div>
             );
           })}
-          {assignments.length === 0 ? <p className="muted">Ez a rutin jelenleg nincs megosztva trainerrel.</p> : null}
+          {assignments.length === 0 ? <p className="muted">Ez a feladatsor jelenleg nincs megosztva trainerrel.</p> : null}
         </div>
         <p className="muted">{status}</p>
       </div>

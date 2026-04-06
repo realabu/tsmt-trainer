@@ -32,6 +32,9 @@ enum BadgeTriggerType {
   WEEKLY_GOAL_COMPLETED
   CONSECUTIVE_WEEKS_COMPLETED
   ROUTINE_RECORD
+  ROUTINE_SESSION_COUNT
+  DISTINCT_ROUTINE_COUNT
+  PERIOD_TARGET_COMPLETED
   TASK_COMPLETION_COUNT
 }
 
@@ -295,12 +298,15 @@ model BadgeAward {
   routineId         String?
   periodId          String?
   badgeDefinitionId String
+  contextKey        String?
   awardedAt         DateTime        @default(now())
   reason            String?
   child             Child           @relation(fields: [childId], references: [id], onDelete: Cascade)
   routine           Routine?        @relation(fields: [routineId], references: [id], onDelete: SetNull)
   period            RoutinePeriod?  @relation(fields: [periodId], references: [id], onDelete: SetNull)
   badgeDefinition   BadgeDefinition @relation(fields: [badgeDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([childId, badgeDefinitionId, contextKey])
 }
 
 model Subscription {

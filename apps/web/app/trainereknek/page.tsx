@@ -5,8 +5,8 @@ export default function TrainersInfoPage() {
         <span className="eyebrow">Trainereknek</span>
         <h1 className="hero-title">Attekintheto betekintes a megosztott otthoni gyakorlasba.</h1>
         <p className="muted">
-          Ez az oldal kesobb reszletesen bemutatja majd, hogyan kovetheti a trainer a megosztott rutinokat,
-          a session eredmenyeket es a fejlodes fo jeleit anelkul, hogy a szuloi elmeny kerulne hatterbe.
+          Ez az oldal kesobb reszletesen bemutatja majd, hogyan kovetheti a trainer a megosztott feladatsorokat,
+          a torna eredmenyeket es a fejlodes fo jeleit anelkul, hogy a szuloi elmeny kerulne hatterbe.
         </p>
       </section>
 
@@ -15,11 +15,11 @@ export default function TrainersInfoPage() {
           <h2>Mi lesz itt a fokusz</h2>
           <div className="list">
             <div className="list-item">
-              <strong>Megosztott rutinok attekintese</strong>
-              <span className="muted">Melyik szulo, melyik gyerek es melyik rutin van a trainerrel megosztva.</span>
+              <strong>Megosztott feladatsorok attekintese</strong>
+              <span className="muted">Melyik szulo, melyik gyerek es melyik feladatsor van a trainerrel megosztva.</span>
             </div>
             <div className="list-item">
-              <strong>Session eredmenyek</strong>
+              <strong>Torna eredmenyek</strong>
               <span className="muted">A befejezett alkalmak es az elorehaladas letisztult, read-only kovetese.</span>
             </div>
             <div className="list-item">

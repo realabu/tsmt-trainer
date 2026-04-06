@@ -8,6 +8,18 @@ export function getApiDocsUrl() {
   return getApiUrl("/api/docs");
 }
 
+function clearAuthAndRedirectHome() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem("tsmt.accessToken");
+  window.localStorage.removeItem("tsmt.refreshToken");
+  window.localStorage.removeItem("tsmt.user");
+  window.dispatchEvent(new Event("tsmt-auth-changed"));
+  window.location.href = "/";
+}
+
 export async function apiFetch<T>(
   path: string,
   init?: RequestInit,
@@ -35,6 +47,15 @@ export async function apiFetch<T>(
         message = body.message;
       }
     } catch {}
+
+    if (
+      response.status === 401 &&
+      accessToken &&
+      (message === "Invalid or expired access token" || message === "Missing Authorization header")
+    ) {
+      clearAuthAndRedirectHome();
+    }
+
     throw new Error(message);
   }
 

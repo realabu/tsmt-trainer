@@ -6,7 +6,7 @@ import { compare, hash } from "bcryptjs";
 import { createHash, randomBytes } from "node:crypto";
 import { PrismaService } from "../common/prisma.service";
 import type { AuthenticatedUser } from "./auth.types";
-import { LoginDto, RefreshTokenDto, RegisterDto } from "./dto";
+import { LoginDto, RefreshTokenDto, RegisterDto, UpdateProfileDto } from "./dto";
 
 @Injectable()
 export class AuthService {
@@ -115,6 +115,44 @@ export class AuthService {
   async me(currentUser: AuthenticatedUser) {
     return this.prisma.user.findUniqueOrThrow({
       where: { id: currentUser.sub },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async updateProfile(currentUser: AuthenticatedUser, input: UpdateProfileDto) {
+    const nextEmail = input.email?.toLowerCase();
+
+    if (nextEmail) {
+      const conflictingUser = await this.prisma.user.findFirst({
+        where: {
+          email: nextEmail,
+          NOT: { id: currentUser.sub },
+        },
+        select: { id: true },
+      });
+
+      if (conflictingUser) {
+        throw new ConflictException("Ez az email cim mar foglalt.");
+      }
+    }
+
+    const passwordHash = input.password ? await hash(input.password, 12) : undefined;
+
+    return this.prisma.user.update({
+      where: { id: currentUser.sub },
+      data: {
+        email: nextEmail,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        passwordHash,
+      },
       select: {
         id: true,
         email: true,

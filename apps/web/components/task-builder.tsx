@@ -184,7 +184,7 @@ export function TaskBuilder({
       <div className="list-item">
         <strong>Task hozzaadasa katalogusbol</strong>
         <p className="muted" style={{ marginTop: 8 }}>
-          Keress cimre, leirasra vagy segedeszkozre, majd emeld be az adott taskot a rutinba.
+          Keress cimre, leirasra vagy segedeszkozre, majd emeld be az adott taskot a feladatsorba.
         </p>
         <div className="list" style={{ marginTop: 12 }}>
           <input

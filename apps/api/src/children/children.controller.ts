@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { AuthGuard } from "../auth/auth.guard";
 import { CurrentUser } from "../auth/current-user.decorator";
@@ -43,7 +43,11 @@ export class ChildrenController {
   }
 
   @Get(":id/badges")
-  listBadges(@CurrentUser() currentUser: AuthenticatedUser, @Param("id") childId: string) {
-    return this.childrenService.listBadges(currentUser, childId);
+  listBadges(
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Param("id") childId: string,
+    @Query("routineId") routineId?: string,
+  ) {
+    return this.childrenService.listBadges(currentUser, childId, routineId);
   }
 }

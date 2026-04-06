@@ -56,7 +56,7 @@ export function AdminSessionDetail({ sessionId }: { sessionId: string }) {
       try {
         const result = await apiFetch<SessionDetail>(`/api/admin/sessions/${sessionId}`, undefined, accessToken);
         setSession(result);
-        setStatus("Session adatlap betoltve.");
+        setStatus("Torna adatlap betoltve.");
       } catch (error) {
         setStatus(error instanceof Error ? error.message : "Betoltesi hiba");
       }
@@ -68,7 +68,7 @@ export function AdminSessionDetail({ sessionId }: { sessionId: string }) {
   return (
     <main className="shell">
       <div className="panel">
-        <h1>Admin session adatlap</h1>
+        <h1>Admin torna adatlap</h1>
         <p className="muted">{status}</p>
       </div>
 

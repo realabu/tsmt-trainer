@@ -88,7 +88,7 @@ export function TrainerDashboard() {
         <div className="panel">
           <h1>Trainer nezet</h1>
           <p className="muted">
-            A trainer nezet csak trainer szerepkorrel erheto el. Szulokent a rutin megosztast a trening oldalon
+            A trainer nezet csak trainer szerepkorrel erheto el. Szulokent a feladatsor megosztast a trening oldalon
             tudod kezelni.
           </p>
         </div>
@@ -101,18 +101,18 @@ export function TrainerDashboard() {
       <div className="panel">
         <h1>Trainer nezet</h1>
         <p className="muted">
-          Read-only betekintes a hozzad rendelt gyerekek es feladatsorok session eredmenyeibe.
+          Read-only betekintes a hozzad rendelt gyerekek es feladatsorok torna eredmenyeibe.
         </p>
       </div>
 
       <section className="nav-row">
         <div className="panel">
           <h2>Hogyan mukodik</h2>
-          <p className="muted">Szuloi oldalon a training kepernyon egy trainer emaillel lehet hozzad rendelni egy rutint.</p>
+          <p className="muted">Szuloi oldalon a training kepernyon egy trainer emaillel lehet hozzad rendelni egy feladatsort.</p>
         </div>
         <div className="panel">
           <h2>Mit latsz itt</h2>
-          <p className="muted">Gyerek, rutin, task lista, legutobbi sessionok es elert badge-ek jelennek meg.</p>
+          <p className="muted">Gyerek, feladatsor, task lista, legutobbi tornak es elert badge-ek jelennek meg.</p>
         </div>
         <div className="panel">
           <h2>Jogosultsag</h2>

@@ -24,7 +24,7 @@ export default function ParentsInfoPage() {
             </div>
             <div className="list-item">
               <strong>Eredmenyek kovetese</strong>
-              <span className="muted">Sessionok, heti celok, rekordok es kesobbi trainer megosztas ertelmezese.</span>
+              <span className="muted">Tornak, heti celok, rekordok es kesobbi trainer megosztas ertelmezese.</span>
             </div>
           </div>
         </div>

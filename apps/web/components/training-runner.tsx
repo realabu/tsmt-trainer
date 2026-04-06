@@ -265,7 +265,7 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
             </p>
           </div>
           <Link href="/routines" className="button secondary">
-            Vissza a rutinokhoz
+            Vissza a feladatsorokhoz
           </Link>
         </div>
       </div>
@@ -275,16 +275,16 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
           <div className="list-card">
             <h2>Kezdesre kesz</h2>
             <p className="muted">
-              A session inditasakor a backend letrehozza az aktiv alkalmat, a feladatok reszidejet pedig
+              A torna inditasakor a backend letrehozza az aktiv alkalmat, a feladatok reszidejet pedig
               mar API-n keresztul mentjuk.
             </p>
             {user?.role !== "TRAINER" ? (
               <button className="button primary" onClick={startSession} type="button">
-                Session inditasa
+                Torna inditasa
               </button>
             ) : (
               <p className="muted">
-                Trainer szerepkorrel ez a nezet jelenleg read-only. Session inditas a szuloi nezetben lehetseges.
+                Trainer szerepkorrel ez a nezet jelenleg read-only. Torna inditas a szuloi nezetben lehetseges.
               </p>
             )}
           </div>
@@ -328,14 +328,14 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
 
           {isFinished ? (
             <section className="list-card" style={{ marginTop: 24 }}>
-              <h2>Session befejezve</h2>
+              <h2>Torna befejezve</h2>
               <p className="muted">
                 Vegeredmeny: {session.totalSeconds ? formatDuration(session.totalSeconds) : "—"}
               </p>
               <p className="muted">
                 {bestSeconds != null && session.totalSeconds != null && session.totalSeconds <= bestSeconds
                   ? "Ez az ido legalabb olyan jo, mint az eddigi legjobb eredmeny."
-                  : "Az eredmeny elmentve a session tortenetbe."}
+                  : "Az eredmeny elmentve a torna tortenetbe."}
               </p>
             </section>
           ) : null}
@@ -399,11 +399,11 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
                       </button>
                     </div>
                   ) : (
-                    <p className="muted">Trainer nezetben a session futtatasa es modositasa rejtve van.</p>
+                    <p className="muted">Trainer nezetben a torna futtatasa es modositasa rejtve van.</p>
                   )}
                 </>
               ) : (
-                <p className="muted">Ez a session mar befejezodott.</p>
+                <p className="muted">Ez a torna mar befejezodott.</p>
               )}
             </div>
 

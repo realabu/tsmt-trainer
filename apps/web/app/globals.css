@@ -168,6 +168,75 @@ body {
   margin-left: auto;
 }
 
+.profile-menu {
+  position: relative;
+}
+
+.profile-menu-trigger {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(20, 99, 86, 0.24);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(20, 99, 86, 0.12), rgba(244, 162, 89, 0.18));
+  color: var(--text);
+  font-weight: 800;
+  font-size: 0.76rem;
+  letter-spacing: -0.03em;
+  cursor: pointer;
+}
+
+.profile-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 240px;
+  padding: 10px;
+  display: none;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 250, 241, 0.98);
+  box-shadow: 0 16px 34px rgba(29, 36, 51, 0.12);
+}
+
+.profile-menu-dropdown.open {
+  display: grid;
+}
+
+.profile-menu-summary {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(223, 211, 191, 0.9);
+}
+
+.profile-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-menu-item:hover {
+  background: rgba(239, 229, 207, 0.65);
+}
+
+.profile-menu-item.danger {
+  color: #8a2e1d;
+}
+
 .app-nav-link {
   padding: 2px 8px;
   border-radius: 999px;
@@ -447,6 +516,295 @@ textarea {
   grid-template-columns: repeat(2, 1fr);
 }
 
+.child-selector-grid,
+.dashboard-metrics-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.child-selector-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.child-selector-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface-strong);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.child-selector-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(20, 99, 86, 0.35);
+  box-shadow: 0 10px 28px rgba(29, 36, 51, 0.08);
+}
+
+.child-selector-card.active {
+  border-color: rgba(20, 99, 86, 0.7);
+  box-shadow: 0 14px 32px rgba(20, 99, 86, 0.12);
+}
+
+.child-avatar {
+  width: 64px;
+  height: 64px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(20, 99, 86, 0.14), rgba(244, 162, 89, 0.22));
+  border: 1px solid rgba(20, 99, 86, 0.18);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.dashboard-metrics-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.metric-tile {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  display: grid;
+  gap: 8px;
+}
+
+.metric-tile strong {
+  font-size: 1.75rem;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.progress-squares {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.progress-square {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid rgba(93, 102, 120, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  color: transparent;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.progress-square.done {
+  border-color: rgba(47, 158, 68, 0.3);
+  background: rgba(47, 158, 68, 0.16);
+  color: #207a34;
+}
+
+.progress-square.pending {
+  border-color: rgba(93, 102, 120, 0.18);
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.progress-square.missed {
+  border-color: rgba(201, 66, 66, 0.28);
+  background: rgba(201, 66, 66, 0.14);
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 12px;
+}
+
+.badge-tile {
+  position: relative;
+  min-height: 136px;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 8px;
+  padding: 14px 12px 12px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  text-align: center;
+}
+
+.badge-tile.locked {
+  background: rgba(255, 250, 241, 0.72);
+}
+
+.badge-tile-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.badge-tile-icon.earned {
+  background: linear-gradient(135deg, rgba(244, 162, 89, 0.95), rgba(20, 99, 86, 0.92));
+  border-color: rgba(20, 99, 86, 0.22);
+  color: white;
+  box-shadow: 0 10px 20px rgba(20, 99, 86, 0.18);
+}
+
+.badge-tile-icon.locked {
+  background: linear-gradient(135deg, rgba(191, 196, 204, 0.6), rgba(117, 124, 137, 0.82));
+  border-color: rgba(93, 102, 120, 0.16);
+  color: rgba(255, 255, 255, 0.92);
+  filter: grayscale(1);
+}
+
+.badge-tile-image {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.badge-tile-title {
+  display: block;
+  min-height: 34px;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.badge-tile-meta {
+  display: grid;
+  gap: 2px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.badge-tile-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.badge-info-button {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.badge-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(29, 36, 51, 0.32);
+  backdrop-filter: blur(6px);
+}
+
+.badge-detail-sheet {
+  width: min(560px, 100%);
+  max-height: min(78vh, 720px);
+  overflow: auto;
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 28px;
+  border: 1px solid var(--line);
+  background: rgba(255, 250, 241, 0.98);
+  box-shadow: 0 24px 48px rgba(29, 36, 51, 0.18);
+}
+
+.badge-detail-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.badge-detail-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.badge-detail-icon.earned {
+  background: linear-gradient(135deg, rgba(244, 162, 89, 0.95), rgba(20, 99, 86, 0.92));
+  color: white;
+}
+
+.badge-detail-icon.locked {
+  background: linear-gradient(135deg, rgba(191, 196, 204, 0.6), rgba(117, 124, 137, 0.82));
+  color: rgba(255, 255, 255, 0.92);
+  filter: grayscale(1);
+}
+
+.badge-detail-close {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.badge-detail-body {
+  display: grid;
+  gap: 10px;
+}
+
+.badge-detail-body p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.badge-detail-breakdown {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.badge-detail-breakdown-item {
+  display: grid;
+  gap: 2px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(223, 211, 191, 0.9);
+}
+
 .progress-bar {
   height: 12px;
   width: 100%;
@@ -522,7 +880,8 @@ textarea {
   .metric-grid,
   .list-grid,
   .routine-grid,
-  .nav-row {
+  .nav-row,
+  .dashboard-metrics-grid {
     grid-template-columns: 1fr;
   }
 
@@ -556,5 +915,27 @@ textarea {
     display: flex;
     align-items: center;
     min-height: 36px;
+  }
+
+  .app-nav-mobile-logout {
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .badge-detail-overlay {
+    align-items: end;
+    padding: 0;
+    background: rgba(29, 36, 51, 0.24);
+  }
+
+  .badge-detail-sheet {
+    width: 100%;
+    max-height: 82vh;
+    border-radius: 24px 24px 0 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    padding: 20px 18px 24px;
   }
 }

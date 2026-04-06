@@ -2,19 +2,14 @@
 
 import { useState } from "react";
 import { apiFetch } from "../lib/api";
+import { clearStoredAuth, setStoredAuthUser, type StoredAuthUser } from "../lib/auth-storage";
 import { useAuthUser } from "../lib/use-auth-user";
 
 type AuthMode = "login" | "register";
 type RegisterRole = "PARENT" | "TRAINER";
 
 interface AuthResponse {
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-  };
+  user: StoredAuthUser;
   accessToken: string;
   refreshToken: string;
 }
@@ -53,8 +48,7 @@ export function AuthPanel({ embedded = false }: { embedded?: boolean }) {
 
       localStorage.setItem("tsmt.accessToken", result.accessToken);
       localStorage.setItem("tsmt.refreshToken", result.refreshToken);
-      localStorage.setItem("tsmt.user", JSON.stringify(result.user));
-      window.dispatchEvent(new Event("tsmt-auth-changed"));
+      setStoredAuthUser(result.user);
       setStatus(`Bejelentkezve: ${result.user.firstName} ${result.user.lastName}`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Auth hiba");
@@ -64,11 +58,7 @@ export function AuthPanel({ embedded = false }: { embedded?: boolean }) {
   }
 
   function logout() {
-    localStorage.removeItem("tsmt.accessToken");
-    localStorage.removeItem("tsmt.refreshToken");
-    localStorage.removeItem("tsmt.user");
-    window.dispatchEvent(new Event("tsmt-auth-changed"));
-    window.location.reload();
+    clearStoredAuth();
   }
 
   return (

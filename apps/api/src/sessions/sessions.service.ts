@@ -306,6 +306,33 @@ export class SessionsService {
         status: SessionStatus.COMPLETED,
       },
     });
+    const completedRoutineSessionsCount = await this.prisma.session.count({
+      where: {
+        childId,
+        routineId,
+        status: SessionStatus.COMPLETED,
+      },
+    });
+    const distinctCompletedRoutineCount = (
+      await this.prisma.session.findMany({
+        where: {
+          childId,
+          status: SessionStatus.COMPLETED,
+        },
+        distinct: ["routineId"],
+        select: {
+          routineId: true,
+        },
+      })
+    ).length;
+    const completedTaskCount = await this.prisma.sessionTaskTiming.count({
+      where: {
+        session: {
+          childId,
+          status: SessionStatus.COMPLETED,
+        },
+      },
+    });
 
     const previousBest = await this.prisma.session.findFirst({
       where: {
@@ -337,6 +364,7 @@ export class SessionsService {
           childId,
           routineId,
           badgeDefinitionId: badge.id,
+          contextKey: "first-session",
           reason: "first-session",
         });
       }
@@ -348,6 +376,7 @@ export class SessionsService {
             childId,
             routineId,
             badgeDefinitionId: badge.id,
+            contextKey: `total-sessions-${threshold}`,
             reason: `total-sessions-${threshold}`,
           });
         }
@@ -357,13 +386,12 @@ export class SessionsService {
         badge.triggerType === BadgeTriggerType.ROUTINE_RECORD &&
         (previousBest?.totalSeconds == null || totalSeconds < previousBest.totalSeconds)
       ) {
-        await this.prisma.badgeAward.create({
-          data: {
-            childId,
-            routineId,
-            badgeDefinitionId: badge.id,
-            reason: `routine-record-${completedAt.toISOString()}`,
-          },
+        await this.createBadgeAwardIfMissing({
+          childId,
+          routineId,
+          badgeDefinitionId: badge.id,
+          contextKey: `routine-record:${routineId}:${completedAt.toISOString()}`,
+          reason: `routine-record-${completedAt.toISOString()}`,
         });
       }
 
@@ -398,9 +426,97 @@ export class SessionsService {
               routineId,
               periodId: matchingPeriod.id,
               badgeDefinitionId: badge.id,
+              contextKey: `weekly-goal:${routineId}:${matchingPeriod.id}:${weekStart.toISOString()}`,
               reason: `weekly-goal-${weekStart.toISOString()}`,
             });
           }
+        }
+      }
+
+      if (badge.triggerType === BadgeTriggerType.ROUTINE_SESSION_COUNT) {
+        const threshold = Number((badge.triggerConfig as { threshold?: number } | null)?.threshold ?? 0);
+        if (threshold > 0 && completedRoutineSessionsCount >= threshold) {
+          await this.createBadgeAwardIfMissing({
+            childId,
+            routineId,
+            badgeDefinitionId: badge.id,
+            contextKey: `routine-sessions:${routineId}:${threshold}`,
+            reason: `routine-sessions-${threshold}`,
+          });
+        }
+      }
+
+      if (badge.triggerType === BadgeTriggerType.DISTINCT_ROUTINE_COUNT) {
+        const threshold = Number((badge.triggerConfig as { threshold?: number } | null)?.threshold ?? 0);
+        if (threshold > 0 && distinctCompletedRoutineCount >= threshold) {
+          await this.createBadgeAwardIfMissing({
+            childId,
+            routineId,
+            badgeDefinitionId: badge.id,
+            contextKey: `distinct-routines:${threshold}`,
+            reason: `distinct-routines-${threshold}`,
+          });
+        }
+      }
+
+      if (badge.triggerType === BadgeTriggerType.CONSECUTIVE_WEEKS_COMPLETED && routine) {
+        const threshold = Number((badge.triggerConfig as { threshold?: number } | null)?.threshold ?? 0);
+        if (threshold > 0) {
+          const streak = await this.getConsecutiveWeeklyGoalStreak(childId, routine, completedAt);
+          if (streak >= threshold) {
+            await this.createBadgeAwardIfMissing({
+              childId,
+              routineId,
+              badgeDefinitionId: badge.id,
+              contextKey: `weekly-streak:${routineId}:${threshold}:${completedAt.toISOString()}`,
+              reason: `weekly-streak-${threshold}-${completedAt.toISOString()}`,
+            });
+          }
+        }
+      }
+
+      if (badge.triggerType === BadgeTriggerType.PERIOD_TARGET_COMPLETED && routine) {
+        const matchingPeriod = routine.periods.find(
+          (period) => completedAt >= period.startsOn && completedAt <= period.endsOn,
+        );
+
+        if (matchingPeriod) {
+          const completedInPeriod = await this.prisma.session.count({
+            where: {
+              childId,
+              routineId,
+              status: SessionStatus.COMPLETED,
+              completedAt: {
+                gte: matchingPeriod.startsOn,
+                lte: matchingPeriod.endsOn,
+              },
+            },
+          });
+          const periodTarget = getTotalTargetForPeriod(matchingPeriod);
+
+          if (completedInPeriod >= periodTarget) {
+            await this.createBadgeAwardIfMissing({
+              childId,
+              routineId,
+              periodId: matchingPeriod.id,
+              badgeDefinitionId: badge.id,
+              contextKey: `period-target:${routineId}:${matchingPeriod.id}`,
+              reason: `period-target-${matchingPeriod.id}`,
+            });
+          }
+        }
+      }
+
+      if (badge.triggerType === BadgeTriggerType.TASK_COMPLETION_COUNT) {
+        const threshold = Number((badge.triggerConfig as { threshold?: number } | null)?.threshold ?? 0);
+        if (threshold > 0 && completedTaskCount >= threshold) {
+          await this.createBadgeAwardIfMissing({
+            childId,
+            routineId,
+            badgeDefinitionId: badge.id,
+            contextKey: `task-completions:${threshold}`,
+            reason: `task-completions-${threshold}`,
+          });
         }
       }
     }
@@ -411,13 +527,14 @@ export class SessionsService {
     routineId?: string;
     periodId?: string;
     badgeDefinitionId: string;
+    contextKey?: string;
     reason: string;
   }) {
     const existing = await this.prisma.badgeAward.findFirst({
       where: {
         childId: input.childId,
         badgeDefinitionId: input.badgeDefinitionId,
-        reason: input.reason,
+        ...(input.contextKey ? { contextKey: input.contextKey } : { reason: input.reason }),
       },
       select: {
         id: true,
@@ -431,6 +548,82 @@ export class SessionsService {
     return this.prisma.badgeAward.create({
       data: input,
     });
+  }
+
+  private async getConsecutiveWeeklyGoalStreak(
+    childId: string,
+    routine: {
+      id: string;
+      periods: Array<{
+        id: string;
+        startsOn: Date;
+        endsOn: Date;
+        weeklyTargetCount: number;
+      }>;
+    },
+    completedAt: Date,
+  ) {
+    const periods = [...routine.periods].sort((a, b) => a.startsOn.getTime() - b.startsOn.getTime());
+    const completedSessions = await this.prisma.session.findMany({
+      where: {
+        childId,
+        routineId: routine.id,
+        status: SessionStatus.COMPLETED,
+        completedAt: {
+          lte: completedAt,
+        },
+      },
+      select: {
+        completedAt: true,
+      },
+      orderBy: {
+        completedAt: "desc",
+      },
+    });
+
+    const weekSummaries: Array<{ weekStart: Date; targetMet: boolean }> = [];
+
+    for (const period of periods) {
+      let cursor = startOfWeek(period.startsOn);
+      while (cursor <= period.endsOn) {
+        const weekStart = new Date(cursor);
+        const weekEnd = endOfWeek(weekStart);
+        const boundedStart = new Date(Math.max(weekStart.getTime(), period.startsOn.getTime()));
+        const boundedEnd = new Date(Math.min(weekEnd.getTime(), period.endsOn.getTime()));
+
+        if (boundedStart > completedAt) {
+          break;
+        }
+
+        const sessionsInWeek = completedSessions.filter((session) => {
+          const value = session.completedAt;
+          return value != null && value >= boundedStart && value <= boundedEnd;
+        }).length;
+        const target = getProRatedWeeklyTarget(period.weeklyTargetCount, boundedStart, boundedEnd);
+
+        weekSummaries.push({
+          weekStart,
+          targetMet: sessionsInWeek >= target,
+        });
+
+        cursor = new Date(weekStart);
+        cursor.setDate(cursor.getDate() + 7);
+      }
+    }
+
+    const sorted = weekSummaries
+      .filter((week) => week.weekStart <= completedAt)
+      .sort((a, b) => b.weekStart.getTime() - a.weekStart.getTime());
+
+    let streak = 0;
+    for (const week of sorted) {
+      if (!week.targetMet) {
+        break;
+      }
+      streak += 1;
+    }
+
+    return streak;
   }
 }
 
@@ -454,6 +647,29 @@ function getProRatedWeeklyTarget(weeklyTargetCount: number, weekStart: Date, wee
   const coveredDays = getInclusiveDayCount(weekStart, weekEnd);
   const rawTarget = (weeklyTargetCount * coveredDays) / 7;
   return Math.round(rawTarget);
+}
+
+function getTotalTargetForPeriod(period: {
+  startsOn: Date;
+  endsOn: Date;
+  weeklyTargetCount: number;
+}) {
+  let total = 0;
+  let cursor = startOfWeek(period.startsOn);
+
+  while (cursor <= period.endsOn) {
+    const weekStart = new Date(cursor);
+    const weekEnd = endOfWeek(weekStart);
+    const boundedStart = new Date(Math.max(weekStart.getTime(), period.startsOn.getTime()));
+    const boundedEnd = new Date(Math.min(weekEnd.getTime(), period.endsOn.getTime()));
+
+    total += getProRatedWeeklyTarget(period.weeklyTargetCount, boundedStart, boundedEnd);
+
+    cursor = new Date(weekStart);
+    cursor.setDate(cursor.getDate() + 7);
+  }
+
+  return total;
 }
 
 function getInclusiveDayCount(start: Date, end: Date) {
