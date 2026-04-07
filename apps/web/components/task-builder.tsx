@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
+import { getDisplayRepetitionsLabel } from "../lib/repetitions";
 
 export interface TaskDraft {
   id?: string;
@@ -17,7 +18,6 @@ export interface TaskDraft {
   details: string;
   coachText: string;
   repetitionsLabel: string;
-  repetitionSchemeRaw: string;
   repetitionCount: string;
   repetitionUnitCount: string;
   mediaImageUrl: string;
@@ -60,6 +60,22 @@ interface SongCatalogOption {
   title: string;
 }
 
+interface DeleteImpactRecord {
+  entityType: string;
+  entityId: string;
+  entityLabel: string;
+  parentLabel?: string;
+  deletes: Array<{
+    label: string;
+    count: number;
+  }>;
+  detaches: Array<{
+    label: string;
+    count: number;
+  }>;
+  notes: string[];
+}
+
 function emptyTask(sortOrder: number): TaskDraft {
   return {
     sortOrder,
@@ -68,7 +84,6 @@ function emptyTask(sortOrder: number): TaskDraft {
     details: "",
     coachText: "",
     repetitionsLabel: "",
-    repetitionSchemeRaw: "",
     repetitionCount: "",
     repetitionUnitCount: "",
     mediaImageUrl: "",
@@ -87,9 +102,17 @@ function normalizeTasks(tasks: TaskDraft[]) {
 export function TaskBuilder({
   tasks,
   onChange,
+  onRequestRemoveTask,
+  taskDeleteImpact,
+  onConfirmDeleteTask,
+  onCancelDeleteTask,
 }: {
   tasks: TaskDraft[];
   onChange: (tasks: TaskDraft[]) => void;
+  onRequestRemoveTask?: (task: TaskDraft, index: number) => void;
+  taskDeleteImpact?: DeleteImpactRecord | null;
+  onConfirmDeleteTask?: (taskId: string) => void;
+  onCancelDeleteTask?: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<TaskCatalogSearchResult[]>([]);
@@ -267,8 +290,19 @@ export function TaskBuilder({
                   Sajat task
                 </span>
               )}
+              {getDisplayRepetitionsLabel(task) ? (
+                <span className="muted" style={{ display: "block", marginTop: 4 }}>
+                  Megjelenik: {getDisplayRepetitionsLabel(task)}
+                </span>
+              ) : null}
             </div>
-            <button className="button secondary" onClick={() => removeTask(index)} type="button">
+            <button
+              className="button secondary"
+              onClick={() =>
+                task.id && onRequestRemoveTask ? onRequestRemoveTask(task, index) : removeTask(index)
+              }
+              type="button"
+            >
               Torles
             </button>
           </div>
@@ -328,16 +362,11 @@ export function TaskBuilder({
               onChange={(event) => updateTask(index, { repetitionsLabel: event.target.value })}
               placeholder="Megjelenitett ismetles, pl. 2x vagy 2x10"
             />
-            <input
-              value={task.repetitionSchemeRaw}
-              onChange={(event) => updateTask(index, { repetitionSchemeRaw: event.target.value })}
-              placeholder="Strukturalt ismetles minta, pl. 2x10"
-            />
             <div className="list-grid" style={{ marginTop: 0 }}>
               <input
                 value={task.repetitionCount}
                 onChange={(event) => updateTask(index, { repetitionCount: event.target.value })}
-                placeholder="Ismetlesek szama, pl. 2"
+                placeholder="Kulso ismetlesek szama, pl. 2"
               />
               <input
                 value={task.repetitionUnitCount}
@@ -360,6 +389,39 @@ export function TaskBuilder({
               onChange={(event) => updateTask(index, { mediaVideoUrl: event.target.value })}
               placeholder="Extra video URL (opcionalis)"
             />
+            {task.id && taskDeleteImpact?.entityId === task.id ? (
+              <div className="list-card" style={{ borderRadius: 18, padding: 16 }}>
+                <h2 style={{ fontSize: "1rem" }}>Feladat torlese</h2>
+                {taskDeleteImpact.parentLabel ? (
+                  <p className="muted">Kapcsolodo feladatsor: {taskDeleteImpact.parentLabel}</p>
+                ) : null}
+                {taskDeleteImpact.deletes
+                  .filter((item) => item.count > 0)
+                  .map((item) => (
+                    <div className="list-item" key={item.label}>
+                      <strong>{item.label}</strong>
+                      <span className="muted">{item.count}</span>
+                    </div>
+                  ))}
+                {taskDeleteImpact.notes.map((note) => (
+                  <p className="muted" key={note}>
+                    {note}
+                  </p>
+                ))}
+                <div className="cta-row" style={{ marginTop: 12 }}>
+                  <button
+                    className="button primary"
+                    onClick={() => onConfirmDeleteTask?.(task.id!)}
+                    type="button"
+                  >
+                    Vegleges torles
+                  </button>
+                  <button className="button secondary" onClick={() => onCancelDeleteTask?.()} type="button">
+                    Megse
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       ))}

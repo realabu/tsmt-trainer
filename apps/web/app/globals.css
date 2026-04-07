@@ -849,6 +849,682 @@ textarea {
   color: #fff;
 }
 
+.training-shell {
+  width: min(1480px, calc(100vw - 24px));
+  min-height: calc(100dvh - 44px);
+  margin: 0 auto;
+  padding: 10px 0 14px;
+}
+
+.training-stage-card,
+.training-timer-card,
+.training-progress-card,
+.training-next-card,
+.training-controls-card,
+.training-standby {
+  background: rgba(255, 250, 241, 0.96);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: 0 10px 30px rgba(29, 36, 51, 0.08);
+}
+
+.training-kicker,
+.training-section-label {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.training-status-pill {
+  max-width: 100%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(20, 99, 86, 0.08);
+  color: var(--text);
+  font-size: 0.94rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.training-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+  gap: 12px;
+}
+
+.training-sidebar {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.training-stage-card {
+  position: relative;
+  min-height: 0;
+  padding: 18px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.training-stage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.training-stage-heading-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.training-routine-name {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.training-stage-header h2 {
+  margin: 10px 0 0;
+  font-size: clamp(1.8rem, 2.8vw, 3rem);
+  line-height: 0.94;
+  letter-spacing: -0.05em;
+}
+
+.training-task-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.training-stage-body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
+  gap: 16px;
+}
+
+.training-visual-column,
+.training-copy-column {
+  min-height: 0;
+}
+
+.training-visual-column {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.training-image-frame {
+  min-height: 0;
+  max-height: 32vh;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(244, 162, 89, 0.18), rgba(20, 99, 86, 0.16));
+  border: 1px solid rgba(223, 211, 191, 0.92);
+}
+
+.training-image-main {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.training-image-placeholder {
+  width: 100%;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(20, 99, 86, 0.72);
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  border-radius: 20px;
+  border: 1px dashed rgba(20, 99, 86, 0.28);
+  background: rgba(255, 255, 255, 0.58);
+  text-align: center;
+  padding: 16px;
+}
+
+.training-image-placeholder-button {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.training-thumb-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(52px, 72px));
+  gap: 8px;
+}
+
+.training-thumb {
+  padding: 0;
+  height: 52px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+}
+
+.training-thumb.active {
+  border-color: rgba(20, 99, 86, 0.72);
+}
+
+.training-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.training-image-collapse-button {
+  appearance: none;
+  justify-self: flex-start;
+  border: 0;
+  background: transparent;
+  color: rgba(20, 99, 86, 0.82);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.training-copy-column {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.training-lead,
+.training-next-card p,
+.training-lyrics-card p,
+.training-text-card p,
+.training-finish-copy p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.training-lead {
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  font-weight: 600;
+}
+
+.training-text-card,
+.training-lyrics-card {
+  padding: 14px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(223, 211, 191, 0.92);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.training-text-card strong,
+.training-lyrics-header strong,
+.training-finish-copy h3,
+.training-next-card strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.training-meta-group {
+  display: grid;
+  gap: 8px;
+}
+
+.training-meta-title {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.training-equipment-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
+  gap: 8px;
+}
+
+.training-equipment-chip {
+  min-height: 78px;
+  padding: 10px 8px;
+  border-radius: 18px;
+  border: 1px solid rgba(223, 211, 191, 0.92);
+  background: rgba(255, 255, 255, 0.78);
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.training-equipment-chip img,
+.training-equipment-chip span {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  object-fit: cover;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 99, 86, 0.12);
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.training-equipment-chip strong {
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.training-lyrics-card {
+  min-height: 0;
+}
+
+.training-lyrics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.training-inline-actions,
+.training-mini-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.training-lyrics-card p {
+  display: -webkit-box;
+  -webkit-line-clamp: 7;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.training-lyrics-text {
+  white-space: pre-line;
+}
+
+.training-timer-card,
+.training-progress-card,
+.training-next-card,
+.training-history-card,
+.training-controls-card {
+  padding: 16px 18px;
+  overflow: hidden;
+}
+
+.training-rings {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.training-ring {
+  width: min(28vw, 260px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.training-ring-best {
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+}
+
+.training-ring-center {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(255, 250, 241, 0.96);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  padding: 22px;
+}
+
+.training-ring-label,
+.training-ring-sub {
+  color: var(--muted);
+}
+
+.training-ring-label {
+  font-size: 0.86rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+.training-ring-center strong {
+  margin: 8px 0 6px;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+}
+
+.training-ring-sub {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.training-timer-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.training-timer-metric {
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(223, 211, 191, 0.92);
+}
+
+.training-timer-metric span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.training-timer-metric strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.3rem;
+  letter-spacing: -0.03em;
+}
+
+.training-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.training-progress-head strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.45rem;
+  line-height: 0.95;
+}
+
+.training-progress-percent {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.training-progress-bar {
+  margin-top: 10px;
+}
+
+.training-progress-squares {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.training-progress-square {
+  min-height: 44px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(223, 211, 191, 0.92);
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.training-progress-square.done {
+  background: rgba(47, 158, 68, 0.18);
+  border-color: rgba(47, 158, 68, 0.26);
+  color: #1f7a33;
+}
+
+.training-progress-square.current {
+  background: linear-gradient(135deg, rgba(244, 162, 89, 0.18), rgba(20, 99, 86, 0.2));
+  border-color: rgba(20, 99, 86, 0.34);
+  color: var(--accent);
+}
+
+.training-next-card p {
+  color: var(--muted);
+}
+
+.training-controls-card {
+  display: grid;
+  gap: 10px;
+  align-content: end;
+  margin-top: auto;
+}
+
+.training-next-button {
+  min-height: 76px;
+  border: 0;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #f4a259, #146356);
+  color: white;
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  cursor: pointer;
+  box-shadow: 0 16px 36px rgba(20, 99, 86, 0.2);
+}
+
+.training-next-button-top {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.training-secondary-button {
+  min-height: 56px;
+  font-size: 1rem;
+}
+
+.training-finish-copy {
+  max-width: 50ch;
+}
+
+.training-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.training-burst-piece {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f4a259, #146356);
+  opacity: 0;
+  animation: training-burst 1s ease-out forwards;
+  animation-delay: var(--burst-delay);
+}
+
+.training-standby {
+  min-height: 0;
+  padding: 22px;
+}
+
+.training-standby-hero {
+  min-height: calc(100dvh - 180px);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+  gap: 18px;
+  align-items: center;
+}
+
+.training-standby-copy h2 {
+  margin: 16px 0 10px;
+  font-size: clamp(2.2rem, 4vw, 4rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
+.training-standby-copy p {
+  max-width: 52ch;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.training-launch-button {
+  min-width: min(420px, 100%);
+  min-height: 78px;
+  margin-top: 20px;
+  font-size: clamp(1.3rem, 2.4vw, 1.8rem);
+  border-radius: 26px;
+}
+
+.training-standby-preview {
+  display: grid;
+  gap: 18px;
+}
+
+.training-mini-ring {
+  width: min(260px, 100%);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border-radius: 999px;
+  padding: 16px;
+  background: conic-gradient(#146356 0 65%, rgba(255, 255, 255, 0.18) 65% 100%);
+}
+
+.training-mini-ring-center {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(255, 250, 241, 0.96);
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
+.training-mini-ring-center strong {
+  font-size: 3rem;
+  line-height: 0.9;
+}
+
+.training-mini-ring-center span {
+  color: var(--muted);
+}
+
+.training-preview-list {
+  display: grid;
+  gap: 10px;
+  max-height: 38dvh;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.training-preview-item {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(223, 211, 191, 0.92);
+}
+
+.training-preview-item-body {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.training-preview-item-body strong {
+  line-height: 1.2;
+}
+
+.training-preview-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.training-preview-item span {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 99, 86, 0.12);
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.training-equipment-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgba(20, 99, 86, 0.18);
+  background: rgba(20, 99, 86, 0.1);
+}
+
+.training-equipment-dot img,
+.training-equipment-dot span {
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  object-fit: cover;
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.training-inline-status {
+  margin-bottom: 10px;
+}
+
+@keyframes training-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--burst-x)), calc(-50% + var(--burst-y))) scale(1.15);
+  }
+}
+
 @media (max-width: 900px) {
   .landing-hero {
     min-height: auto;
@@ -859,7 +1535,7 @@ textarea {
   .landing-hero-overlay {
     width: min(100%, calc(100% - 24px));
     padding: 24px 0;
-    align-items: start;
+    align-items: flex-start;
   }
 
   .landing-left-stack {
@@ -924,7 +1600,7 @@ textarea {
   }
 
   .badge-detail-overlay {
-    align-items: end;
+    align-items: flex-end;
     padding: 0;
     background: rgba(29, 36, 51, 0.24);
   }
@@ -937,5 +1613,68 @@ textarea {
     border-right: 0;
     border-bottom: 0;
     padding: 20px 18px 24px;
+  }
+
+  .training-shell {
+    width: min(100vw - 16px, 100%);
+    min-height: calc(100dvh - 44px);
+    padding: 8px 0 12px;
+  }
+
+  .training-topbar,
+  .training-stage-body,
+  .training-layout,
+  .training-standby-hero,
+  .training-timer-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .training-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .training-stage-card {
+    padding: 14px;
+  }
+
+  .training-stage-header {
+    flex-direction: column;
+  }
+
+  .training-task-badges {
+    justify-content: flex-start;
+  }
+
+  .training-stage-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .training-image-frame {
+    max-height: 22vh;
+  }
+
+  .training-lead {
+    font-size: 0.98rem;
+  }
+
+  .training-lyrics-card p {
+    -webkit-line-clamp: 4;
+  }
+
+  .training-ring {
+    width: min(56vw, 230px);
+  }
+
+  .training-next-button {
+    min-height: 68px;
+  }
+
+  .training-standby {
+    padding: 16px;
+  }
+
+  .training-standby-hero {
+    min-height: calc(100dvh - 170px);
   }
 }

@@ -128,7 +128,6 @@ model RoutineTask {
   details           String?
   coachText         String?
   repetitionsLabel  String?
-  repetitionSchemeRaw String?
   repetitionCount   Int?
   repetitionUnitCount Int?
   expectedSeconds   Int?

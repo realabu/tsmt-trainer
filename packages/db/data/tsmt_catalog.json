@@ -1,0 +1,435 @@
+{
+  "songs": [
+    {
+      "title": "Hinta-palinta",
+      "lyrics": "Hinta-palinta, régi Duna kis katona, ugorj a Tiszába, zsupsz!",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Plédes oldalirányú hintáztatásnál szerepel."
+    },
+    {
+      "title": "Borsót főztem",
+      "lyrics": "Borsót főztem, jól meg sóztam, meg is paprikáztam. Á- bele, bá- bele, fuss!",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Plédes csavarásnál és forgatásnál szerepel."
+    },
+    {
+      "title": "Süss fel nap",
+      "lyrics": "Süss fel nap, fényes nap, kertek alatt a ludaim megfagynak.",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Plédes emelgetéshez és egyes hintás feladatokhoz szerepel."
+    },
+    {
+      "title": "Zsipp-zsupp",
+      "lyrics": "Zsipp-zsupp, kenderzsupp, ha megázik, kidobjuk. Zsuppsz!",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Plédes előre-hátra hintáztatásnál szerepel."
+    },
+    {
+      "title": "Csiga-biga",
+      "lyrics": "Csiga-biga gyere ki, ég a házad ide ki, kapsz tejet-vajat, holnapra is marad.",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Körző mozgásokhoz szerepel."
+    },
+    {
+      "title": "Cini-cini muzsika",
+      "lyrics": "Cini, cini muzsika, táncol a kis Zsuzsika, jobbra dűl, balra dűl, tücsök koma hegedül.",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Jobbra-balra billenéshez szerepel."
+    },
+    {
+      "title": "Kipp-kopp, kalapács",
+      "lyrics": "Kipp-kopp, kalapács, hát te mit csinálsz? Kipp-kopp kopogok, a nagy labdán tornázok.",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Nagylabdás rugózásnál szerepel."
+    },
+    {
+      "title": "Aki nem lép egyszerre",
+      "lyrics": "Aki nem lép egyszerre, nem kap rétest estére, mert a rétes igen jó, katonának az való.",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Talicskázásnál és ritmusos haladásnál szerepel."
+    },
+    {
+      "title": "Megy a hajó a Dunán",
+      "lyrics": "Megy a hajó a Dunán, lemaradt a kapitány. Kiabál, trombitál, de a hajó meg sem áll.",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Nagylabdán előre-hátra billenésnél szerepel."
+    },
+    {
+      "title": "Ha én cica volnék",
+      "lyrics": "Ha én cica volnék, száz egeret fognék, de én cica nem vagyok, egeret sem foghatok.",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Körző mozgásnál szerepel egy forrásban."
+    },
+    {
+      "title": "Poros úton kocsi zörög",
+      "lyrics": "Poros úton kocsi zörög, a kereke gyorsan pörög, Sári néni vezeti, aki látja, neveti!",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Plédes csavarásnál szerepel egy forrásban."
+    },
+    {
+      "title": "Ziki-zaka-zakatol",
+      "lyrics": "Ziki-zaka-zakatol, ez a vonat valahol. Én vagyok a vasutas, te meg legyél az utas!",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Gördeszkás húzásnál szerepel."
+    },
+    {
+      "title": "Ecc, pecc, kimehetsz",
+      "lyrics": "Ecc, pecc, kimehetsz, holnapután bejöhetsz, cérnára, cinegére, ugorj cica az egérre! Fuss!",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Billenőlapon előre-hátra billenésnél szerepel."
+    },
+    {
+      "title": "Bújj, bújj zöld ág",
+      "lyrics": "Bújj, bújj zöld ág, zöld levelecske, nyitva van az aranykapu, csak bújjatok rajta!",
+      "audioExternalUrl": "",
+      "videoExternalUrl": "",
+      "notes": "Bukfenchez kapcsolódik egy forrásban."
+    }
+  ],
+  "equipment": [
+    {
+      "name": "pléd",
+      "description": "Textil eszköz hintáztatáshoz, emeléshez és forgatáshoz.",
+      "iconExternalUrl": ""
+    },
+    {
+      "name": "nagylabda",
+      "description": "Nagy méretű torna- vagy terápiás labda.",
+      "iconExternalUrl": ""
+    },
+    {
+      "name": "gördeszka",
+      "description": "Alacsony guruló eszköz húzó- és tolófeladatokhoz.",
+      "iconExternalUrl": ""
+    },
+    {
+      "name": "billenőlap",
+      "description": "Billenő egyensúlyfejlesztő lap.",
+      "iconExternalUrl": ""
+    },
+    {
+      "name": "labda",
+      "description": "Kisebb labda dobó és elkapó feladatokhoz.",
+      "iconExternalUrl": ""
+    },
+    {
+      "name": "kötél",
+      "description": "Ugráshoz vagy akadálykijelöléshez használt kötél.",
+      "iconExternalUrl": ""
+    },
+    {
+      "name": "plüss",
+      "description": "Puha játékfigura motivációhoz vagy célpontként.",
+      "iconExternalUrl": ""
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Plédes hintáztatás oldalra",
+      "summary": "A gyermek plédben fekve jobbra-balra leng. Passzív vesztibuláris ingerelést ad.",
+      "instructions": "A gyermeket plédbe fektetjük. Két oldalról megtartva jobbra-balra hintáztatjuk a megadott ismétlésszámmal.",
+      "focusPoints": "Biztonságos fogás, egyenletes amplitúdó, szemkontaktus, fej helyzetének figyelése.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Hinta-palinta",
+      "imageUrls": [
+        "icons/pledes_hintaztatas_oldalra.png"
+      ],
+      "equipmentNames": [
+        "pléd"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Plédes körzés",
+      "summary": "A gyermek plédben fekve köríves, körző mozgást kap. A feladat passzív forgóingerrel dolgozik.",
+      "instructions": "A gyermeket plédben tartjuk, majd köríves mozgással egyik és másik irányba körözzük.",
+      "focusPoints": "Lassú indítás, irányok váltásának jelzése, szédülés vagy diszkomfort figyelése.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Csiga-biga",
+      "imageUrls": [
+        "icons/pledes_korzes.png"
+      ],
+      "equipmentNames": [
+        "pléd"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Plédes csavarás",
+      "summary": "A gyermek plédben fekve csavaró-forgó mozgást végez. A mozgás a test tengelye körüli ingerelést ad.",
+      "instructions": "A gyermeket plédben biztonságosan megtartva egyik, majd másik irányba csavaró forgatást végzünk.",
+      "focusPoints": "Kis amplitúdóval kezdeni, fej és törzs megtámasztása, irányváltásnál kontrollált lassítás.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Borsót főztem",
+      "imageUrls": [
+        "icons/pledes_csavaras.png"
+      ],
+      "equipmentNames": [
+        "pléd"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Plédes hintáztatás hosszirányban",
+      "summary": "A gyermek plédben fekve előre-hátra, fej-láb tengely mentén leng. Hosszirányú hintáztatás.",
+      "instructions": "A gyermeket plédbe fektetjük, majd előre-hátra hintáztatjuk a test hosszanti irányában.",
+      "focusPoints": "A fej-láb tengely megtartása, egyenletes tempó, a gyermek reakcióinak figyelése.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Zsipp-zsupp",
+      "imageUrls": [
+        "icons/pledes_hintaztatas_hossziranyban.png"
+      ],
+      "equipmentNames": [
+        "pléd"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Plédes emelgetés",
+      "summary": "A gyermek plédben fekve fel-le mozgást kap. A feladat rövid vertikális vesztibuláris ingerelést ad.",
+      "instructions": "A gyermeket plédben tartjuk, majd kontrolláltan fel és le emeljük a megadott ismétlésszámban.",
+      "focusPoints": "Kis magasság, biztos fogás, a mozgás végpontjainak tompítása.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Süss fel nap",
+      "imageUrls": [
+        "icons/pledes_emelgetes.png"
+      ],
+      "equipmentNames": [
+        "pléd"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Páros lábú ugrás akadály között",
+      "summary": "A gyermek páros lábbal ugrik kijelölt sávban vagy két kötél között. Ritmusos alsóvégtagi koordinációs feladat.",
+      "instructions": "Két kötéllel vagy jelöléssel sávot készítünk. A gyermek páros lábbal oda-vissza ugrik a kijelölt úton.",
+      "focusPoints": "Páros láb egyszerre érkezzen, térd enyhén hajlítva, ritmus tartása.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "",
+      "imageUrls": [
+        "icons/paros_lab_ugras_akadaly_kozott.png"
+      ],
+      "equipmentNames": [
+        "kötél"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Nagylabdán rugózás",
+      "summary": "A gyermek nagylabdán ülve függőleges rugózó mozgást végez. Egyszerű ritmikus labdás feladat.",
+      "instructions": "A gyermeket nagylabdára ültetjük vagy sarokülésben ráhelyezzük. A szülő tartás mellett rugóztatja.",
+      "focusPoints": "Medence középhelyzet, biztos tartás, ne csússzon le a labdáról.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Kipp-kopp, kalapács",
+      "imageUrls": [
+        "icons/nagylabdan_rugozas.png"
+      ],
+      "equipmentNames": [
+        "nagylabda"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Nagylabdán billentés előre-hátra",
+      "summary": "A gyermek nagylabdán előre és hátra billen. A törzsstabilitást és egyensúlyi reakciókat dolgoztatja.",
+      "instructions": "A gyermeket a labdán megtartjuk, majd kontrolláltan előre és hátra billentjük.",
+      "focusPoints": "A mozgástartomány fokozatos növelése, fej helyzetének védelme, stabil kéztámasz ahol kell.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Megy a hajó a Dunán",
+      "imageUrls": [
+        "icons/nagylabdan_billentes_elore_hatra.png"
+      ],
+      "equipmentNames": [
+        "nagylabda"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Nagylabdán billentés jobbra-balra",
+      "summary": "A gyermek a nagylabdán oldalirányú billentést végez. Oldalirányú egyensúlyi reakciókat hív elő.",
+      "instructions": "A gyermeket a labdán megtartjuk, majd kontrolláltan jobbra és balra billentjük.",
+      "focusPoints": "Oldalra dőlés közben biztos tartás, vállöv és törzs figyelése, lassú irányváltás.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Cini-cini muzsika",
+      "imageUrls": [
+        "icons/nagylabdan_billentes_jobbra_balra.png"
+      ],
+      "equipmentNames": [
+        "nagylabda"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Gördeszkás húzás",
+      "summary": "A gyermek gördeszkán fekve passzívan halad húzással. A feladat testhelyzet-tartást és vesztibuláris ingerlést ad.",
+      "instructions": "A gyermek hason vagy a forrás szerinti testhelyzetben a gördeszkára fekszik. A szülő húzza előre a deszkát.",
+      "focusPoints": "Karok helyzete, fej megemelése ha ezt kérik, egyenes haladás, ütközés elkerülése.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Ziki-zaka-zakatol",
+      "imageUrls": [
+        "icons/gordeszkas_huzas.png"
+      ],
+      "equipmentNames": [
+        "gördeszka"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Gördeszkás tolás",
+      "summary": "A gyermek gördeszkán aktívan halad tolással. Felsővégtagi erőt és koordinációt igényel.",
+      "instructions": "A gyermek gördeszkán fekszik, és kézzel vagy lábbal a forrás szerinti módon tolja magát előre.",
+      "focusPoints": "Aktív részvétel, kontrollált tempó, a deszka egyenes vezetése.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "",
+      "imageUrls": [
+        "icons/gordeszkas_tolas.png"
+      ],
+      "equipmentNames": [
+        "gördeszka"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Talicskázás",
+      "summary": "A gyermek kézen halad, miközben a felnőtt a lábait tartja. Vállövi és törzserősítő feladat.",
+      "instructions": "A gyermek tenyéren támaszkodik, a felnőtt megemeli és tartja a lábait, majd a gyermek kézen halad előre.",
+      "focusPoints": "Nyújtott karok, stabil törzs, rövid szakaszokkal kezdeni.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Aki nem lép egyszerre",
+      "imageUrls": [
+        "icons/talicskazas.png"
+      ],
+      "equipmentNames": [],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Labda feldobás-elkapás",
+      "summary": "A gyermek a labdát feldobja és megpróbálja elkapni. Egyszerű szem-kéz koordinációs feladat.",
+      "instructions": "A gyermek kis magasságba feldobja a labdát, majd kézzel elkapja. A megadott ismétlésszámban végzi.",
+      "focusPoints": "Szemmel követés, kétkezes elkapás, a dobás magasságának kontrollja.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "",
+      "imageUrls": [
+        "icons/labda_feldobas_elkapas.png"
+      ],
+      "equipmentNames": [
+        "labda"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Labda dobás-elkapás párban",
+      "summary": "A gyermek és a partner egymásnak dobják a labdát. Váltakozó figyelmet és ritmust kér.",
+      "instructions": "A résztvevők egymással szemben állnak. Egymásnak dobják a labdát, és a forrás szerint közben számolnak vagy verbalizálnak.",
+      "focusPoints": "Célzott dobás, elkapás előkészítése, szemkontaktus és ritmus.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "",
+      "imageUrls": [
+        "icons/labda_dobas_elkapas_parban.png"
+      ],
+      "equipmentNames": [
+        "labda"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Gurulás oda-vissza",
+      "summary": "A gyermek a talajon egyik irányba, majd vissza gurul. Egyszerű testtudati és vesztibuláris feladat.",
+      "instructions": "A gyermeket a talajon fekvő helyzetből indítjuk, majd végiggurul az egyik irányba, utána vissza.",
+      "focusPoints": "Egyenes tengely, elegendő hely, fej védelme.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "",
+      "imageUrls": [
+        "icons/gurulas_oda_vissza.png"
+      ],
+      "equipmentNames": [],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Bukfenc",
+      "summary": "A gyermek előre bukfencet végez. Összetettebb koordinációs feladat.",
+      "instructions": "Guggolásból vagy állásból a forrás szerinti segítséggel előre gördül. Szükség esetén a felnőtt segíti az átfordulást.",
+      "focusPoints": "Áll behúzása, tarkó védelme, puha felület használata.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Bújj, bújj zöld ág",
+      "imageUrls": [
+        "icons/bukfenc.png"
+      ],
+      "equipmentNames": [],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Billenőlapon egyensúlyozás",
+      "summary": "A gyermek billenőlapon ülve vagy állva egyensúlyoz. Általános egyensúlyfejlesztő feladat.",
+      "instructions": "A gyermeket a billenőlapra helyezzük, és a forrás szerinti testhelyzetben egyensúlyi helyzeteket tartunk vagy kis billenéseket végzünk.",
+      "focusPoints": "Középhelyzet keresése, lassú mozdulatok, leesés elleni biztosítás.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "",
+      "imageUrls": [
+        "icons/billenolap_egyensulyozas.png"
+      ],
+      "equipmentNames": [
+        "billenőlap"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Plüssökkel egyhelyben gyakorlás",
+      "summary": "A gyermek egyhelyben végez feladatot plüssök vagy tárgyak bevonásával. A forrás alapján motivációs és helyben végzett gyakorló elem.",
+      "instructions": "A plüssöket vagy jelölő tárgyakat a gyermek elé helyezzük, és a feladatot a forrás szerinti egyhelyben végzett formában gyakoroljuk.",
+      "focusPoints": "A pontos mozgásminta megtartása, tárgyak elhelyezésének állandósága.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "",
+      "imageUrls": [
+        "icons/plussokkel_egyhelyben_gyakorlas.png"
+      ],
+      "equipmentNames": [
+        "plüss"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Billenőlapon sarokülés előre-hátra",
+      "summary": "A gyermek billenőlapon sarokülésben előre-hátra billen. A forrásban külön variánsként szerepel.",
+      "instructions": "A gyermeket sarokülésbe helyezzük a billenőlapon, majd kontrollált előre-hátra billentést végzünk.",
+      "focusPoints": "Sarokülés megtartása, biztosítás két oldalról, kis amplitúdó.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Ecc, pecc, kimehetsz",
+      "imageUrls": [
+        "icons/billenolapon_sarokules_elore_hatra.png"
+      ],
+      "equipmentNames": [
+        "billenőlap"
+      ],
+      "difficultyLevels": []
+    },
+    {
+      "title": "Billenőlapon sarokülés jobbra-balra",
+      "summary": "A gyermek billenőlapon sarokülésben jobbra-balra billen. Oldalirányú kontrollt kér.",
+      "instructions": "A gyermeket sarokülésbe helyezzük a billenőlapon, majd jobbra-balra billentjük vagy hagyjuk egyensúlyozni.",
+      "focusPoints": "Oldalirányú biztosítás, törzs helyzete, lassú irányváltás.",
+      "demoVideoUrl": "",
+      "defaultSongTitle": "Cini-cini muzsika",
+      "imageUrls": [
+        "icons/billenolapon_sarokules_jobbra_balra.png"
+      ],
+      "equipmentNames": [
+        "billenőlap"
+      ],
+      "difficultyLevels": []
+    }
+  ]
+}

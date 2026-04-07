@@ -191,6 +191,7 @@ export function ParentDashboard() {
   const [periods, setPeriods] = useState<ProgressPeriod[]>([]);
   const [status, setStatus] = useState("Toltes...");
   const [progressLoaded, setProgressLoaded] = useState(false);
+  const [loadedProgressRoutineId, setLoadedProgressRoutineId] = useState("");
 
   useEffect(() => {
     async function loadDashboard() {
@@ -232,6 +233,14 @@ export function ParentDashboard() {
     [routines, selectedChildId],
   );
 
+  const effectiveRoutineId = useMemo(() => {
+    if (selectedRoutineId && childRoutines.some((routine) => routine.id === selectedRoutineId)) {
+      return selectedRoutineId;
+    }
+
+    return childRoutines[0]?.id ?? "";
+  }, [childRoutines, selectedRoutineId]);
+
   const sortedSessions = useMemo(
     () => [...sessions].sort((a, b) => getSessionSortValue(b) - getSessionSortValue(a)),
     [sessions],
@@ -263,6 +272,7 @@ export function ParentDashboard() {
         setPeriods([]);
         setSelectedPeriodId("");
         setProgressLoaded(false);
+        setLoadedProgressRoutineId("");
         return;
       }
 
@@ -273,9 +283,9 @@ export function ParentDashboard() {
           undefined,
           accessToken,
         );
-        const progressPromise = selectedRoutineId
+        const progressPromise = effectiveRoutineId
           ? apiFetch<{ periods: ProgressPeriod[] }>(
-              `/api/routines/${selectedRoutineId}/progress`,
+              `/api/routines/${effectiveRoutineId}/progress`,
               undefined,
               accessToken,
             )
@@ -284,6 +294,7 @@ export function ParentDashboard() {
         const [badgeResult, progressResult] = await Promise.all([badgePromise, progressPromise]);
         setBadges(badgeResult);
         setPeriods(progressResult.periods);
+        setLoadedProgressRoutineId(effectiveRoutineId);
         setSelectedPeriodId((current) => {
           if (current && progressResult.periods.some((period) => period.id === current)) {
             return current;
@@ -294,12 +305,13 @@ export function ParentDashboard() {
         setProgressLoaded(true);
       } catch (error) {
         setStatus(error instanceof Error ? error.message : "Nem sikerult frissiteni a gyerekhez tartozo adatokat.");
+        setLoadedProgressRoutineId(effectiveRoutineId);
         setProgressLoaded(true);
       }
     }
 
     void loadChildSpecificData();
-  }, [selectedChildId, selectedRoutineId]);
+  }, [effectiveRoutineId, selectedChildId]);
 
   const selectedChild = useMemo(
     () => children.find((child) => child.id === selectedChildId) ?? null,
@@ -307,9 +319,11 @@ export function ParentDashboard() {
   );
 
   const selectedRoutine = useMemo(
-    () => childRoutines.find((routine) => routine.id === selectedRoutineId) ?? null,
-    [childRoutines, selectedRoutineId],
+    () => childRoutines.find((routine) => routine.id === effectiveRoutineId) ?? null,
+    [childRoutines, effectiveRoutineId],
   );
+  const isSelectedRoutineProgressReady =
+    !effectiveRoutineId || (progressLoaded && loadedProgressRoutineId === effectiveRoutineId);
 
   const latestSessionsForChild = useMemo(
     () => sortedSessions.filter((session) => session.childId === selectedChildId).slice(0, 5),
@@ -412,7 +426,7 @@ export function ParentDashboard() {
               {childRoutines.length > 0 ? (
                 <select
                   onChange={(event) => setSelectedRoutineId(event.target.value)}
-                  value={selectedRoutineId}
+                  value={effectiveRoutineId}
                   style={{ maxWidth: 280 }}
                 >
                   {childRoutines.map((routine) => (
@@ -498,7 +512,7 @@ export function ParentDashboard() {
                 </Link>
               </div>
             </div>
-          ) : selectedRoutine && !progressLoaded ? (
+          ) : selectedRoutine && !isSelectedRoutineProgressReady ? (
             <div className="list" style={{ marginTop: 16 }}>
               <p className="muted">A feladatsor es az idoszak adatai betoltodnek.</p>
             </div>

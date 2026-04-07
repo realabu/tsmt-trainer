@@ -55,11 +55,6 @@ export class CreateRoutineTaskDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
-  repetitionSchemeRaw?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
   @IsInt()
   @Min(1)
   repetitionCount?: number;

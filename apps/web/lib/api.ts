@@ -1,6 +1,10 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export function getApiUrl(path: string) {
+  if (typeof window !== "undefined" && path.startsWith("/api/")) {
+    return path;
+  }
+
   return `${API_URL}${path}`;
 }
 

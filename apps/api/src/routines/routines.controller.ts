@@ -53,6 +53,11 @@ export class RoutinesController {
     return this.routinesService.listSongCatalog(currentUser, query);
   }
 
+  @Get(":id/delete-impact")
+  getDeleteImpact(@CurrentUser() currentUser: AuthenticatedUser, @Param("id") routineId: string) {
+    return this.routinesService.getDeleteImpact(currentUser, routineId);
+  }
+
   @Get(":id")
   getById(@CurrentUser() currentUser: AuthenticatedUser, @Param("id") routineId: string) {
     return this.routinesService.getById(currentUser, routineId);
@@ -81,6 +86,11 @@ export class RoutinesController {
     return this.routinesService.updateTask(currentUser, taskId, input);
   }
 
+  @Get("tasks/:taskId/delete-impact")
+  getTaskDeleteImpact(@CurrentUser() currentUser: AuthenticatedUser, @Param("taskId") taskId: string) {
+    return this.routinesService.getTaskDeleteImpact(currentUser, taskId);
+  }
+
   @Delete("tasks/:taskId")
   removeTask(@CurrentUser() currentUser: AuthenticatedUser, @Param("taskId") taskId: string) {
     return this.routinesService.removeTask(currentUser, taskId);
@@ -107,6 +117,14 @@ export class RoutinesController {
   @Delete("periods/:periodId")
   removePeriod(@CurrentUser() currentUser: AuthenticatedUser, @Param("periodId") periodId: string) {
     return this.routinesService.removePeriod(currentUser, periodId);
+  }
+
+  @Get("periods/:periodId/delete-impact")
+  getPeriodDeleteImpact(
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Param("periodId") periodId: string,
+  ) {
+    return this.routinesService.getPeriodDeleteImpact(currentUser, periodId);
   }
 
   @Patch(":id")

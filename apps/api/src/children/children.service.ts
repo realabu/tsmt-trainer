@@ -86,6 +86,84 @@ export class ChildrenService {
     return { success: true };
   }
 
+  async getDeleteImpact(currentUser: AuthenticatedUser, childId: string) {
+    const child = await this.getById(currentUser, childId);
+
+    const [
+      routineCount,
+      routineTaskCount,
+      taskMediaLinkCount,
+      periodCount,
+      sessionCount,
+      sessionTaskTimingCount,
+      badgeAwardCount,
+      trainerAssignmentCount,
+    ] = await Promise.all([
+      this.prisma.routine.count({
+        where: { childId },
+      }),
+      this.prisma.routineTask.count({
+        where: {
+          routine: {
+            childId,
+          },
+        },
+      }),
+      this.prisma.taskMediaLink.count({
+        where: {
+          task: {
+            routine: {
+              childId,
+            },
+          },
+        },
+      }),
+      this.prisma.routinePeriod.count({
+        where: {
+          routine: {
+            childId,
+          },
+        },
+      }),
+      this.prisma.session.count({
+        where: { childId },
+      }),
+      this.prisma.sessionTaskTiming.count({
+        where: {
+          session: {
+            childId,
+          },
+        },
+      }),
+      this.prisma.badgeAward.count({
+        where: { childId },
+      }),
+      this.prisma.routineAssignment.count({
+        where: { childId },
+      }),
+    ]);
+
+    return {
+      entityType: "child",
+      entityId: child.id,
+      entityLabel: `${child.firstName} ${child.lastName}`,
+      deletes: [
+        { label: "Feladatsor", count: routineCount },
+        { label: "Feladat", count: routineTaskCount },
+        { label: "Feladat media kapcsolat", count: taskMediaLinkCount },
+        { label: "Idoszak", count: periodCount },
+        { label: "Torna", count: sessionCount },
+        { label: "Reszido bejegyzes", count: sessionTaskTimingCount },
+        { label: "Badge megszerzes", count: badgeAwardCount },
+        { label: "Trainer megosztas", count: trainerAssignmentCount },
+      ],
+      detaches: [],
+      notes: [
+        "A gyerek torlesevel minden hozza tartozo feladatsor, tornaelozmeny es badge megszerzes is vegleg torlodik.",
+      ],
+    };
+  }
+
   async listBadges(currentUser: AuthenticatedUser, childId: string, routineId?: string) {
     await this.getById(currentUser, childId);
 

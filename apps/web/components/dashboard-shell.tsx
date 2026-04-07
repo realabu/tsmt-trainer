@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { AuthPanel } from "./auth-panel";
+import { getApiDocsUrl } from "../lib/api";
 import { useAuthUser } from "../lib/use-auth-user";
 import { ParentDashboard } from "./parent-dashboard";
 
@@ -126,7 +127,7 @@ export function DashboardShell() {
       </section>
 
       <section className="nav-row">
-        <a href="http://localhost:4000/api/docs" className="panel">
+        <a href={getApiDocsUrl()} className="panel">
           <h2>OpenAPI docs</h2>
           <p className="muted">A webtol fuggetlen, mobilbarat REST API dokumentacioja.</p>
         </a>

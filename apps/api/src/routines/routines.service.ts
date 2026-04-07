@@ -15,6 +15,32 @@ import {
 export class RoutinesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private normalizeRepetitionsLabel(
+    repetitionsLabel?: string | null,
+    repetitionCount?: number | null,
+    repetitionUnitCount?: number | null,
+  ) {
+    const explicitLabel = repetitionsLabel?.trim();
+
+    if (explicitLabel) {
+      return explicitLabel;
+    }
+
+    if (repetitionCount && repetitionUnitCount) {
+      return `${repetitionCount}x${repetitionUnitCount}`;
+    }
+
+    if (repetitionCount) {
+      return `${repetitionCount}x`;
+    }
+
+    if (repetitionUnitCount) {
+      return `${repetitionUnitCount}x`;
+    }
+
+    return null;
+  }
+
   private routineTaskInclude() {
     return {
       catalogTask: {
@@ -198,8 +224,11 @@ export class RoutinesService {
       title,
       details: input.details ?? catalogTask?.summary ?? null,
       coachText: input.coachText ?? null,
-      repetitionsLabel: input.repetitionsLabel ?? null,
-      repetitionSchemeRaw: input.repetitionSchemeRaw ?? null,
+      repetitionsLabel: this.normalizeRepetitionsLabel(
+        input.repetitionsLabel,
+        input.repetitionCount,
+        input.repetitionUnitCount,
+      ),
       repetitionCount: input.repetitionCount ?? null,
       repetitionUnitCount: input.repetitionUnitCount ?? null,
       customImageExternalUrl: input.customImageExternalUrl || null,
@@ -336,6 +365,103 @@ export class RoutinesService {
     return { success: true };
   }
 
+  async getDeleteImpact(currentUser: AuthenticatedUser, routineId: string) {
+    const routine = await this.prisma.routine.findFirst({
+      where: {
+        id: routineId,
+        child: {
+          ownerId: currentUser.sub,
+        },
+      },
+      include: {
+        child: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        periods: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!routine) {
+      throw new NotFoundException("Feladatsor nem talalhato.");
+    }
+
+    const periodIds = routine.periods.map((period) => period.id);
+
+    const [
+      taskCount,
+      taskMediaLinkCount,
+      periodCount,
+      sessionCount,
+      sessionTaskTimingCount,
+      trainerAssignmentCount,
+      detachedBadgeAwardCount,
+    ] = await Promise.all([
+      this.prisma.routineTask.count({
+        where: { routineId },
+      }),
+      this.prisma.taskMediaLink.count({
+        where: {
+          task: {
+            routineId,
+          },
+        },
+      }),
+      this.prisma.routinePeriod.count({
+        where: { routineId },
+      }),
+      this.prisma.session.count({
+        where: { routineId },
+      }),
+      this.prisma.sessionTaskTiming.count({
+        where: {
+          session: {
+            routineId,
+          },
+        },
+      }),
+      this.prisma.routineAssignment.count({
+        where: { routineId },
+      }),
+      this.prisma.badgeAward.count({
+        where: {
+          OR: [
+            { routineId },
+            ...(periodIds.length ? [{ periodId: { in: periodIds } }] : []),
+          ],
+        },
+      }),
+    ]);
+
+    return {
+      entityType: "routine",
+      entityId: routine.id,
+      entityLabel: routine.name,
+      parentLabel: `${routine.child.firstName} ${routine.child.lastName}`,
+      deletes: [
+        { label: "Feladat", count: taskCount },
+        { label: "Feladat media kapcsolat", count: taskMediaLinkCount },
+        { label: "Idoszak", count: periodCount },
+        { label: "Torna", count: sessionCount },
+        { label: "Reszido bejegyzes", count: sessionTaskTimingCount },
+        { label: "Trainer megosztas", count: trainerAssignmentCount },
+      ],
+      detaches: [
+        { label: "Badge megszerzes kapcsolat", count: detachedBadgeAwardCount },
+      ],
+      notes: [
+        "A badge megszerzesek gyermek szinten megmaradnak, de a torolt feladatsorhoz es idoszakokhoz valo kapcsolatuk megszunik.",
+      ],
+    };
+  }
+
   async listSongCatalog(currentUser: AuthenticatedUser, query?: string) {
     if (!currentUser.sub) {
       throw new NotFoundException("Felhasznalo nem talalhato.");
@@ -385,7 +511,6 @@ export class RoutinesService {
         details: resolvedTask.details,
         coachText: resolvedTask.coachText,
         repetitionsLabel: resolvedTask.repetitionsLabel,
-        repetitionSchemeRaw: resolvedTask.repetitionSchemeRaw,
         repetitionCount: resolvedTask.repetitionCount,
         repetitionUnitCount: resolvedTask.repetitionUnitCount,
         catalogTask: resolvedTask.catalogTaskId
@@ -452,7 +577,6 @@ export class RoutinesService {
         details: resolvedTask.details,
         coachText: resolvedTask.coachText,
         repetitionsLabel: resolvedTask.repetitionsLabel,
-        repetitionSchemeRaw: resolvedTask.repetitionSchemeRaw,
         repetitionCount: resolvedTask.repetitionCount,
         repetitionUnitCount: resolvedTask.repetitionUnitCount,
         catalogTask: resolvedTask.catalogTaskId
@@ -520,6 +644,65 @@ export class RoutinesService {
     return { success: true };
   }
 
+  async getTaskDeleteImpact(currentUser: AuthenticatedUser, taskId: string) {
+    const task = await this.prisma.routineTask.findFirst({
+      where: {
+        id: taskId,
+        routine: {
+          child: {
+            ownerId: currentUser.sub,
+          },
+        },
+      },
+      include: {
+        routine: {
+          select: {
+            id: true,
+            name: true,
+            child: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!task) {
+      throw new NotFoundException("Feladat nem talalhato.");
+    }
+
+    const [taskMediaLinkCount, sessionTimingCount] = await Promise.all([
+      this.prisma.taskMediaLink.count({
+        where: {
+          taskId,
+        },
+      }),
+      this.prisma.sessionTaskTiming.count({
+        where: {
+          taskId,
+        },
+      }),
+    ]);
+
+    return {
+      entityType: "task",
+      entityId: task.id,
+      entityLabel: task.title,
+      parentLabel: `${task.routine.child.firstName} ${task.routine.child.lastName} / ${task.routine.name}`,
+      deletes: [
+        { label: "Feladat media kapcsolat", count: taskMediaLinkCount },
+        { label: "Reszido bejegyzes", count: sessionTimingCount },
+      ],
+      detaches: [],
+      notes: [
+        "A feladat torlesevel a korabbi tornakhoz rogzitett ehhez tartozo reszidok is torlodnek.",
+      ],
+    };
+  }
+
   async createPeriod(currentUser: AuthenticatedUser, routineId: string, input: CreateRoutinePeriodDto) {
     await this.getOwnedRoutine(currentUser, routineId);
 
@@ -554,6 +737,67 @@ export class RoutinesService {
       where: { id: periodId },
     });
     return { success: true };
+  }
+
+  async getPeriodDeleteImpact(currentUser: AuthenticatedUser, periodId: string) {
+    const period = await this.prisma.routinePeriod.findFirst({
+      where: {
+        id: periodId,
+        routine: {
+          child: {
+            ownerId: currentUser.sub,
+          },
+        },
+      },
+      include: {
+        routine: {
+          select: {
+            id: true,
+            name: true,
+            child: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!period) {
+      throw new NotFoundException("Idoszak nem talalhato.");
+    }
+
+    const [detachedBadgeAwardCount, completedSessionCount] = await Promise.all([
+      this.prisma.badgeAward.count({
+        where: { periodId },
+      }),
+      this.prisma.session.count({
+        where: {
+          routineId: period.routineId,
+          status: SessionStatus.COMPLETED,
+          completedAt: {
+            gte: period.startsOn,
+            lte: period.endsOn,
+          },
+        },
+      }),
+    ]);
+
+    return {
+      entityType: "period",
+      entityId: period.id,
+      entityLabel: period.name ?? "Nev nelkuli idoszak",
+      parentLabel: `${period.routine.child.firstName} ${period.routine.child.lastName} / ${period.routine.name}`,
+      deletes: [],
+      detaches: [
+        { label: "Idoszakhoz kotott badge kapcsolat", count: detachedBadgeAwardCount },
+      ],
+      notes: [
+        `${completedSessionCount} befejezett torna marad meg, de a torolt idoszak tobbe nem fog megjelenni a haladasi nezetekben.`,
+      ],
+    };
   }
 
   async getProgress(currentUser: AuthenticatedUser, routineId: string) {
@@ -729,7 +973,6 @@ export class RoutinesService {
       details: task.details,
       coachText: task.coachText,
       repetitionsLabel: task.repetitionsLabel,
-      repetitionSchemeRaw: task.repetitionSchemeRaw,
       repetitionCount: task.repetitionCount,
       repetitionUnitCount: task.repetitionUnitCount,
       customImageMedia: task.customImageExternalUrl

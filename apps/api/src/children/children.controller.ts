@@ -23,6 +23,11 @@ export class ChildrenController {
     return this.childrenService.create(currentUser, input);
   }
 
+  @Get(":id/delete-impact")
+  getDeleteImpact(@CurrentUser() currentUser: AuthenticatedUser, @Param("id") childId: string) {
+    return this.childrenService.getDeleteImpact(currentUser, childId);
+  }
+
   @Get(":id")
   getById(@CurrentUser() currentUser: AuthenticatedUser, @Param("id") childId: string) {
     return this.childrenService.getById(currentUser, childId);

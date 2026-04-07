@@ -50,6 +50,7 @@ export function AuthPanel({ embedded = false }: { embedded?: boolean }) {
       localStorage.setItem("tsmt.refreshToken", result.refreshToken);
       setStoredAuthUser(result.user);
       setStatus(`Bejelentkezve: ${result.user.firstName} ${result.user.lastName}`);
+      window.location.href = "/";
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Auth hiba");
     } finally {
@@ -122,7 +123,7 @@ export function AuthPanel({ embedded = false }: { embedded?: boolean }) {
         <button className="button primary" disabled={busy} onClick={submit} type="button">
           {busy ? "Dolgozom..." : mode === "login" ? "Bejelentkezes" : "Regisztracio"}
         </button>
-        {user ? <p className="muted">{status}</p> : null}
+        <p className="muted">{status}</p>
       </div>
     </div>
   );

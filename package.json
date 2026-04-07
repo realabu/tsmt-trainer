@@ -9,7 +9,8 @@
     "typecheck": "turbo run typecheck",
     "db:generate": "pnpm --filter @tsmt/db db:generate",
     "db:migrate": "pnpm --filter @tsmt/db db:migrate",
-    "db:seed": "pnpm --filter @tsmt/db db:seed"
+    "db:seed": "pnpm --filter @tsmt/db db:seed",
+    "db:import:tsmt-catalog": "pnpm --filter @tsmt/db db:import:tsmt-catalog"
   },
   "devDependencies": {
     "turbo": "^2.0.12",

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
+import { getDisplayRepetitionsLabel } from "../lib/repetitions";
 import { TaskBuilder, type TaskDraft } from "./task-builder";
 import { useAuthUser } from "../lib/use-auth-user";
 
@@ -25,7 +26,6 @@ interface RoutineRecord {
     coachText?: string | null;
     sortOrder: number;
     repetitionsLabel?: string | null;
-    repetitionSchemeRaw?: string | null;
     repetitionCount?: number | null;
     repetitionUnitCount?: number | null;
     song?: {
@@ -72,6 +72,22 @@ interface PeriodDraft {
   weeklyTargetCount: string;
 }
 
+interface DeleteImpactRecord {
+  entityType: string;
+  entityId: string;
+  entityLabel: string;
+  parentLabel?: string;
+  deletes: Array<{
+    label: string;
+    count: number;
+  }>;
+  detaches: Array<{
+    label: string;
+    count: number;
+  }>;
+  notes: string[];
+}
+
 const defaultPeriods = [
   { name: "Indulo szakasz", startsOn: "2026-04-01", endsOn: "2026-04-21", weeklyTargetCount: 3 },
 ];
@@ -84,6 +100,43 @@ function parseOptionalInt(value: string) {
 
   const parsed = Number.parseInt(trimmed, 10);
   return Number.isNaN(parsed) ? undefined : parsed;
+}
+
+function ImpactSummary({ impact }: { impact: DeleteImpactRecord }) {
+  return (
+    <div className="list" style={{ marginTop: 12 }}>
+      {impact.parentLabel ? <p className="muted">Kapcsolodo szulo/gyerek: {impact.parentLabel}</p> : null}
+      {impact.deletes.filter((item) => item.count > 0).length ? (
+        <div className="list-item">
+          <strong>Vegleg torlodik</strong>
+          {impact.deletes
+            .filter((item) => item.count > 0)
+            .map((item) => (
+              <span className="muted" key={item.label}>
+                {item.label}: {item.count}
+              </span>
+            ))}
+        </div>
+      ) : null}
+      {impact.detaches.filter((item) => item.count > 0).length ? (
+        <div className="list-item">
+          <strong>Kapcsolat megszunik</strong>
+          {impact.detaches
+            .filter((item) => item.count > 0)
+            .map((item) => (
+              <span className="muted" key={item.label}>
+                {item.label}: {item.count}
+              </span>
+            ))}
+        </div>
+      ) : null}
+      {impact.notes.map((note) => (
+        <p className="muted" key={note}>
+          {note}
+        </p>
+      ))}
+    </div>
+  );
 }
 
 export function RoutinesManager() {
@@ -102,6 +155,9 @@ export function RoutinesManager() {
   const [editingPeriods, setEditingPeriods] = useState<PeriodDraft[]>([]);
   const [originalTaskIds, setOriginalTaskIds] = useState<string[]>([]);
   const [originalPeriodIds, setOriginalPeriodIds] = useState<string[]>([]);
+  const [routineDeleteImpact, setRoutineDeleteImpact] = useState<DeleteImpactRecord | null>(null);
+  const [periodDeleteImpact, setPeriodDeleteImpact] = useState<DeleteImpactRecord | null>(null);
+  const [taskDeleteImpact, setTaskDeleteImpact] = useState<DeleteImpactRecord | null>(null);
   const [status, setStatus] = useState("Jelentkezz be, majd toltsd be a sajat rutinlistat.");
 
   async function loadInitial() {
@@ -177,7 +233,6 @@ export function RoutinesManager() {
               details: task.details || undefined,
               coachText: task.coachText || undefined,
               repetitionsLabel: task.repetitionsLabel || undefined,
-              repetitionSchemeRaw: task.repetitionSchemeRaw || undefined,
               repetitionCount: parseOptionalInt(task.repetitionCount),
               repetitionUnitCount: parseOptionalInt(task.repetitionUnitCount),
               customImageExternalUrl: task.mediaImageUrl || undefined,
@@ -232,8 +287,13 @@ export function RoutinesManager() {
       title: task.title,
       details: task.details ?? "",
       coachText: task.coachText ?? "",
-      repetitionsLabel: task.repetitionsLabel ?? "",
-      repetitionSchemeRaw: task.repetitionSchemeRaw ?? "",
+      repetitionsLabel:
+        task.repetitionsLabel ??
+        getDisplayRepetitionsLabel({
+          repetitionsLabel: task.repetitionsLabel,
+          repetitionCount: task.repetitionCount,
+          repetitionUnitCount: task.repetitionUnitCount,
+        }),
       repetitionCount: task.repetitionCount?.toString() ?? "",
       repetitionUnitCount: task.repetitionUnitCount?.toString() ?? "",
       mediaImageUrl: imageLink ?? "",
@@ -260,6 +320,9 @@ export function RoutinesManager() {
     setEditingPeriods(routine.periods.map(routinePeriodToDraft));
     setOriginalTaskIds(routine.tasks.map((task) => task.id));
     setOriginalPeriodIds(routine.periods.map((period) => period.id));
+    setRoutineDeleteImpact(null);
+    setPeriodDeleteImpact(null);
+    setTaskDeleteImpact(null);
   }
 
   function addPeriodDraft() {
@@ -282,6 +345,116 @@ export function RoutinesManager() {
 
   function removePeriodDraft(index: number) {
     setEditingPeriods((current) => current.filter((_, periodIndex) => periodIndex !== index));
+  }
+
+  async function requestRoutineDeleteImpact(routineId: string) {
+    const accessToken = window.localStorage.getItem("tsmt.accessToken");
+    if (!accessToken) {
+      return;
+    }
+
+    try {
+      const result = await apiFetch<DeleteImpactRecord>(`/api/routines/${routineId}/delete-impact`, undefined, accessToken);
+      setRoutineDeleteImpact(result);
+      setPeriodDeleteImpact(null);
+      setTaskDeleteImpact(null);
+      setEditingRoutineId("");
+      setStatus("Feladatsor torlesi elonezet betoltve.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Nem sikerult betolteni a torlesi elonezetet.");
+    }
+  }
+
+  async function confirmRoutineDelete() {
+    const accessToken = window.localStorage.getItem("tsmt.accessToken");
+    if (!accessToken || !routineDeleteImpact) {
+      return;
+    }
+
+    try {
+      await apiFetch(`/api/routines/${routineDeleteImpact.entityId}`, { method: "DELETE" }, accessToken);
+      setRoutineDeleteImpact(null);
+      await loadInitial();
+      setStatus("Feladatsor torolve.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Nem sikerult torolni a feladatsort.");
+    }
+  }
+
+  async function requestPeriodDeleteImpact(periodId: string) {
+    const accessToken = window.localStorage.getItem("tsmt.accessToken");
+    if (!accessToken) {
+      return;
+    }
+
+    try {
+      const result = await apiFetch<DeleteImpactRecord>(
+        `/api/routines/periods/${periodId}/delete-impact`,
+        undefined,
+        accessToken,
+      );
+      setPeriodDeleteImpact(result);
+      setTaskDeleteImpact(null);
+      setStatus("Idoszak torlesi elonezet betoltve.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Nem sikerult betolteni az idoszak torlesi elonezetet.");
+    }
+  }
+
+  async function confirmPeriodDelete(periodId: string) {
+    const accessToken = window.localStorage.getItem("tsmt.accessToken");
+    if (!accessToken) {
+      return;
+    }
+
+    try {
+      await apiFetch(`/api/routines/periods/${periodId}`, { method: "DELETE" }, accessToken);
+      setEditingPeriods((current) => current.filter((period) => period.id !== periodId));
+      setOriginalPeriodIds((current) => current.filter((id) => id !== periodId));
+      setPeriodDeleteImpact(null);
+      await loadInitial();
+      setStatus("Idoszak torolve.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Nem sikerult torolni az idoszakot.");
+    }
+  }
+
+  async function requestTaskDeleteImpact(taskId: string) {
+    const accessToken = window.localStorage.getItem("tsmt.accessToken");
+    if (!accessToken) {
+      return;
+    }
+
+    try {
+      const result = await apiFetch<DeleteImpactRecord>(
+        `/api/routines/tasks/${taskId}/delete-impact`,
+        undefined,
+        accessToken,
+      );
+      setTaskDeleteImpact(result);
+      setPeriodDeleteImpact(null);
+      setStatus("Feladat torlesi elonezet betoltve.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Nem sikerult betolteni a feladat torlesi elonezetet.");
+    }
+  }
+
+  async function confirmTaskDelete(taskId: string) {
+    const accessToken = window.localStorage.getItem("tsmt.accessToken");
+    if (!accessToken) {
+      return;
+    }
+
+    try {
+      await apiFetch(`/api/routines/tasks/${taskId}`, { method: "DELETE" }, accessToken);
+      setEditingTasks((current) => current.filter((task) => task.id !== taskId).map((task, index) => ({ ...task, sortOrder: index + 1 })));
+      setOriginalTaskIds((current) => current.filter((id) => id !== taskId));
+      setTaskDeleteImpact(null);
+      await loadInitial();
+      setStatus("Feladat torolve.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Nem sikerult torolni a feladatot.");
+    }
   }
 
   async function saveRoutineEditor() {
@@ -320,7 +493,6 @@ export function RoutinesManager() {
           details: task.details || undefined,
           coachText: task.coachText || undefined,
           repetitionsLabel: task.repetitionsLabel || undefined,
-          repetitionSchemeRaw: task.repetitionSchemeRaw || undefined,
           repetitionCount: parseOptionalInt(task.repetitionCount),
           repetitionUnitCount: parseOptionalInt(task.repetitionUnitCount),
           customImageExternalUrl: task.mediaImageUrl || undefined,
@@ -465,6 +637,14 @@ export function RoutinesManager() {
                 >
                   Szerkesztes
                 </button>
+                <button
+                  className="button secondary"
+                  onClick={() => requestRoutineDeleteImpact(routine.id)}
+                  style={{ marginLeft: 8 }}
+                  type="button"
+                >
+                  Torles
+                </button>
               </div>
               {editingRoutineId === routine.id ? (
                 <div className="list" style={{ marginTop: 16 }}>
@@ -478,7 +658,14 @@ export function RoutinesManager() {
                     onChange={(event) => setEditingDescription(event.target.value)}
                     placeholder="Rovid leiras"
                   />
-                  <TaskBuilder tasks={editingTasks} onChange={setEditingTasks} />
+                  <TaskBuilder
+                    tasks={editingTasks}
+                    onChange={setEditingTasks}
+                    onRequestRemoveTask={(task) => task.id && void requestTaskDeleteImpact(task.id)}
+                    taskDeleteImpact={taskDeleteImpact}
+                    onConfirmDeleteTask={confirmTaskDelete}
+                    onCancelDeleteTask={() => setTaskDeleteImpact(null)}
+                  />
                   <div className="list-item">
                     <div className="split-row">
                       <strong>Idoszakok</strong>
@@ -516,11 +703,35 @@ export function RoutinesManager() {
                             />
                             <button
                               className="button secondary"
-                              onClick={() => removePeriodDraft(index)}
+                              onClick={() =>
+                                period.id ? requestPeriodDeleteImpact(period.id) : removePeriodDraft(index)
+                              }
                               type="button"
                             >
                               Idoszak torlese
                             </button>
+                            {period.id && periodDeleteImpact?.entityId === period.id ? (
+                              <div className="list-card" style={{ marginTop: 12, borderRadius: 18, padding: 16 }}>
+                                <h2 style={{ fontSize: "1rem" }}>Idoszak torlese</h2>
+                                <ImpactSummary impact={periodDeleteImpact} />
+                                <div className="cta-row" style={{ marginTop: 12 }}>
+                                  <button
+                                    className="button primary"
+                                    onClick={() => confirmPeriodDelete(period.id!)}
+                                    type="button"
+                                  >
+                                    Vegleges torles
+                                  </button>
+                                  <button
+                                    className="button secondary"
+                                    onClick={() => setPeriodDeleteImpact(null)}
+                                    type="button"
+                                  >
+                                    Megse
+                                  </button>
+                                </div>
+                              </div>
+                            ) : null}
                           </div>
                         </div>
                       ))}
@@ -536,6 +747,20 @@ export function RoutinesManager() {
                       type="button"
                     >
                       Szerkesztes bezarasa
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+              {routineDeleteImpact?.entityId === routine.id ? (
+                <div className="list-card" style={{ marginTop: 16, borderRadius: 20, padding: 18 }}>
+                  <h2 style={{ fontSize: "1.05rem" }}>Feladatsor torlese</h2>
+                  <ImpactSummary impact={routineDeleteImpact} />
+                  <div className="cta-row" style={{ marginTop: 12 }}>
+                    <button className="button primary" onClick={confirmRoutineDelete} type="button">
+                      Vegleges torles
+                    </button>
+                    <button className="button secondary" onClick={() => setRoutineDeleteImpact(null)} type="button">
+                      Megse
                     </button>
                   </div>
                 </div>
