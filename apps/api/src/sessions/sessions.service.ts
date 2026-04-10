@@ -9,11 +9,14 @@ import { PrismaService } from "../common/prisma.service";
 import { buildBadgeAwardIdentifiers } from "./domain/badge-award-identifiers";
 import {
   endOfWeek,
-  getInclusiveDayCount,
   getProRatedWeeklyTarget,
   getTotalTargetForPeriod,
   startOfWeek,
 } from "./domain/session-week-boundaries";
+import {
+  buildWeeklyGoalSummaries,
+  getConsecutiveWeeklyGoalStreakFromSummaries,
+} from "./domain/weekly-goal-streak";
 import { CancelSessionDto, CompleteTaskDto, FinishSessionDto } from "./dto";
 
 @Injectable()
@@ -619,49 +622,12 @@ export class SessionsService {
         completedAt: "desc",
       },
     });
+    const weekSummaries = buildWeeklyGoalSummaries({
+      periods,
+      completedSessionDates: completedSessions.map((session) => session.completedAt),
+      completedAt,
+    });
 
-    const weekSummaries: Array<{ weekStart: Date; targetMet: boolean }> = [];
-
-    for (const period of periods) {
-      let cursor = startOfWeek(period.startsOn);
-      while (cursor <= period.endsOn) {
-        const weekStart = new Date(cursor);
-        const weekEnd = endOfWeek(weekStart);
-        const boundedStart = new Date(Math.max(weekStart.getTime(), period.startsOn.getTime()));
-        const boundedEnd = new Date(Math.min(weekEnd.getTime(), period.endsOn.getTime()));
-
-        if (boundedStart > completedAt) {
-          break;
-        }
-
-        const sessionsInWeek = completedSessions.filter((session) => {
-          const value = session.completedAt;
-          return value != null && value >= boundedStart && value <= boundedEnd;
-        }).length;
-        const target = getProRatedWeeklyTarget(period.weeklyTargetCount, boundedStart, boundedEnd);
-
-        weekSummaries.push({
-          weekStart,
-          targetMet: sessionsInWeek >= target,
-        });
-
-        cursor = new Date(weekStart);
-        cursor.setDate(cursor.getDate() + 7);
-      }
-    }
-
-    const sorted = weekSummaries
-      .filter((week) => week.weekStart <= completedAt)
-      .sort((a, b) => b.weekStart.getTime() - a.weekStart.getTime());
-
-    let streak = 0;
-    for (const week of sorted) {
-      if (!week.targetMet) {
-        break;
-      }
-      streak += 1;
-    }
-
-    return streak;
+    return getConsecutiveWeeklyGoalStreakFromSummaries(weekSummaries, completedAt);
   }
 }
