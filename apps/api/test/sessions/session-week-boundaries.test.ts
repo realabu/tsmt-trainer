@@ -4,6 +4,7 @@ import {
   endOfWeek,
   getInclusiveDayCount,
   getProRatedWeeklyTarget,
+  getTotalTargetForPeriod,
   startOfWeek,
 } from "../../src/sessions/domain/session-week-boundaries";
 
@@ -89,4 +90,34 @@ test("getProRatedWeeklyTarget preserves rounding behavior for very small ranges"
   );
 
   assert.equal(result, 0);
+});
+
+test("getTotalTargetForPeriod returns the weekly target for a single full week period", () => {
+  const result = getTotalTargetForPeriod({
+    weeklyTargetCount: 3,
+    startsOn: new Date(2026, 3, 6, 0, 0, 0, 0),
+    endsOn: new Date(2026, 3, 12, 23, 59, 59, 999),
+  });
+
+  assert.equal(result, 3);
+});
+
+test("getTotalTargetForPeriod sums multiple full weeks", () => {
+  const result = getTotalTargetForPeriod({
+    weeklyTargetCount: 3,
+    startsOn: new Date(2026, 3, 6, 0, 0, 0, 0),
+    endsOn: new Date(2026, 3, 19, 23, 59, 59, 999),
+  });
+
+  assert.equal(result, 6);
+});
+
+test("getTotalTargetForPeriod preserves partial first and last week prorating", () => {
+  const result = getTotalTargetForPeriod({
+    weeklyTargetCount: 3,
+    startsOn: new Date(2026, 3, 8, 10, 0, 0, 0),
+    endsOn: new Date(2026, 3, 17, 18, 0, 0, 0),
+  });
+
+  assert.equal(result, 4);
 });

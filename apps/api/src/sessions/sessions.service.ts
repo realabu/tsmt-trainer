@@ -11,6 +11,7 @@ import {
   endOfWeek,
   getInclusiveDayCount,
   getProRatedWeeklyTarget,
+  getTotalTargetForPeriod,
   startOfWeek,
 } from "./domain/session-week-boundaries";
 import { CancelSessionDto, CompleteTaskDto, FinishSessionDto } from "./dto";
@@ -663,27 +664,4 @@ export class SessionsService {
 
     return streak;
   }
-}
-
-function getTotalTargetForPeriod(period: {
-  startsOn: Date;
-  endsOn: Date;
-  weeklyTargetCount: number;
-}) {
-  let total = 0;
-  let cursor = startOfWeek(period.startsOn);
-
-  while (cursor <= period.endsOn) {
-    const weekStart = new Date(cursor);
-    const weekEnd = endOfWeek(weekStart);
-    const boundedStart = new Date(Math.max(weekStart.getTime(), period.startsOn.getTime()));
-    const boundedEnd = new Date(Math.min(weekEnd.getTime(), period.endsOn.getTime()));
-
-    total += getProRatedWeeklyTarget(period.weeklyTargetCount, boundedStart, boundedEnd);
-
-    cursor = new Date(weekStart);
-    cursor.setDate(cursor.getDate() + 7);
-  }
-
-  return total;
 }

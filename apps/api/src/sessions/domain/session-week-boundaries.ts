@@ -29,3 +29,26 @@ export function getProRatedWeeklyTarget(weeklyTargetCount: number, weekStart: Da
   const rawTarget = (weeklyTargetCount * coveredDays) / 7;
   return Math.round(rawTarget);
 }
+
+export function getTotalTargetForPeriod(period: {
+  startsOn: Date;
+  endsOn: Date;
+  weeklyTargetCount: number;
+}) {
+  let total = 0;
+  let cursor = startOfWeek(period.startsOn);
+
+  while (cursor <= period.endsOn) {
+    const weekStart = new Date(cursor);
+    const weekEnd = endOfWeek(weekStart);
+    const boundedStart = new Date(Math.max(weekStart.getTime(), period.startsOn.getTime()));
+    const boundedEnd = new Date(Math.min(weekEnd.getTime(), period.endsOn.getTime()));
+
+    total += getProRatedWeeklyTarget(period.weeklyTargetCount, boundedStart, boundedEnd);
+
+    cursor = new Date(weekStart);
+    cursor.setDate(cursor.getDate() + 7);
+  }
+
+  return total;
+}
