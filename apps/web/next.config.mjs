@@ -1,9 +1,9 @@
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://192.168.68.103:4000";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://192.168.68.102:4000";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typedRoutes: true,
-  allowedDevOrigins: ["192.168.68.103", "*.192.168.68.103"],
+  allowedDevOrigins: ["192.168.68.102", "*.192.168.68.102"],
   async rewrites() {
     return [
       {
