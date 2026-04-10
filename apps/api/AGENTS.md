@@ -11,6 +11,14 @@ Move the backend toward:
 
 Do this incrementally, not by rewriting the whole API at once.
 
+## Stability Before Sophistication
+Prefer stable backend behavior over architectural ambition.
+
+Rules:
+- preserve behavior by default during refactors
+- do not mix architectural cleanup and business-rule changes silently
+- if a behavior change is intentional, state it explicitly
+
 ## Current Reality
 The API already has feature folders:
 - `auth`
@@ -48,6 +56,19 @@ Services should not:
 - become giant “god services”
 - mix unrelated CRUD, calculation, and orchestration concerns
 
+Not every feature needs every layer.
+For a small backend feature, this is enough:
+
+```text
+feature/
+  controller.ts
+  dto.ts
+  service.ts
+  rules.ts
+```
+
+Only introduce more layers when they reduce real complexity.
+
 ### Pure Logic
 Move pure logic into dedicated modules when possible:
 - progress calculation
@@ -69,21 +90,20 @@ Direction:
 - isolate Prisma from calculation-heavy logic when practical
 - prefer focused repository-style helpers for repeated or risky queries
 
-Do not:
-- introduce a full repository layer everywhere just for style
+Forbidden:
+- do not add new calculation-heavy logic into already-large Prisma service methods if it can be extracted cleanly
+- do not introduce a full repository layer everywhere just for style
 
 ## Current Refactor Hotspots
 Highest backend refactor priority:
-- [routines.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/routines/routines.service.ts)
-- [sessions.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/sessions/sessions.service.ts)
-- [admin.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/admin/admin.service.ts)
+- `apps/api/src/routines/routines.service.ts`
+- `apps/api/src/sessions/sessions.service.ts`
+- `apps/api/src/admin/admin.service.ts`
 
-Refactor these by extracting:
-- one use case at a time
-- one calculator at a time
-- one policy at a time
-
-Do not split them into dozens of meaningless files.
+If touching these:
+- extract one responsibility at a time
+- avoid adding more responsibilities
+- separate behavior changes from architectural cleanup
 
 ## Domain-Specific Rules
 

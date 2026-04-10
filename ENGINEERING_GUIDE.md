@@ -8,9 +8,19 @@ The engineering objective is not premature elegance. It is:
 - clear domain boundaries
 - easy onboarding for both humans and AI agents
 - small, reviewable changes with low regression risk
-- gradual movement toward clean architecture without stopping delivery
+- gradual movement toward cleaner architecture without stopping delivery
 
 This guide is intentionally pragmatic and reflects the current codebase reality as of April 2026.
+
+## Stability Before Sophistication
+Stability comes before architectural sophistication.
+
+Rules:
+- Prefer predictable behavior over clever structure.
+- Prefer small extractions over broad rewrites.
+- Prefer explicitness over abstraction when the domain is still changing.
+- Prefer preserving working behavior over chasing ideal architecture.
+- If a refactor is meant to preserve behavior, it must preserve behavior unless the change is explicitly called out.
 
 ## Current Codebase Reality
 The repository already has a good high-level monorepo shape:
@@ -22,17 +32,17 @@ The repository already has a good high-level monorepo shape:
 The main maintainability risk today is not the folder structure. It is that too much logic has accumulated in a few large files.
 
 Current high-risk files include:
-- [routines.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/routines/routines.service.ts)
-- [sessions.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/sessions/sessions.service.ts)
-- [admin.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/admin/admin.service.ts)
-- [routines-manager.tsx](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/web/components/routines-manager.tsx)
-- [training-runner.tsx](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/web/components/training-runner.tsx)
-- [parent-dashboard.tsx](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/web/components/parent-dashboard.tsx)
-- [admin-catalog-manager.tsx](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/web/components/admin-catalog-manager.tsx)
+- `apps/api/src/routines/routines.service.ts`
+- `apps/api/src/sessions/sessions.service.ts`
+- `apps/api/src/admin/admin.service.ts`
+- `apps/web/components/routines-manager.tsx`
+- `apps/web/components/training-runner.tsx`
+- `apps/web/components/parent-dashboard.tsx`
+- `apps/web/components/admin-catalog-manager.tsx`
 
-Assumption:
+Assumptions:
 - functionality and product concepts will continue changing materially
-- broad UI/behavior rewrites are expected
+- broad UI and behavior rewrites are expected later
 - AI agents will continue making a significant percentage of changes
 
 ## Architectural Principles
@@ -46,6 +56,22 @@ Assumption:
 8. Split large files only when the split maps to a real responsibility.
 9. Optimize for local reasoning: a contributor should understand a change by reading a small set of files.
 10. Refactor incrementally, never by sweeping architectural churn unless the system is blocked.
+11. Preserve behavior by default during refactors.
+
+## Refactor Behavior Rules
+Refactors are behavior-preserving by default.
+
+Rules:
+- A refactor should not change behavior unless that behavior change is explicitly stated.
+- Architecture changes and behavior changes must not be mixed silently.
+- If a task includes both refactor and behavior change, call out both separately.
+- If the goal is structural cleanup, avoid “small functional tweaks” in the same change.
+- If a behavior change is necessary to complete a refactor safely, document it clearly and keep it minimal.
+
+Preferred pattern:
+1. behavior-preserving extraction
+2. tests or checks proving no regression
+3. separate follow-up for intended behavior change
 
 ## Target Architecture
 
@@ -61,9 +87,28 @@ Assumption:
 - `packages/types`
   - shared cross-app contracts and stable domain DTOs
 
-### Backend Target Shape
-Each backend domain should gradually move toward:
+### Important Pragmatic Rule
+Not every feature needs every layer.
 
+Avoid overengineering. The target architecture is directional, not mandatory ceremony.
+
+For small features, prefer the minimum structure that still keeps responsibilities clear.
+
+### Preferred Minimum Viable Structure for Small Backend Features
+```text
+feature/
+  controller.ts
+  dto.ts
+  service.ts
+  rules.ts
+```
+
+Use this when:
+- the feature is small
+- one service can still stay cohesive
+- there is only a small amount of pure logic
+
+### Preferred Expanded Backend Structure for Larger Features
 ```text
 feature/
   controller.ts
@@ -79,21 +124,23 @@ feature/
     prisma-mapper.ts
 ```
 
-This does not need to be introduced all at once. For small features, a lighter version is acceptable:
-
-```text
-feature/
-  controller.ts
-  dto.ts
-  service.ts
-  rules.ts
-```
+Use this when:
+- the service is growing too large
+- there are multiple use cases
+- there is important calculation logic
+- persistence concerns and business rules are getting mixed
 
 The rule is: do not keep growing giant service files when the domain clearly has separable use cases or pure calculations.
 
-### Frontend Target Shape
-Each frontend feature should gradually move toward:
+### Preferred Minimum Viable Structure for Small Frontend Features
+```text
+feature/
+  component.tsx
+  api.ts
+  utils.ts
+```
 
+### Preferred Expanded Frontend Structure for Larger Features
 ```text
 feature/
   components/
@@ -107,7 +154,7 @@ For example:
 - page file: route composition only
 - data hook: fetching, mutation, loading/error state
 - component: rendering only
-- utils/view-model: display calculations, derived state, formatting
+- view-model/utils: display calculations, derived state, formatting
 
 ## Domain Boundaries
 Primary domain modules for this product:
@@ -138,19 +185,23 @@ Domain boundary rule:
 
 Example:
 - `sessions` may trigger badge evaluation
-- but badge awarding logic should live in `badges/progress`, not become embedded procedural logic inside session transport code long-term
+- but badge awarding logic should live in `badges/progress`, not remain permanently embedded in session orchestration code
 
 ## Rules for Business Logic Placement
 Business logic must not live in:
 - Nest controllers
 - React pages
+- React presentational components
 - large JSX trees
 - ad hoc API response mappers mixed into UI
+
+No new business logic should be added to React page files or presentational components.
 
 Business logic should live in:
 - pure calculation modules
 - focused domain services
 - application services that coordinate use cases
+- dedicated frontend view-model or helper modules for display-only derivation
 
 Examples for this repo:
 - weekly/period progress calculation should be pure and unit-testable
@@ -198,6 +249,7 @@ Backend direction:
 Frontend direction:
 - centralize auth storage, session expiry handling, and redirect rules
 - avoid each component making its own ad hoc assumptions about logged-in state
+- do not duplicate auth/session logic across components
 
 Security direction:
 - prefer server-enforced authorization over UI hiding
@@ -212,7 +264,7 @@ Current reality:
 
 Target strategy:
 
-### Unit tests first for critical pure logic
+### Unit Tests First for Critical Pure Logic
 Priority modules to test first:
 - progress calculation
 - badge awarding rules
@@ -220,13 +272,13 @@ Priority modules to test first:
 - routine import matching logic
 - delete impact calculation
 
-### Integration tests next for backend use cases
+### Integration Tests Next for Backend Use Cases
 Examples:
 - complete session -> progress update -> badge award
 - delete child -> expected cascade impact preview
 - create routine from catalog task -> expected overrides
 
-### Frontend tests selectively
+### Frontend Tests Selectively
 Use them for critical interaction logic, not every rendering detail.
 Examples:
 - parent dashboard selection flow
@@ -250,6 +302,10 @@ These rules are mandatory for future AI-assisted work.
 8. Make side effects obvious.
 9. When a file becomes too large or mixes concerns, split it.
 10. Keep new abstractions concrete and close to current use cases.
+11. Avoid adding more responsibilities to already-identified hotspot files.
+12. Do not add new calculation-heavy logic inside large Prisma service methods if it can be extracted.
+13. Do not add new business logic to React pages or presentational components.
+14. Do not duplicate auth/session handling logic across components.
 
 Additional AI-specific guidance:
 - if touching a file already above ~400-500 lines, first ask whether a local extraction is possible
@@ -264,7 +320,7 @@ Minimum quality gates for merged work:
 - `build`
 - tests for affected critical logic
 - migration sanity if schema changes
-- docs update if architecture or workflow changes
+- update docs if architecture or workflow changes
 
 Practical repository-specific gates:
 1. `pnpm typecheck`
@@ -293,12 +349,26 @@ It is not done if:
 - it duplicates API logic in the frontend
 - it introduces silent schema/delete behavior without surfacing it
 
+## Definition of Done for AI Tasks
+An AI-driven task is done when all of the following are true:
+- a short plan was written first
+- the touched files stayed scoped to the requested outcome
+- checks relevant to the change were run
+- any behavior change was explicitly stated
+- follow-up work is listed separately, not silently bundled in
+
+Minimum AI task close-out should say:
+- what changed
+- which checks ran
+- what assumptions were made
+- what remains as follow-up
+
 ## Refactor Priorities in Recommended Order
 Do not refactor everything at once. Use this order.
 
 1. Extract pure progress and badge logic from large backend services
-   - target: [sessions.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/sessions/sessions.service.ts)
-   - target: [routines.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/routines/routines.service.ts)
+   - target: `apps/api/src/sessions/sessions.service.ts`
+   - target: `apps/api/src/routines/routines.service.ts`
 
 2. Split routine backend into clearer use cases
    - routine CRUD
@@ -307,9 +377,9 @@ Do not refactor everything at once. Use this order.
    - catalog search/import logic
 
 3. Split large frontend dashboard and manager components
-   - [parent-dashboard.tsx](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/web/components/parent-dashboard.tsx)
-   - [routines-manager.tsx](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/web/components/routines-manager.tsx)
-   - [training-runner.tsx](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/web/components/training-runner.tsx)
+   - `apps/web/components/parent-dashboard.tsx`
+   - `apps/web/components/routines-manager.tsx`
+   - `apps/web/components/training-runner.tsx`
 
 4. Introduce backend repository/calculator separation where logic is unstable but important
    - especially badges, progress, delete impact, catalog matching
@@ -328,6 +398,7 @@ Do not do these yet:
 - do not optimize for final UI polish
 - do not move everything into `packages/*` prematurely
 - do not build a full event bus or plugin system yet
+- do not create a refactor roadmap before the rules in this guide are accepted
 
 ## How to Break Work into Safe, Reviewable Increments
 Preferred increment size:
@@ -359,13 +430,13 @@ Bad examples:
 ## Immediate Next Refactor Candidates
 These are the best next candidates given the current code:
 - backend:
-  - split routine progress calculation from [routines.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/routines/routines.service.ts)
-  - split badge awarding from [sessions.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/sessions/sessions.service.ts)
+  - split routine progress calculation from `apps/api/src/routines/routines.service.ts`
+  - split badge awarding from `apps/api/src/sessions/sessions.service.ts`
   - split delete impact calculation from children/routines services
 - frontend:
-  - split selection/fetch logic out of [parent-dashboard.tsx](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/web/components/parent-dashboard.tsx)
-  - split standby, active, and completed states out of [training-runner.tsx](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/web/components/training-runner.tsx)
-  - split editor state and destructive flows out of [routines-manager.tsx](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/web/components/routines-manager.tsx)
+  - split selection/fetch logic out of `apps/web/components/parent-dashboard.tsx`
+  - split standby, active, and completed states out of `apps/web/components/training-runner.tsx`
+  - split editor state and destructive flows out of `apps/web/components/routines-manager.tsx`
 
 ## Engineering Workflow Expectations
 - prefer feature branches or focused commits
