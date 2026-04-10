@@ -6,7 +6,8 @@
     "dev": "nest start --watch",
     "build": "nest build",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:unit": "tsc -p tsconfig.test.json && node --test .test-dist/test/**/*.test.js"
   },
   "dependencies": {
     "@nestjs/jwt": "^11.0.1",

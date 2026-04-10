@@ -6,6 +6,7 @@ import {
 import { BadgeTriggerType, SessionStatus } from "@prisma/client";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../common/prisma.service";
+import { buildBadgeAwardIdentifiers } from "./domain/badge-award-identifiers";
 import { CancelSessionDto, CompleteTaskDto, FinishSessionDto } from "./dto";
 
 @Injectable()
@@ -360,24 +361,26 @@ export class SessionsService {
 
     for (const badge of badgeDefinitions) {
       if (badge.triggerType === BadgeTriggerType.FIRST_SESSION && completedSessionsCount === 1) {
+        const identifiers = buildBadgeAwardIdentifiers({ type: "first-session" });
         await this.createBadgeAwardIfMissing({
           childId,
           routineId,
           badgeDefinitionId: badge.id,
-          contextKey: "first-session",
-          reason: "first-session",
+          contextKey: identifiers.contextKey,
+          reason: identifiers.reason,
         });
       }
 
       if (badge.triggerType === BadgeTriggerType.TOTAL_SESSION_COUNT) {
         const threshold = Number((badge.triggerConfig as { threshold?: number } | null)?.threshold ?? 0);
         if (threshold > 0 && completedSessionsCount >= threshold) {
+          const identifiers = buildBadgeAwardIdentifiers({ type: "total-sessions", threshold });
           await this.createBadgeAwardIfMissing({
             childId,
             routineId,
             badgeDefinitionId: badge.id,
-            contextKey: `total-sessions-${threshold}`,
-            reason: `total-sessions-${threshold}`,
+            contextKey: identifiers.contextKey,
+            reason: identifiers.reason,
           });
         }
       }
@@ -386,12 +389,17 @@ export class SessionsService {
         badge.triggerType === BadgeTriggerType.ROUTINE_RECORD &&
         (previousBest?.totalSeconds == null || totalSeconds < previousBest.totalSeconds)
       ) {
+        const identifiers = buildBadgeAwardIdentifiers({
+          type: "routine-record",
+          routineId,
+          completedAt,
+        });
         await this.createBadgeAwardIfMissing({
           childId,
           routineId,
           badgeDefinitionId: badge.id,
-          contextKey: `routine-record:${routineId}:${completedAt.toISOString()}`,
-          reason: `routine-record-${completedAt.toISOString()}`,
+          contextKey: identifiers.contextKey,
+          reason: identifiers.reason,
         });
       }
 
@@ -421,13 +429,19 @@ export class SessionsService {
           );
 
           if (completedInWeek >= proratedTarget) {
+            const identifiers = buildBadgeAwardIdentifiers({
+              type: "weekly-goal",
+              routineId,
+              periodId: matchingPeriod.id,
+              weekStart,
+            });
             await this.createBadgeAwardIfMissing({
               childId,
               routineId,
               periodId: matchingPeriod.id,
               badgeDefinitionId: badge.id,
-              contextKey: `weekly-goal:${routineId}:${matchingPeriod.id}:${weekStart.toISOString()}`,
-              reason: `weekly-goal-${weekStart.toISOString()}`,
+              contextKey: identifiers.contextKey,
+              reason: identifiers.reason,
             });
           }
         }
@@ -436,12 +450,17 @@ export class SessionsService {
       if (badge.triggerType === BadgeTriggerType.ROUTINE_SESSION_COUNT) {
         const threshold = Number((badge.triggerConfig as { threshold?: number } | null)?.threshold ?? 0);
         if (threshold > 0 && completedRoutineSessionsCount >= threshold) {
+          const identifiers = buildBadgeAwardIdentifiers({
+            type: "routine-sessions",
+            routineId,
+            threshold,
+          });
           await this.createBadgeAwardIfMissing({
             childId,
             routineId,
             badgeDefinitionId: badge.id,
-            contextKey: `routine-sessions:${routineId}:${threshold}`,
-            reason: `routine-sessions-${threshold}`,
+            contextKey: identifiers.contextKey,
+            reason: identifiers.reason,
           });
         }
       }
@@ -449,12 +468,13 @@ export class SessionsService {
       if (badge.triggerType === BadgeTriggerType.DISTINCT_ROUTINE_COUNT) {
         const threshold = Number((badge.triggerConfig as { threshold?: number } | null)?.threshold ?? 0);
         if (threshold > 0 && distinctCompletedRoutineCount >= threshold) {
+          const identifiers = buildBadgeAwardIdentifiers({ type: "distinct-routines", threshold });
           await this.createBadgeAwardIfMissing({
             childId,
             routineId,
             badgeDefinitionId: badge.id,
-            contextKey: `distinct-routines:${threshold}`,
-            reason: `distinct-routines-${threshold}`,
+            contextKey: identifiers.contextKey,
+            reason: identifiers.reason,
           });
         }
       }
@@ -464,12 +484,18 @@ export class SessionsService {
         if (threshold > 0) {
           const streak = await this.getConsecutiveWeeklyGoalStreak(childId, routine, completedAt);
           if (streak >= threshold) {
+            const identifiers = buildBadgeAwardIdentifiers({
+              type: "weekly-streak",
+              routineId,
+              threshold,
+              completedAt,
+            });
             await this.createBadgeAwardIfMissing({
               childId,
               routineId,
               badgeDefinitionId: badge.id,
-              contextKey: `weekly-streak:${routineId}:${threshold}:${completedAt.toISOString()}`,
-              reason: `weekly-streak-${threshold}-${completedAt.toISOString()}`,
+              contextKey: identifiers.contextKey,
+              reason: identifiers.reason,
             });
           }
         }
@@ -495,13 +521,18 @@ export class SessionsService {
           const periodTarget = getTotalTargetForPeriod(matchingPeriod);
 
           if (completedInPeriod >= periodTarget) {
+            const identifiers = buildBadgeAwardIdentifiers({
+              type: "period-target",
+              routineId,
+              periodId: matchingPeriod.id,
+            });
             await this.createBadgeAwardIfMissing({
               childId,
               routineId,
               periodId: matchingPeriod.id,
               badgeDefinitionId: badge.id,
-              contextKey: `period-target:${routineId}:${matchingPeriod.id}`,
-              reason: `period-target-${matchingPeriod.id}`,
+              contextKey: identifiers.contextKey,
+              reason: identifiers.reason,
             });
           }
         }
@@ -510,12 +541,13 @@ export class SessionsService {
       if (badge.triggerType === BadgeTriggerType.TASK_COMPLETION_COUNT) {
         const threshold = Number((badge.triggerConfig as { threshold?: number } | null)?.threshold ?? 0);
         if (threshold > 0 && completedTaskCount >= threshold) {
+          const identifiers = buildBadgeAwardIdentifiers({ type: "task-completions", threshold });
           await this.createBadgeAwardIfMissing({
             childId,
             routineId,
             badgeDefinitionId: badge.id,
-            contextKey: `task-completions:${threshold}`,
-            reason: `task-completions-${threshold}`,
+            contextKey: identifiers.contextKey,
+            reason: identifiers.reason,
           });
         }
       }
