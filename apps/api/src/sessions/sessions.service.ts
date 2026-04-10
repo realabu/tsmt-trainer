@@ -10,6 +10,7 @@ import { buildBadgeAwardIdentifiers } from "./domain/badge-award-identifiers";
 import {
   endOfWeek,
   getInclusiveDayCount,
+  getProRatedWeeklyTarget,
   startOfWeek,
 } from "./domain/session-week-boundaries";
 import { CancelSessionDto, CompleteTaskDto, FinishSessionDto } from "./dto";
@@ -662,12 +663,6 @@ export class SessionsService {
 
     return streak;
   }
-}
-
-function getProRatedWeeklyTarget(weeklyTargetCount: number, weekStart: Date, weekEnd: Date) {
-  const coveredDays = getInclusiveDayCount(weekStart, weekEnd);
-  const rawTarget = (weeklyTargetCount * coveredDays) / 7;
-  return Math.round(rawTarget);
 }
 
 function getTotalTargetForPeriod(period: {

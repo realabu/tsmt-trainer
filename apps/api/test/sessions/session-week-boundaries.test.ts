@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   endOfWeek,
   getInclusiveDayCount,
+  getProRatedWeeklyTarget,
   startOfWeek,
 } from "../../src/sessions/domain/session-week-boundaries";
 
@@ -58,4 +59,34 @@ test("getInclusiveDayCount returns inclusive multi-day count", () => {
   );
 
   assert.equal(result, 7);
+});
+
+test("getProRatedWeeklyTarget returns the original target for a full week", () => {
+  const result = getProRatedWeeklyTarget(
+    3,
+    new Date(2026, 3, 6, 0, 0, 0, 0),
+    new Date(2026, 3, 12, 23, 59, 59, 999),
+  );
+
+  assert.equal(result, 3);
+});
+
+test("getProRatedWeeklyTarget preserves current partial-week behavior", () => {
+  const result = getProRatedWeeklyTarget(
+    3,
+    new Date(2026, 3, 6, 12, 0, 0, 0),
+    new Date(2026, 3, 8, 8, 0, 0, 0),
+  );
+
+  assert.equal(result, 1);
+});
+
+test("getProRatedWeeklyTarget preserves rounding behavior for very small ranges", () => {
+  const result = getProRatedWeeklyTarget(
+    3,
+    new Date(2026, 3, 6, 12, 0, 0, 0),
+    new Date(2026, 3, 6, 12, 5, 0, 0),
+  );
+
+  assert.equal(result, 0);
 });

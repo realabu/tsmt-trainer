@@ -23,3 +23,9 @@ export function getInclusiveDayCount(start: Date, end: Date) {
   const diffMs = normalizedEnd.getTime() - normalizedStart.getTime();
   return Math.max(1, Math.floor(diffMs / 86_400_000) + 1);
 }
+
+export function getProRatedWeeklyTarget(weeklyTargetCount: number, weekStart: Date, weekEnd: Date) {
+  const coveredDays = getInclusiveDayCount(weekStart, weekEnd);
+  const rawTarget = (weeklyTargetCount * coveredDays) / 7;
+  return Math.round(rawTarget);
+}
