@@ -8,6 +8,7 @@ import {
   buildRoutineTaskDeleteImpact,
 } from "./domain/routine-delete-impact";
 import { calculateRoutineProgressPeriods } from "./domain/routine-progress";
+import { buildRoutineTaskDisplayFields } from "./domain/routine-task-display";
 import { normalizeRepetitionsLabel } from "./domain/repetition-label";
 import {
   CreateRoutineDto,
@@ -191,7 +192,8 @@ export class RoutinesService {
       }
     }
 
-    const title = input.title ?? catalogTask?.title;
+    const displayFields = buildRoutineTaskDisplayFields(input, catalogTask);
+    const title = displayFields.title;
 
     if (!title) {
       throw new BadRequestException("Minden rutin feladathoz kell cim vagy katalogus forras.");
@@ -203,8 +205,8 @@ export class RoutinesService {
       catalogDifficultyLevelId: input.catalogDifficultyLevelId || null,
       songId: resolvedSongId ?? null,
       title,
-      details: input.details ?? catalogTask?.summary ?? null,
-      coachText: input.coachText ?? null,
+      details: displayFields.details,
+      coachText: displayFields.coachText,
       repetitionsLabel: normalizeRepetitionsLabel(
         input.repetitionsLabel,
         input.repetitionCount,
