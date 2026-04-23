@@ -8,9 +8,11 @@ import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../common/prisma.service";
 import { buildBadgeAwardIdentifiers } from "./domain/badge-award-identifiers";
 import {
+  isPeriodTargetMet,
+  isWeeklyGoalMet,
+} from "./domain/weekly-goal-eligibility";
+import {
   endOfWeek,
-  getProRatedWeeklyTarget,
-  getTotalTargetForPeriod,
   startOfWeek,
 } from "./domain/session-week-boundaries";
 import {
@@ -432,13 +434,15 @@ export class SessionsService {
               },
             },
           });
-          const proratedTarget = getProRatedWeeklyTarget(
-            matchingPeriod.weeklyTargetCount,
-            new Date(Math.max(weekStart.getTime(), matchingPeriod.startsOn.getTime())),
-            new Date(Math.min(weekEnd.getTime(), matchingPeriod.endsOn.getTime())),
-          );
 
-          if (completedInWeek >= proratedTarget) {
+          if (
+            isWeeklyGoalMet({
+              completedInWeek,
+              weekStart,
+              weekEnd,
+              period: matchingPeriod,
+            })
+          ) {
             const identifiers = buildBadgeAwardIdentifiers({
               type: "weekly-goal",
               routineId,
@@ -528,9 +532,13 @@ export class SessionsService {
               },
             },
           });
-          const periodTarget = getTotalTargetForPeriod(matchingPeriod);
 
-          if (completedInPeriod >= periodTarget) {
+          if (
+            isPeriodTargetMet({
+              completedInPeriod,
+              period: matchingPeriod,
+            })
+          ) {
             const identifiers = buildBadgeAwardIdentifiers({
               type: "period-target",
               routineId,
