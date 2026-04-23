@@ -8,6 +8,7 @@ import {
   buildRoutineTaskDeleteImpact,
 } from "./domain/routine-delete-impact";
 import { calculateRoutineProgressPeriods } from "./domain/routine-progress";
+import { normalizeRepetitionsLabel } from "./domain/repetition-label";
 import {
   CreateRoutineDto,
   CreateRoutinePeriodDto,
@@ -20,32 +21,6 @@ import {
 @Injectable()
 export class RoutinesService {
   constructor(private readonly prisma: PrismaService) {}
-
-  private normalizeRepetitionsLabel(
-    repetitionsLabel?: string | null,
-    repetitionCount?: number | null,
-    repetitionUnitCount?: number | null,
-  ) {
-    const explicitLabel = repetitionsLabel?.trim();
-
-    if (explicitLabel) {
-      return explicitLabel;
-    }
-
-    if (repetitionCount && repetitionUnitCount) {
-      return `${repetitionCount}x${repetitionUnitCount}`;
-    }
-
-    if (repetitionCount) {
-      return `${repetitionCount}x`;
-    }
-
-    if (repetitionUnitCount) {
-      return `${repetitionUnitCount}x`;
-    }
-
-    return null;
-  }
 
   private routineTaskInclude() {
     return {
@@ -230,7 +205,7 @@ export class RoutinesService {
       title,
       details: input.details ?? catalogTask?.summary ?? null,
       coachText: input.coachText ?? null,
-      repetitionsLabel: this.normalizeRepetitionsLabel(
+      repetitionsLabel: normalizeRepetitionsLabel(
         input.repetitionsLabel,
         input.repetitionCount,
         input.repetitionUnitCount,
