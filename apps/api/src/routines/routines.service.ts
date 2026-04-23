@@ -2,6 +2,11 @@ import { MediaKind, Prisma, SessionStatus, type SongCatalogItem, type TaskCatalo
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../common/prisma.service";
+import {
+  buildRoutineDeleteImpact,
+  buildRoutinePeriodDeleteImpact,
+  buildRoutineTaskDeleteImpact,
+} from "./domain/routine-delete-impact";
 import { calculateRoutineProgressPeriods } from "./domain/routine-progress";
 import {
   CreateRoutineDto,
@@ -441,26 +446,19 @@ export class RoutinesService {
       }),
     ]);
 
-    return {
-      entityType: "routine",
-      entityId: routine.id,
-      entityLabel: routine.name,
-      parentLabel: `${routine.child.firstName} ${routine.child.lastName}`,
-      deletes: [
-        { label: "Feladat", count: taskCount },
-        { label: "Feladat media kapcsolat", count: taskMediaLinkCount },
-        { label: "Idoszak", count: periodCount },
-        { label: "Torna", count: sessionCount },
-        { label: "Reszido bejegyzes", count: sessionTaskTimingCount },
-        { label: "Trainer megosztas", count: trainerAssignmentCount },
-      ],
-      detaches: [
-        { label: "Badge megszerzes kapcsolat", count: detachedBadgeAwardCount },
-      ],
-      notes: [
-        "A badge megszerzesek gyermek szinten megmaradnak, de a torolt feladatsorhoz es idoszakokhoz valo kapcsolatuk megszunik.",
-      ],
-    };
+    return buildRoutineDeleteImpact({
+      routineId: routine.id,
+      routineName: routine.name,
+      childFirstName: routine.child.firstName,
+      childLastName: routine.child.lastName,
+      taskCount,
+      taskMediaLinkCount,
+      periodCount,
+      sessionCount,
+      sessionTaskTimingCount,
+      trainerAssignmentCount,
+      detachedBadgeAwardCount,
+    });
   }
 
   async listSongCatalog(currentUser: AuthenticatedUser, query?: string) {
@@ -688,20 +686,15 @@ export class RoutinesService {
       }),
     ]);
 
-    return {
-      entityType: "task",
-      entityId: task.id,
-      entityLabel: task.title,
-      parentLabel: `${task.routine.child.firstName} ${task.routine.child.lastName} / ${task.routine.name}`,
-      deletes: [
-        { label: "Feladat media kapcsolat", count: taskMediaLinkCount },
-        { label: "Reszido bejegyzes", count: sessionTimingCount },
-      ],
-      detaches: [],
-      notes: [
-        "A feladat torlesevel a korabbi tornakhoz rogzitett ehhez tartozo reszidok is torlodnek.",
-      ],
-    };
+    return buildRoutineTaskDeleteImpact({
+      taskId: task.id,
+      taskTitle: task.title,
+      routineName: task.routine.name,
+      childFirstName: task.routine.child.firstName,
+      childLastName: task.routine.child.lastName,
+      taskMediaLinkCount,
+      sessionTimingCount,
+    });
   }
 
   async createPeriod(currentUser: AuthenticatedUser, routineId: string, input: CreateRoutinePeriodDto) {
@@ -786,19 +779,15 @@ export class RoutinesService {
       }),
     ]);
 
-    return {
-      entityType: "period",
-      entityId: period.id,
-      entityLabel: period.name ?? "Nev nelkuli idoszak",
-      parentLabel: `${period.routine.child.firstName} ${period.routine.child.lastName} / ${period.routine.name}`,
-      deletes: [],
-      detaches: [
-        { label: "Idoszakhoz kotott badge kapcsolat", count: detachedBadgeAwardCount },
-      ],
-      notes: [
-        `${completedSessionCount} befejezett torna marad meg, de a torolt idoszak tobbe nem fog megjelenni a haladasi nezetekben.`,
-      ],
-    };
+    return buildRoutinePeriodDeleteImpact({
+      periodId: period.id,
+      periodName: period.name,
+      routineName: period.routine.name,
+      childFirstName: period.routine.child.firstName,
+      childLastName: period.routine.child.lastName,
+      detachedBadgeAwardCount,
+      completedSessionCount,
+    });
   }
 
   async getProgress(currentUser: AuthenticatedUser, routineId: string) {
