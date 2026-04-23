@@ -10,6 +10,7 @@ import {
 import { calculateRoutineProgressPeriods } from "./domain/routine-progress";
 import { buildRoutineTaskDisplayFields } from "./domain/routine-task-display";
 import { normalizeRepetitionsLabel } from "./domain/repetition-label";
+import { resolveRoutineTaskSongId } from "./domain/routine-task-song";
 import {
   CreateRoutineDto,
   CreateRoutinePeriodDto,
@@ -172,11 +173,10 @@ export class RoutinesService {
       );
     }
 
-    const explicitSongId =
-      input.songId === undefined ? undefined : input.songId || null;
-
-    const resolvedSongId =
-      explicitSongId === undefined ? catalogTask?.defaultSongId ?? undefined : explicitSongId;
+    const resolvedSongId = resolveRoutineTaskSongId(
+      input.songId,
+      catalogTask?.defaultSongId,
+    );
 
     if (resolvedSongId) {
       const song = await this.prisma.songCatalogItem.findFirst({
