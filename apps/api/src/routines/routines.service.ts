@@ -522,13 +522,13 @@ export class RoutinesService {
         mediaLinks: {
           create: resolvedTask.mediaLinks.map((media, mediaIndex) => ({
             label: media.label,
-                sortOrder: mediaIndex,
-                mediaAsset: {
-                  create: {
-                    kind: parseRoutineTaskMediaKind(media.kind),
-                    externalUrl: media.externalUrl,
-                  },
-                },
+            sortOrder: mediaIndex,
+            mediaAsset: {
+              create: {
+                kind: parseRoutineTaskMediaKind(media.kind),
+                externalUrl: media.externalUrl,
+              },
+            },
           })),
         },
       } satisfies Prisma.RoutineTaskCreateInput,
@@ -922,13 +922,13 @@ export class RoutinesService {
       mediaLinks: {
         create: task.mediaLinks.map((media, mediaIndex) => ({
           label: media.label,
-            sortOrder: mediaIndex,
-            mediaAsset: {
-              create: {
-                kind: parseRoutineTaskMediaKind(media.kind),
-                externalUrl: media.externalUrl,
-              },
+          sortOrder: mediaIndex,
+          mediaAsset: {
+            create: {
+              kind: parseRoutineTaskMediaKind(media.kind),
+              externalUrl: media.externalUrl,
             },
+          },
         })),
       },
     };
