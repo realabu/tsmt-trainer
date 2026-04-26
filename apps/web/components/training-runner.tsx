@@ -8,6 +8,7 @@ import {
   formatDuration,
   initialsFromTitle,
 } from "../lib/training-runner-helpers";
+import { buildCurrentTaskImages } from "../lib/training-runner-task-images";
 import { useAuthUser } from "../lib/use-auth-user";
 
 interface TaskMediaLinkRecord {
@@ -173,41 +174,7 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
   }, [routine?.sessions]);
 
   const currentTaskImages = useMemo(() => {
-    if (!currentTask) {
-      return [];
-    }
-
-    const images: Array<{ key: string; label: string; url: string }> = [];
-
-    if (currentTask.customImageMedia?.externalUrl) {
-      images.push({
-        key: `${currentTask.id}-custom-image`,
-        label: "Feladatkep",
-        url: currentTask.customImageMedia.externalUrl,
-      });
-    }
-
-    for (const media of currentTask.mediaLinks ?? []) {
-      if (media.mediaAsset.kind === "IMAGE" && media.mediaAsset.externalUrl) {
-        images.push({
-          key: media.id,
-          label: media.label ?? "Kep",
-          url: media.mediaAsset.externalUrl,
-        });
-      }
-    }
-
-    for (const media of currentTask.catalogTask?.mediaLinks ?? []) {
-      if (media.mediaAsset.kind === "IMAGE" && media.mediaAsset.externalUrl) {
-        images.push({
-          key: `${media.id}-catalog`,
-          label: media.label ?? "Mintakep",
-          url: media.mediaAsset.externalUrl,
-        });
-      }
-    }
-
-    return images;
+    return buildCurrentTaskImages(currentTask);
   }, [currentTask]);
 
   const effectiveSong = currentTask?.song ?? currentTask?.catalogTask?.defaultSong ?? null;
