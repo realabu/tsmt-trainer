@@ -7,6 +7,7 @@ import {
   buildRoutinePeriodDeleteImpact,
   buildRoutineTaskDeleteImpact,
 } from "./domain/routine-delete-impact";
+import { parseRoutineTaskMediaKind } from "./domain/media-kind";
 import { calculateRoutineProgressPeriods } from "./domain/routine-progress";
 import { buildRoutineTaskDisplayFields } from "./domain/routine-task-display";
 import { normalizeRepetitionsLabel } from "./domain/repetition-label";
@@ -521,13 +522,13 @@ export class RoutinesService {
         mediaLinks: {
           create: resolvedTask.mediaLinks.map((media, mediaIndex) => ({
             label: media.label,
-            sortOrder: mediaIndex,
-            mediaAsset: {
-              create: {
-                kind: parseMediaKind(media.kind),
-                externalUrl: media.externalUrl,
-              },
-            },
+                sortOrder: mediaIndex,
+                mediaAsset: {
+                  create: {
+                    kind: parseRoutineTaskMediaKind(media.kind),
+                    externalUrl: media.externalUrl,
+                  },
+                },
           })),
         },
       } satisfies Prisma.RoutineTaskCreateInput,
@@ -599,7 +600,7 @@ export class RoutinesService {
             sortOrder: mediaIndex,
             mediaAsset: {
               create: {
-                kind: parseMediaKind(media.kind),
+                kind: parseRoutineTaskMediaKind(media.kind),
                 externalUrl: media.externalUrl,
               },
             },
@@ -921,19 +922,15 @@ export class RoutinesService {
       mediaLinks: {
         create: task.mediaLinks.map((media, mediaIndex) => ({
           label: media.label,
-          sortOrder: mediaIndex,
-          mediaAsset: {
-            create: {
-              kind: parseMediaKind(media.kind),
-              externalUrl: media.externalUrl,
+            sortOrder: mediaIndex,
+            mediaAsset: {
+              create: {
+                kind: parseRoutineTaskMediaKind(media.kind),
+                externalUrl: media.externalUrl,
+              },
             },
-          },
         })),
       },
     };
   }
-}
-
-function parseMediaKind(kind: "IMAGE" | "AUDIO" | "VIDEO" | "EXTERNAL_LINK") {
-  return MediaKind[kind];
 }
