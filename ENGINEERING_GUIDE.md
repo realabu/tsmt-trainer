@@ -333,6 +333,20 @@ Practical repository-specific gates:
 4. if auth, badges, progress, deletion impact, or import logic changed:
    - targeted tests must exist or be added in that same workstream
 
+## Pre-PR Quality Gate
+Before opening a PR, run:
+- `pnpm typecheck`
+- `pnpm test`
+
+In this repository, `pnpm test` runs both:
+- API unit tests
+- Web unit tests
+
+Additional rules:
+- do not commit generated test/build output such as `.test-dist`
+- keep PRs small and behavior-preserving unless they are explicitly marked as feature work
+- if a change touches auth, sessions, routines, admin, or training flow, mention that affected area in the PR summary
+
 ## Definition of Done
 Work is done when:
 - the change is scoped to a clear outcome
