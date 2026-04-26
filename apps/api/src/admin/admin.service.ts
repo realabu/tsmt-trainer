@@ -7,7 +7,7 @@ import { MediaKind, UserRole } from "@prisma/client";
 import { hash } from "bcryptjs";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../common/prisma.service";
-import { parseAdminCatalogMediaKind } from "./domain/admin-media-kind";
+import { buildAdminCatalogMediaCreate } from "./domain/admin-catalog-media";
 import {
   CreateEquipmentCatalogDto,
   CreateSongCatalogDto,
@@ -358,13 +358,7 @@ export class AdminService {
         mediaLinks: {
           create: (input.mediaLinks ?? []).map((media, index) => ({
             label: media.label,
-            sortOrder: index,
-            mediaAsset: {
-              create: {
-                kind: parseAdminCatalogMediaKind(media.kind),
-                externalUrl: media.externalUrl,
-              },
-            },
+            ...buildAdminCatalogMediaCreate(media, index),
           })),
         },
         equipmentLinks: {
@@ -418,13 +412,7 @@ export class AdminService {
           mediaLinks: {
             create: input.mediaLinks.map((media, index) => ({
               label: media.label,
-              sortOrder: index,
-              mediaAsset: {
-                create: {
-                  kind: parseAdminCatalogMediaKind(media.kind),
-                  externalUrl: media.externalUrl,
-                },
-              },
+              ...buildAdminCatalogMediaCreate(media, index),
             })),
           },
         },
