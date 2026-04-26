@@ -3,6 +3,11 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { apiFetch } from "../lib/api";
 import { getDisplayRepetitionsLabel } from "../lib/repetitions";
+import {
+  buildRingStyle,
+  formatDuration,
+  initialsFromTitle,
+} from "../lib/training-runner-helpers";
 import { useAuthUser } from "../lib/use-auth-user";
 
 interface TaskMediaLinkRecord {
@@ -111,31 +116,6 @@ interface SessionRecord {
     }>;
   };
   taskTimings: SessionTaskTiming[];
-}
-
-function formatDuration(totalSeconds: number) {
-  const safe = Math.max(0, Math.floor(totalSeconds));
-  const minutes = Math.floor(safe / 60);
-  const seconds = safe % 60;
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
-}
-
-function buildRingStyle(value: number, max: number, color: string) {
-  const safeMax = Math.max(max, 1);
-  const progress = Math.min(100, Math.max(0, (value / safeMax) * 100));
-
-  return {
-    background: `conic-gradient(${color} ${progress}%, rgba(255,255,255,0.18) ${progress}% 100%)`,
-  };
-}
-
-function initialsFromTitle(value: string) {
-  return value
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
 }
 
 export function TrainingRunner({ routineId }: { routineId: string }) {

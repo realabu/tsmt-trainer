@@ -7,6 +7,7 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
+    "test": "pnpm --filter @tsmt/web test:unit",
     "db:generate": "pnpm --filter @tsmt/db db:generate",
     "db:migrate": "pnpm --filter @tsmt/db db:migrate",
     "db:seed": "pnpm --filter @tsmt/db db:seed",

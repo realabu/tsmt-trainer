@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:unit": "tsc -p tsconfig.test.json && node --test .test-dist/apps/web/lib/__tests__/*.test.js"
   },
   "dependencies": {
     "@tsmt/types": "workspace:*",
