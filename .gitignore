@@ -15,3 +15,4 @@ apps/api/prisma/dev.db
 packages/db/generated
 *.tsbuildinfo
 apps/api/.test-dist
+apps/web/.test-dist
