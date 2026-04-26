@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
-import { getDisplayRepetitionsLabel } from "../lib/repetitions";
+import {
+  defaultPeriods,
+  parseOptionalInt,
+  routinePeriodToDraft,
+  routineTaskToDraft,
+} from "../lib/routines-manager-helpers";
 import { TaskBuilder, type TaskDraft } from "./task-builder";
 import { useAuthUser } from "../lib/use-auth-user";
 
@@ -86,20 +91,6 @@ interface DeleteImpactRecord {
     count: number;
   }>;
   notes: string[];
-}
-
-const defaultPeriods = [
-  { name: "Indulo szakasz", startsOn: "2026-04-01", endsOn: "2026-04-21", weeklyTargetCount: 3 },
-];
-
-function parseOptionalInt(value: string) {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-
-  const parsed = Number.parseInt(trimmed, 10);
-  return Number.isNaN(parsed) ? undefined : parsed;
 }
 
 function ImpactSummary({ impact }: { impact: DeleteImpactRecord }) {
@@ -257,59 +248,6 @@ export function RoutinesManager() {
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Letrehozasi hiba");
     }
-  }
-
-  function routineTaskToDraft(task: RoutineRecord["tasks"][number], index: number): TaskDraft {
-    const imageLink =
-      task.customImageMedia?.externalUrl ??
-      task.mediaLinks?.find((mediaLink) => mediaLink.mediaAsset.kind === "IMAGE")?.mediaAsset.externalUrl ??
-      "";
-    const audioLink =
-      task.mediaLinks?.find((mediaLink) => mediaLink.mediaAsset.kind === "AUDIO")?.mediaAsset.externalUrl ?? "";
-    const videoLink =
-      task.mediaLinks?.find((mediaLink) => mediaLink.mediaAsset.kind === "VIDEO")?.mediaAsset.externalUrl ?? "";
-    const catalogDefaultSongId = task.catalogTask?.defaultSong?.id;
-    const selectedSongId = task.song?.id;
-
-    return {
-      id: task.id,
-      sortOrder: task.sortOrder ?? index + 1,
-      catalogTaskId: task.catalogTaskId ?? undefined,
-      catalogTaskTitle: task.catalogTask?.title ?? undefined,
-      catalogDifficultyLevelId: task.catalogDifficultyLevel?.id ?? undefined,
-      catalogDifficultyLevels: task.catalogTask?.difficultyLevels ?? [],
-      catalogDefaultSongId: catalogDefaultSongId ?? undefined,
-      catalogDefaultSongTitle: task.catalogTask?.defaultSong?.title ?? undefined,
-      songSelection:
-        selectedSongId && catalogDefaultSongId && selectedSongId === catalogDefaultSongId
-          ? "__DEFAULT__"
-          : selectedSongId ?? "",
-      title: task.title,
-      details: task.details ?? "",
-      coachText: task.coachText ?? "",
-      repetitionsLabel:
-        task.repetitionsLabel ??
-        getDisplayRepetitionsLabel({
-          repetitionsLabel: task.repetitionsLabel,
-          repetitionCount: task.repetitionCount,
-          repetitionUnitCount: task.repetitionUnitCount,
-        }),
-      repetitionCount: task.repetitionCount?.toString() ?? "",
-      repetitionUnitCount: task.repetitionUnitCount?.toString() ?? "",
-      mediaImageUrl: imageLink ?? "",
-      mediaAudioUrl: audioLink ?? "",
-      mediaVideoUrl: videoLink ?? "",
-    };
-  }
-
-  function routinePeriodToDraft(period: RoutineRecord["periods"][number]): PeriodDraft {
-    return {
-      id: period.id,
-      name: period.name ?? "",
-      startsOn: period.startsOn.slice(0, 10),
-      endsOn: period.endsOn.slice(0, 10),
-      weeklyTargetCount: period.weeklyTargetCount.toString(),
-    };
   }
 
   function openRoutineEditor(routine: RoutineRecord) {
