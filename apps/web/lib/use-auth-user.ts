@@ -1,30 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-interface AuthUser {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: "PARENT" | "TRAINER" | "ADMIN";
-}
+import { AUTH_CHANGED_EVENT, getStoredAuthUser, type StoredAuthUser } from "./auth-storage";
 
 export function useAuthUser() {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<StoredAuthUser | null>(null);
 
   useEffect(() => {
     function syncUser() {
-      try {
-        const raw = window.localStorage.getItem("tsmt.user");
-        if (!raw) {
-          setUser(null);
-          return;
-        }
-        setUser(JSON.parse(raw) as AuthUser);
-      } catch {
-        setUser(null);
-      }
+      setUser(getStoredAuthUser());
     }
 
     function handleStorage(event: StorageEvent) {
@@ -39,11 +23,11 @@ export function useAuthUser() {
 
     syncUser();
     window.addEventListener("storage", handleStorage);
-    window.addEventListener("tsmt-auth-changed", handleAuthChanged);
+    window.addEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
 
     return () => {
       window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("tsmt-auth-changed", handleAuthChanged);
+      window.removeEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
     };
   }, []);
 

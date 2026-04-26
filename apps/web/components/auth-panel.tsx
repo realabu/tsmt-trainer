@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { apiFetch } from "../lib/api";
-import { clearStoredAuth, setStoredAuthUser, type StoredAuthUser } from "../lib/auth-storage";
+import {
+  clearStoredAuth,
+  setStoredAuthTokens,
+  setStoredAuthUser,
+  type StoredAuthUser,
+} from "../lib/auth-storage";
 import { useAuthUser } from "../lib/use-auth-user";
 
 type AuthMode = "login" | "register";
@@ -46,8 +51,7 @@ export function AuthPanel({ embedded = false }: { embedded?: boolean }) {
         },
       );
 
-      localStorage.setItem("tsmt.accessToken", result.accessToken);
-      localStorage.setItem("tsmt.refreshToken", result.refreshToken);
+      setStoredAuthTokens(result.accessToken, result.refreshToken);
       setStoredAuthUser(result.user);
       setStatus(`Bejelentkezve: ${result.user.firstName} ${result.user.lastName}`);
       window.location.href = "/";

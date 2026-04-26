@@ -1,3 +1,5 @@
+import { clearStoredAuth } from "./auth-storage";
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export function getApiUrl(path: string) {
@@ -10,18 +12,6 @@ export function getApiUrl(path: string) {
 
 export function getApiDocsUrl() {
   return getApiUrl("/api/docs");
-}
-
-function clearAuthAndRedirectHome() {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.localStorage.removeItem("tsmt.accessToken");
-  window.localStorage.removeItem("tsmt.refreshToken");
-  window.localStorage.removeItem("tsmt.user");
-  window.dispatchEvent(new Event("tsmt-auth-changed"));
-  window.location.href = "/";
 }
 
 export async function apiFetch<T>(
@@ -57,7 +47,7 @@ export async function apiFetch<T>(
       accessToken &&
       (message === "Invalid or expired access token" || message === "Missing Authorization header")
     ) {
-      clearAuthAndRedirectHome();
+      clearStoredAuth();
     }
 
     throw new Error(message);
