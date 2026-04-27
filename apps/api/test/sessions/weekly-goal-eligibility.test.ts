@@ -50,6 +50,36 @@ test("weekly goal preserves partial-week prorating behavior", () => {
   assert.equal(result, true);
 });
 
+test("weekly goal preserves current prorated boundary behavior within the same calendar week", () => {
+  const result = isWeeklyGoalMet({
+    completedInWeek: 1,
+    weekStart: new Date(2026, 3, 6, 0, 0, 0, 0),
+    weekEnd: new Date(2026, 3, 12, 23, 59, 59, 999),
+    period: {
+      startsOn: new Date(2026, 3, 10, 0, 0, 0, 0),
+      endsOn: new Date(2026, 3, 12, 23, 59, 59, 999),
+      weeklyTargetCount: 3,
+    },
+  });
+
+  assert.equal(result, true);
+});
+
+test("weekly goal preserves exact behavior on weekStart and weekEnd boundaries", () => {
+  const result = isWeeklyGoalMet({
+    completedInWeek: 3,
+    weekStart: new Date(2026, 3, 6, 0, 0, 0, 0),
+    weekEnd: new Date(2026, 3, 12, 23, 59, 59, 999),
+    period: {
+      startsOn: new Date(2026, 3, 6, 0, 0, 0, 0),
+      endsOn: new Date(2026, 3, 12, 23, 59, 59, 999),
+      weeklyTargetCount: 3,
+    },
+  });
+
+  assert.equal(result, true);
+});
+
 test("period target is met when completed sessions reach the derived period target", () => {
   const result = isPeriodTargetMet({
     completedInPeriod: 6,
@@ -74,4 +104,17 @@ test("period target is not met when completed sessions stay below the derived pe
   });
 
   assert.equal(result, false);
+});
+
+test("period target preserves current derived target behavior across partial boundaries", () => {
+  const result = isPeriodTargetMet({
+    completedInPeriod: 4,
+    period: {
+      startsOn: new Date(2026, 3, 8, 10, 0, 0, 0),
+      endsOn: new Date(2026, 3, 17, 18, 0, 0, 0),
+      weeklyTargetCount: 3,
+    },
+  });
+
+  assert.equal(result, true);
 });
