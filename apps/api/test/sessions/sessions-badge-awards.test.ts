@@ -5,6 +5,8 @@ import {
   SessionStatus,
   UserRole,
 } from "@prisma/client";
+import { buildBadgeAwardIdentifiers } from "../../src/sessions/domain/badge-award-identifiers";
+import { startOfWeek } from "../../src/sessions/domain/session-week-boundaries";
 import { SessionsService } from "../../src/sessions/sessions.service";
 
 type BadgeDefinitionLike = {
@@ -301,6 +303,7 @@ test("finish awards TASK_COMPLETION_COUNT badge when threshold is met", async ()
 });
 
 test("finish awards WEEKLY_GOAL_COMPLETED badge with periodId when matching period exists and goal is met", async () => {
+  const completedAt = new Date("2026-04-08T12:00:00.000Z");
   const { service, currentUser, badgeAwardCreates } = createSessionsServiceHarness({
     badgeDefinitions: [
       {
@@ -313,8 +316,8 @@ test("finish awards WEEKLY_GOAL_COMPLETED badge with periodId when matching peri
       periods: [
         {
           id: "period-1",
-          startsOn: new Date("2026-04-06T00:00:00.000Z"),
-          endsOn: new Date("2026-04-12T23:59:59.999Z"),
+          startsOn: new Date("2026-04-01T00:00:00.000Z"),
+          endsOn: new Date("2026-04-30T23:59:59.999Z"),
           weeklyTargetCount: 3,
         },
       ],
@@ -323,17 +326,22 @@ test("finish awards WEEKLY_GOAL_COMPLETED badge with periodId when matching peri
   });
 
   await service.finish(currentUser, "session-1", {
-    completedAt: "2026-04-08T12:00:00.000Z",
+    completedAt: completedAt.toISOString(),
   });
 
-  const currentWeekStartIso = new Date(2026, 3, 6, 0, 0, 0, 0).toISOString();
+  const identifiers = buildBadgeAwardIdentifiers({
+    type: "weekly-goal",
+    routineId: "routine-1",
+    periodId: "period-1",
+    weekStart: startOfWeek(completedAt),
+  });
   assert.equal(badgeAwardCreates.length, 1);
   assert.deepEqual(badgeAwardCreates[0], {
     childId: "child-1",
     routineId: "routine-1",
     periodId: "period-1",
     badgeDefinitionId: "badge-weekly",
-    contextKey: `weekly-goal:routine-1:period-1:${currentWeekStartIso}`,
-    reason: `weekly-goal-${currentWeekStartIso}`,
+    contextKey: identifiers.contextKey,
+    reason: identifiers.reason,
   });
 });

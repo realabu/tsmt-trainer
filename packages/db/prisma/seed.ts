@@ -1,7 +1,5 @@
-import prismaClient from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
-
-const { PrismaClient } = prismaClient;
 
 const prisma = new PrismaClient();
 
@@ -140,7 +138,7 @@ async function main() {
     const existing = await prisma.sessionTaskTiming.count({ where: { sessionId: session.id } });
     if (!existing) {
       await prisma.sessionTaskTiming.createMany({
-        data: tasks.map((task, index) => ({
+        data: tasks.map((task: (typeof tasks)[number], index: number) => ({
           sessionId: session.id,
           taskId: task.id,
           sortOrder: task.sortOrder,
