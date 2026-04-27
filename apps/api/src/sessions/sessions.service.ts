@@ -9,6 +9,14 @@ import { PrismaService } from "../common/prisma.service";
 import { buildBadgeAwardIdentifiers } from "./domain/badge-award-identifiers";
 import { getBadgeTriggerThreshold } from "./domain/badge-trigger-config";
 import {
+  shouldAwardDistinctRoutineCountBadge,
+  shouldAwardFirstSessionBadge,
+  shouldAwardRoutineRecordBadge,
+  shouldAwardRoutineSessionCountBadge,
+  shouldAwardTaskCompletionCountBadge,
+  shouldAwardTotalSessionCountBadge,
+} from "./domain/badge-trigger-decisions";
+import {
   isPeriodTargetMet,
   isWeeklyGoalMet,
 } from "./domain/weekly-goal-eligibility";
@@ -373,7 +381,10 @@ export class SessionsService {
     });
 
     for (const badge of badgeDefinitions) {
-      if (badge.triggerType === BadgeTriggerType.FIRST_SESSION && completedSessionsCount === 1) {
+      if (
+        badge.triggerType === BadgeTriggerType.FIRST_SESSION &&
+        shouldAwardFirstSessionBadge(completedSessionsCount)
+      ) {
         const identifiers = buildBadgeAwardIdentifiers({ type: "first-session" });
         await this.createBadgeAwardIfMissing({
           childId,
@@ -388,7 +399,7 @@ export class SessionsService {
         const threshold = getBadgeTriggerThreshold(
           badge.triggerConfig as { threshold?: number } | null,
         );
-        if (threshold > 0 && completedSessionsCount >= threshold) {
+        if (shouldAwardTotalSessionCountBadge(completedSessionsCount, threshold)) {
           const identifiers = buildBadgeAwardIdentifiers({ type: "total-sessions", threshold });
           await this.createBadgeAwardIfMissing({
             childId,
@@ -402,7 +413,7 @@ export class SessionsService {
 
       if (
         badge.triggerType === BadgeTriggerType.ROUTINE_RECORD &&
-        (previousBest?.totalSeconds == null || totalSeconds < previousBest.totalSeconds)
+        shouldAwardRoutineRecordBadge(totalSeconds, previousBest?.totalSeconds)
       ) {
         const identifiers = buildBadgeAwardIdentifiers({
           type: "routine-record",
@@ -468,7 +479,7 @@ export class SessionsService {
         const threshold = getBadgeTriggerThreshold(
           badge.triggerConfig as { threshold?: number } | null,
         );
-        if (threshold > 0 && completedRoutineSessionsCount >= threshold) {
+        if (shouldAwardRoutineSessionCountBadge(completedRoutineSessionsCount, threshold)) {
           const identifiers = buildBadgeAwardIdentifiers({
             type: "routine-sessions",
             routineId,
@@ -488,7 +499,7 @@ export class SessionsService {
         const threshold = getBadgeTriggerThreshold(
           badge.triggerConfig as { threshold?: number } | null,
         );
-        if (threshold > 0 && distinctCompletedRoutineCount >= threshold) {
+        if (shouldAwardDistinctRoutineCountBadge(distinctCompletedRoutineCount, threshold)) {
           const identifiers = buildBadgeAwardIdentifiers({ type: "distinct-routines", threshold });
           await this.createBadgeAwardIfMissing({
             childId,
@@ -569,7 +580,7 @@ export class SessionsService {
         const threshold = getBadgeTriggerThreshold(
           badge.triggerConfig as { threshold?: number } | null,
         );
-        if (threshold > 0 && completedTaskCount >= threshold) {
+        if (shouldAwardTaskCompletionCountBadge(completedTaskCount, threshold)) {
           const identifiers = buildBadgeAwardIdentifiers({ type: "task-completions", threshold });
           await this.createBadgeAwardIfMissing({
             childId,
