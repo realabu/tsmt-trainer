@@ -4,15 +4,12 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
 import {
-  buildProgressSquares,
   formatDuration,
   getInitials,
-  getPeriodState,
   getSessionSortValue,
-  pickCurrentWeek,
   pickRelevantPeriod,
-  sumTargetSessions,
 } from "../lib/parent-dashboard-helpers";
+import { buildParentDashboardViewModel } from "../lib/parent-dashboard-view-model";
 import { BadgeGallery } from "./badge-gallery";
 
 interface ChildRecord {
@@ -140,22 +137,46 @@ export function ParentDashboard() {
     void loadDashboard();
   }, []);
 
-  const childRoutines = useMemo(
-    () => routines.filter((routine) => routine.childId === selectedChildId),
-    [routines, selectedChildId],
-  );
-
-  const effectiveRoutineId = useMemo(() => {
-    if (selectedRoutineId && childRoutines.some((routine) => routine.id === selectedRoutineId)) {
-      return selectedRoutineId;
-    }
-
-    return childRoutines[0]?.id ?? "";
-  }, [childRoutines, selectedRoutineId]);
-
-  const sortedSessions = useMemo(
-    () => [...sessions].sort((a, b) => getSessionSortValue(b) - getSessionSortValue(a)),
-    [sessions],
+  const {
+    childRoutines,
+    effectiveRoutineId,
+    selectedChild,
+    selectedRoutine,
+    sortedSessions,
+    latestSessionsForChild,
+    selectedPeriod,
+    periodState,
+    currentWeek,
+    remainingThisWeek,
+    totalTargetInPeriod,
+    remainingInPeriod,
+    weeklySquares,
+    periodSquares,
+    isSelectedRoutineProgressReady,
+  } = useMemo(
+    () =>
+      buildParentDashboardViewModel({
+        children,
+        routines,
+        sessions,
+        periods,
+        selectedChildId,
+        selectedRoutineId,
+        selectedPeriodId,
+        progressLoaded,
+        loadedProgressRoutineId,
+      }),
+    [
+      children,
+      routines,
+      sessions,
+      periods,
+      selectedChildId,
+      selectedRoutineId,
+      selectedPeriodId,
+      progressLoaded,
+      loadedProgressRoutineId,
+    ],
   );
 
   useEffect(() => {
@@ -224,55 +245,6 @@ export function ParentDashboard() {
 
     void loadChildSpecificData();
   }, [effectiveRoutineId, selectedChildId]);
-
-  const selectedChild = useMemo(
-    () => children.find((child) => child.id === selectedChildId) ?? null,
-    [children, selectedChildId],
-  );
-
-  const selectedRoutine = useMemo(
-    () => childRoutines.find((routine) => routine.id === effectiveRoutineId) ?? null,
-    [childRoutines, effectiveRoutineId],
-  );
-  const isSelectedRoutineProgressReady =
-    !effectiveRoutineId || (progressLoaded && loadedProgressRoutineId === effectiveRoutineId);
-
-  const latestSessionsForChild = useMemo(
-    () => sortedSessions.filter((session) => session.childId === selectedChildId).slice(0, 5),
-    [sortedSessions, selectedChildId],
-  );
-
-  const selectedPeriod = useMemo(
-    () => periods.find((period) => period.id === selectedPeriodId) ?? pickRelevantPeriod(periods).period,
-    [periods, selectedPeriodId],
-  );
-
-  const periodState = useMemo(() => getPeriodState(selectedPeriod), [selectedPeriod]);
-
-  const currentWeek = useMemo(
-    () => pickCurrentWeek(selectedPeriod),
-    [selectedPeriod],
-  );
-
-  const remainingThisWeek = currentWeek
-    ? Math.max(0, currentWeek.targetSessions - currentWeek.completedSessions)
-    : 0;
-  const totalTargetInPeriod = selectedPeriod ? sumTargetSessions(selectedPeriod) : 0;
-  const remainingInPeriod = selectedPeriod
-    ? Math.max(0, totalTargetInPeriod - selectedPeriod.totalCompletedSessions)
-    : 0;
-  const weekImpossible =
-    !!currentWeek && new Date(currentWeek.weekEnd) < new Date() && currentWeek.completedSessions < currentWeek.targetSessions;
-  const periodImpossible =
-    periodState === "Lezart idoszak" &&
-    !!selectedPeriod &&
-    selectedPeriod.totalCompletedSessions < totalTargetInPeriod;
-  const weeklySquares = currentWeek
-    ? buildProgressSquares(currentWeek.targetSessions, currentWeek.completedSessions, weekImpossible, "week")
-    : [];
-  const periodSquares = selectedPeriod
-    ? buildProgressSquares(totalTargetInPeriod, selectedPeriod.totalCompletedSessions, periodImpossible, "period")
-    : [];
 
   if (!children.length) {
     return (
