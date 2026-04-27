@@ -9,6 +9,11 @@ import {
   routinePeriodToDraft,
   routineTaskToDraft,
 } from "../lib/routines-manager-helpers";
+import {
+  buildCreateRoutinePayload,
+  buildRoutinePeriodPayload,
+  buildRoutineTaskPayload,
+} from "../lib/routines-manager-payloads";
 import { TaskBuilder, type TaskDraft } from "./task-builder";
 import { useAuthUser } from "../lib/use-auth-user";
 
@@ -208,36 +213,7 @@ export function RoutinesManager() {
         "/api/routines",
         {
           method: "POST",
-          body: JSON.stringify({
-            childId,
-            name,
-            description,
-            tasks: tasks.map((task, index) => ({
-              sortOrder: index + 1,
-              catalogTaskId: task.catalogTaskId || undefined,
-              catalogDifficultyLevelId: task.catalogDifficultyLevelId || undefined,
-              songId:
-                task.songSelection === "__DEFAULT__"
-                  ? undefined
-                  : task.songSelection,
-              title: task.title || undefined,
-              details: task.details || undefined,
-              coachText: task.coachText || undefined,
-              repetitionsLabel: task.repetitionsLabel || undefined,
-              repetitionCount: parseOptionalInt(task.repetitionCount),
-              repetitionUnitCount: parseOptionalInt(task.repetitionUnitCount),
-              customImageExternalUrl: task.mediaImageUrl || undefined,
-              mediaLinks: [
-                task.mediaAudioUrl
-                  ? { kind: "AUDIO", label: "Feladat hang", externalUrl: task.mediaAudioUrl }
-                  : null,
-                task.mediaVideoUrl
-                  ? { kind: "VIDEO", label: "Feladat video", externalUrl: task.mediaVideoUrl }
-                  : null,
-              ].filter(Boolean),
-            })),
-            periods: defaultPeriods,
-          }),
+          body: JSON.stringify(buildCreateRoutinePayload({ childId, name, description, tasks })),
         },
         accessToken,
       );
@@ -422,27 +398,7 @@ export function RoutinesManager() {
       }
 
       for (const [index, task] of editingTasks.entries()) {
-        const payload = {
-          sortOrder: index + 1,
-          catalogTaskId: task.catalogTaskId || undefined,
-          catalogDifficultyLevelId: task.catalogDifficultyLevelId || undefined,
-          songId: task.songSelection === "__DEFAULT__" ? undefined : task.songSelection,
-          title: task.title || undefined,
-          details: task.details || undefined,
-          coachText: task.coachText || undefined,
-          repetitionsLabel: task.repetitionsLabel || undefined,
-          repetitionCount: parseOptionalInt(task.repetitionCount),
-          repetitionUnitCount: parseOptionalInt(task.repetitionUnitCount),
-          customImageExternalUrl: task.mediaImageUrl || undefined,
-          mediaLinks: [
-            task.mediaAudioUrl
-              ? { kind: "AUDIO", label: "Feladat hang", externalUrl: task.mediaAudioUrl }
-              : null,
-            task.mediaVideoUrl
-              ? { kind: "VIDEO", label: "Feladat video", externalUrl: task.mediaVideoUrl }
-              : null,
-          ].filter(Boolean),
-        };
+        const payload = buildRoutineTaskPayload(task, index + 1);
 
         if (task.id) {
           await apiFetch(
@@ -475,12 +431,7 @@ export function RoutinesManager() {
       }
 
       for (const period of editingPeriods) {
-        const payload = {
-          name: period.name || undefined,
-          startsOn: period.startsOn,
-          endsOn: period.endsOn,
-          weeklyTargetCount: parseOptionalInt(period.weeklyTargetCount) ?? 1,
-        };
+        const payload = buildRoutinePeriodPayload(period);
 
         if (period.id) {
           await apiFetch(
