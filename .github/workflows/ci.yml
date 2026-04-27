@@ -9,6 +9,8 @@ on:
 jobs:
   quality-gate:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tsmt_trainer_ci
 
     steps:
       - name: Checkout
