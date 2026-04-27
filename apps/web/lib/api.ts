@@ -42,12 +42,8 @@ function getRequestAccessToken(path: string, accessToken?: string | null) {
     return accessToken;
   }
 
-  if (accessToken === null && path.startsWith("/api/auth/")) {
-    return null;
-  }
-
-  if (accessToken === undefined && path.startsWith("/api/auth/")) {
-    return undefined;
+  if (path.startsWith("/api/auth/")) {
+    return accessToken;
   }
 
   if (typeof window !== "undefined") {

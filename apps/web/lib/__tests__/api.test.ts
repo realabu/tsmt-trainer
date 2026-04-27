@@ -120,6 +120,21 @@ test("returns response JSON on normal success", async () => {
   });
 });
 
+test("auth endpoints do not auto-pick stored access tokens", async () => {
+  await withMockBrowser(async ({ calls, setFetchQueue, storage }) => {
+    storage.set(AUTH_ACCESS_TOKEN_KEY, "stored-access");
+    setFetchQueue([createJsonResponse(200, { accessToken: "a", refreshToken: "r" })]);
+
+    await apiFetch("/api/auth/refresh", {
+      method: "POST",
+      body: JSON.stringify({ refreshToken: "refresh-1" }),
+    });
+
+    const headers = new Headers(calls[0]?.init?.headers);
+    assert.equal(headers.get("Authorization"), null);
+  });
+});
+
 test("throws parsed non-401 error and does not refresh", async () => {
   await withMockBrowser(async ({ calls, setFetchQueue }) => {
     setFetchQueue([createJsonResponse(400, { message: "Rossz keres" })]);
