@@ -9,7 +9,13 @@ import {
 } from "./domain/routine-delete-impact";
 import { parseRoutineTaskMediaKind } from "./domain/media-kind";
 import { calculateRoutineProgressPeriods } from "./domain/routine-progress";
+import { buildRoutinePeriodInputData } from "./domain/routine-period-input";
 import { buildRoutineTaskDisplayFields } from "./domain/routine-task-display";
+import {
+  buildRoutineTaskCreateData,
+  buildRoutineTaskMediaLinkCreates,
+  type ResolvedRoutineTaskInput,
+} from "./domain/routine-task-input";
 import { normalizeRepetitionsLabel } from "./domain/repetition-label";
 import { resolveRoutineTaskSongId } from "./domain/routine-task-song";
 import {
@@ -269,15 +275,10 @@ export class RoutinesService {
         name: input.name,
         description: input.description,
         tasks: {
-          create: resolvedTasks.map((task) => this.buildRoutineTaskCreate(task)),
+          create: resolvedTasks.map((task) => buildRoutineTaskCreateData(task)),
         },
         periods: {
-          create: input.periods.map((period) => ({
-            name: period.name,
-            startsOn: new Date(period.startsOn),
-            endsOn: new Date(period.endsOn),
-            weeklyTargetCount: period.weeklyTargetCount,
-          })),
+          create: input.periods.map((period) => buildRoutinePeriodInputData(period)),
         },
       },
       include: {
@@ -520,16 +521,7 @@ export class RoutinesService {
             }
           : undefined,
         mediaLinks: {
-          create: resolvedTask.mediaLinks.map((media, mediaIndex) => ({
-            label: media.label,
-            sortOrder: mediaIndex,
-            mediaAsset: {
-              create: {
-                kind: parseRoutineTaskMediaKind(media.kind),
-                externalUrl: media.externalUrl,
-              },
-            },
-          })),
+          create: buildRoutineTaskMediaLinkCreates(resolvedTask.mediaLinks),
         },
       } satisfies Prisma.RoutineTaskCreateInput,
       include: this.routineTaskInclude(),
@@ -595,16 +587,7 @@ export class RoutinesService {
             ? { disconnect: true }
             : undefined,
         mediaLinks: {
-          create: resolvedTask.mediaLinks.map((media, mediaIndex) => ({
-            label: media.label,
-            sortOrder: mediaIndex,
-            mediaAsset: {
-              create: {
-                kind: parseRoutineTaskMediaKind(media.kind),
-                externalUrl: media.externalUrl,
-              },
-            },
-          })),
+          create: buildRoutineTaskMediaLinkCreates(resolvedTask.mediaLinks),
         },
       } satisfies Prisma.RoutineTaskUpdateInput,
       include: this.routineTaskInclude(),
@@ -681,10 +664,7 @@ export class RoutinesService {
     return this.prisma.routinePeriod.create({
       data: {
         routineId,
-        name: input.name,
-        startsOn: new Date(input.startsOn),
-        endsOn: new Date(input.endsOn),
-        weeklyTargetCount: input.weeklyTargetCount,
+        ...buildRoutinePeriodInputData(input),
       },
     });
   }
@@ -695,10 +675,7 @@ export class RoutinesService {
     return this.prisma.routinePeriod.update({
       where: { id: periodId },
       data: {
-        name: input.name,
-        startsOn: new Date(input.startsOn),
-        endsOn: new Date(input.endsOn),
-        weeklyTargetCount: input.weeklyTargetCount,
+        ...buildRoutinePeriodInputData(input),
       },
     });
   }
@@ -894,43 +871,4 @@ export class RoutinesService {
     });
   }
 
-  private buildRoutineTaskCreate(
-    task: Awaited<ReturnType<RoutinesService["resolveTaskInput"]>>,
-    currentMaxSortOrder = 0,
-  ) {
-    const sortOrder = task.sortOrder || currentMaxSortOrder + 1;
-
-    return {
-      sortOrder,
-      catalogTaskId: task.catalogTaskId,
-      catalogDifficultyLevelId: task.catalogDifficultyLevelId,
-      songId: task.songId,
-      title: task.title,
-      details: task.details,
-      coachText: task.coachText,
-      repetitionsLabel: task.repetitionsLabel,
-      repetitionCount: task.repetitionCount,
-      repetitionUnitCount: task.repetitionUnitCount,
-      customImageMedia: task.customImageExternalUrl
-        ? {
-            create: {
-              kind: MediaKind.IMAGE,
-              externalUrl: task.customImageExternalUrl,
-            },
-          }
-        : undefined,
-      mediaLinks: {
-        create: task.mediaLinks.map((media, mediaIndex) => ({
-          label: media.label,
-          sortOrder: mediaIndex,
-          mediaAsset: {
-            create: {
-              kind: parseRoutineTaskMediaKind(media.kind),
-              externalUrl: media.externalUrl,
-            },
-          },
-        })),
-      },
-    };
-  }
 }
