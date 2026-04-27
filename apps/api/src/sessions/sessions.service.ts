@@ -7,6 +7,7 @@ import { BadgeTriggerType, SessionStatus } from "@prisma/client";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../common/prisma.service";
 import { buildBadgeAwardIdentifiers } from "./domain/badge-award-identifiers";
+import { buildBadgeEvaluationFacts } from "./domain/badge-evaluation-facts";
 import { getBadgeTriggerThreshold } from "./domain/badge-trigger-config";
 import {
   shouldAwardDistinctRoutineCountBadge,
@@ -379,11 +380,24 @@ export class SessionsService {
         periods: true,
       },
     });
+    const facts = buildBadgeEvaluationFacts({
+      completedSessionsCount,
+      completedRoutineSessionsCount,
+      distinctCompletedRoutineCount,
+      completedTaskCount,
+      previousBestTotalSeconds: previousBest?.totalSeconds,
+      routine: routine
+        ? {
+            id: routine.id,
+            periods: routine.periods,
+          }
+        : null,
+    });
 
     for (const badge of badgeDefinitions) {
       if (
         badge.triggerType === BadgeTriggerType.FIRST_SESSION &&
-        shouldAwardFirstSessionBadge(completedSessionsCount)
+        shouldAwardFirstSessionBadge(facts.completedSessionsCount)
       ) {
         const identifiers = buildBadgeAwardIdentifiers({ type: "first-session" });
         await this.createBadgeAwardIfMissing({
@@ -399,7 +413,7 @@ export class SessionsService {
         const threshold = getBadgeTriggerThreshold(
           badge.triggerConfig as { threshold?: number } | null,
         );
-        if (shouldAwardTotalSessionCountBadge(completedSessionsCount, threshold)) {
+        if (shouldAwardTotalSessionCountBadge(facts.completedSessionsCount, threshold)) {
           const identifiers = buildBadgeAwardIdentifiers({ type: "total-sessions", threshold });
           await this.createBadgeAwardIfMissing({
             childId,
@@ -413,7 +427,7 @@ export class SessionsService {
 
       if (
         badge.triggerType === BadgeTriggerType.ROUTINE_RECORD &&
-        shouldAwardRoutineRecordBadge(totalSeconds, previousBest?.totalSeconds)
+        shouldAwardRoutineRecordBadge(totalSeconds, facts.previousBestTotalSeconds)
       ) {
         const identifiers = buildBadgeAwardIdentifiers({
           type: "routine-record",
@@ -430,7 +444,7 @@ export class SessionsService {
       }
 
       if (badge.triggerType === BadgeTriggerType.WEEKLY_GOAL_COMPLETED && routine) {
-        const matchingPeriod = routine.periods.find(
+        const matchingPeriod = facts.routine?.periods.find(
           (period) => completedAt >= period.startsOn && completedAt <= period.endsOn,
         );
 
@@ -479,7 +493,9 @@ export class SessionsService {
         const threshold = getBadgeTriggerThreshold(
           badge.triggerConfig as { threshold?: number } | null,
         );
-        if (shouldAwardRoutineSessionCountBadge(completedRoutineSessionsCount, threshold)) {
+        if (
+          shouldAwardRoutineSessionCountBadge(facts.completedRoutineSessionsCount, threshold)
+        ) {
           const identifiers = buildBadgeAwardIdentifiers({
             type: "routine-sessions",
             routineId,
@@ -499,7 +515,9 @@ export class SessionsService {
         const threshold = getBadgeTriggerThreshold(
           badge.triggerConfig as { threshold?: number } | null,
         );
-        if (shouldAwardDistinctRoutineCountBadge(distinctCompletedRoutineCount, threshold)) {
+        if (
+          shouldAwardDistinctRoutineCountBadge(facts.distinctCompletedRoutineCount, threshold)
+        ) {
           const identifiers = buildBadgeAwardIdentifiers({ type: "distinct-routines", threshold });
           await this.createBadgeAwardIfMissing({
             childId,
@@ -511,12 +529,16 @@ export class SessionsService {
         }
       }
 
-      if (badge.triggerType === BadgeTriggerType.CONSECUTIVE_WEEKS_COMPLETED && routine) {
+      if (badge.triggerType === BadgeTriggerType.CONSECUTIVE_WEEKS_COMPLETED && facts.routine) {
         const threshold = getBadgeTriggerThreshold(
           badge.triggerConfig as { threshold?: number } | null,
         );
         if (threshold > 0) {
-          const streak = await this.getConsecutiveWeeklyGoalStreak(childId, routine, completedAt);
+          const streak = await this.getConsecutiveWeeklyGoalStreak(
+            childId,
+            facts.routine,
+            completedAt,
+          );
           if (streak >= threshold) {
             const identifiers = buildBadgeAwardIdentifiers({
               type: "weekly-streak",
@@ -535,8 +557,8 @@ export class SessionsService {
         }
       }
 
-      if (badge.triggerType === BadgeTriggerType.PERIOD_TARGET_COMPLETED && routine) {
-        const matchingPeriod = routine.periods.find(
+      if (badge.triggerType === BadgeTriggerType.PERIOD_TARGET_COMPLETED && facts.routine) {
+        const matchingPeriod = facts.routine.periods.find(
           (period) => completedAt >= period.startsOn && completedAt <= period.endsOn,
         );
 
@@ -580,7 +602,7 @@ export class SessionsService {
         const threshold = getBadgeTriggerThreshold(
           badge.triggerConfig as { threshold?: number } | null,
         );
-        if (shouldAwardTaskCompletionCountBadge(completedTaskCount, threshold)) {
+        if (shouldAwardTaskCompletionCountBadge(facts.completedTaskCount, threshold)) {
           const identifiers = buildBadgeAwardIdentifiers({ type: "task-completions", threshold });
           await this.createBadgeAwardIfMissing({
             childId,
