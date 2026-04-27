@@ -8,7 +8,7 @@ import {
   formatDuration,
   initialsFromTitle,
 } from "../lib/training-runner-helpers";
-import { buildCurrentTaskImages } from "../lib/training-runner-task-images";
+import { buildTrainingRunnerViewModel } from "../lib/training-runner-view-model";
 import { useAuthUser } from "../lib/use-auth-user";
 
 interface TaskMediaLinkRecord {
@@ -134,8 +134,6 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
 
   const completedCount = session?.taskTimings.length ?? 0;
   const activeTasks: TaskRecord[] = routine?.tasks ?? [];
-  const currentTask = activeTasks[completedCount] ?? null;
-  const nextTask = activeTasks[completedCount + 1] ?? null;
   const totalTaskCount = activeTasks.length || session?.routine.tasks.length || 0;
   const isFinished = session?.status === "COMPLETED";
   const isRunning = session?.status === "IN_PROGRESS";
@@ -173,15 +171,30 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
     return result;
   }, [routine?.sessions]);
 
-  const currentTaskImages = useMemo(() => {
-    return buildCurrentTaskImages(currentTask);
-  }, [currentTask]);
+  const {
+    currentTask,
+    nextTask,
+    currentTaskImages,
+    selectedImage,
+    effectiveSong,
+    demoVideoUrl,
+    equipment,
+    currentTaskRepetitionsLabel,
+    progressPercent,
+    finishActionLabel,
+  } = useMemo(
+    () =>
+      buildTrainingRunnerViewModel({
+        tasks: activeTasks,
+        completedCount,
+        totalTaskCount,
+        isFinished,
+        activeImageIndex,
+      }),
+    [activeTasks, completedCount, totalTaskCount, isFinished, activeImageIndex],
+  );
 
-  const effectiveSong = currentTask?.song ?? currentTask?.catalogTask?.defaultSong ?? null;
-  const demoVideoUrl = currentTask?.catalogTask?.demoVideoUrl ?? null;
-  const equipment = currentTask?.catalogTask?.equipmentLinks.map((item) => item.equipmentCatalogItem) ?? [];
   const currentTaskBestSeconds = currentTask ? bestTaskSecondsById.get(currentTask.id) ?? null : null;
-  const currentTaskRepetitionsLabel = currentTask ? getDisplayRepetitionsLabel(currentTask) : "";
 
   const sessionElapsedSeconds = useMemo(() => {
     if (!session?.startedAt || session.status !== "IN_PROGRESS") {
@@ -203,8 +216,6 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
     currentTask?.expectedSeconds ?? 0,
     20,
   );
-
-  const progressPercent = totalTaskCount ? Math.round((completedCount / totalTaskCount) * 100) : 0;
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -357,8 +368,6 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
       setStatus(error instanceof Error ? error.message : "Nem sikerult megszakitani a tornat.");
     }
   }
-
-  const selectedImage = activeImageIndex == null ? null : currentTaskImages[activeImageIndex] ?? null;
 
   const celebrationPieces = Array.from({ length: 12 }, (_, index) => ({
     id: `${celebrationBurst}-${index}`,
@@ -611,7 +620,7 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
                   onClick={isFinished ? startSession : completeCurrentTask}
                   type="button"
                 >
-                  {isFinished ? "Uj torna inditasa" : nextTask ? "Kovetkezo feladat" : "Torna befejezese"}
+                  {finishActionLabel}
                 </button>
               ) : null}
 
