@@ -1,27 +1,9 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
-import { MediaKind, UserRole } from "@prisma/client";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { UserRole } from "@prisma/client";
 import { hash } from "bcryptjs";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../common/prisma.service";
-import {
-  buildEquipmentIconMediaCreateRelation,
-  buildEquipmentIconMediaUpdateRelation,
-  buildSongAudioMediaCreateRelation,
-  buildSongAudioMediaUpdateRelation,
-  buildSongVideoMediaCreateRelation,
-  buildSongVideoMediaUpdateRelation,
-  buildTaskCatalogDifficultyLevelCreates,
-  buildTaskCatalogEquipmentLinkCreates,
-  buildTaskCatalogMediaLinkCreates,
-} from "./domain/admin-catalog-data";
-import {
-  buildTaskCatalogCreateData,
-  buildTaskCatalogUpdateScalarData,
-} from "./domain/admin-task-catalog-data";
+import { AdminCatalogService } from "./admin-catalog.service";
 import {
   CreateEquipmentCatalogDto,
   CreateSongCatalogDto,
@@ -34,7 +16,10 @@ import {
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly adminCatalogService: AdminCatalogService,
+  ) {}
 
   async listUsers(currentUser: AuthenticatedUser) {
     this.assertAdmin(currentUser);
@@ -332,49 +317,17 @@ export class AdminService {
 
   async listTaskCatalog(currentUser: AuthenticatedUser) {
     this.assertAdmin(currentUser);
-
-    return this.prisma.taskCatalogItem.findMany({
-      orderBy: [{ isActive: "desc" }, { title: "asc" }],
-      include: this.taskCatalogInclude(),
-    });
+    return this.adminCatalogService.listTaskCatalog(currentUser);
   }
 
   async getTaskCatalogDetail(currentUser: AuthenticatedUser, taskCatalogId: string) {
     this.assertAdmin(currentUser);
-
-    const task = await this.prisma.taskCatalogItem.findUnique({
-      where: { id: taskCatalogId },
-      include: this.taskCatalogInclude(),
-    });
-
-    if (!task) {
-      throw new NotFoundException("Katalogus feladat nem talalhato.");
-    }
-
-    return task;
+    return this.adminCatalogService.getTaskCatalogDetail(currentUser, taskCatalogId);
   }
 
   async createTaskCatalog(currentUser: AuthenticatedUser, input: CreateTaskCatalogDto) {
     this.assertAdmin(currentUser);
-
-    await this.assertSongExistsIfProvided(input.defaultSongId);
-    await this.assertEquipmentIdsExist(input.equipmentIds);
-
-    return this.prisma.taskCatalogItem.create({
-      data: {
-        ...buildTaskCatalogCreateData(input),
-        mediaLinks: {
-          create: buildTaskCatalogMediaLinkCreates(input.mediaLinks),
-        },
-        equipmentLinks: {
-          create: buildTaskCatalogEquipmentLinkCreates(input.equipmentIds),
-        },
-        difficultyLevels: {
-          create: buildTaskCatalogDifficultyLevelCreates(input.difficultyLevels),
-        },
-      },
-      include: this.taskCatalogInclude(),
-    });
+    return this.adminCatalogService.createTaskCatalog(currentUser, input);
   }
 
   async updateTaskCatalog(
@@ -383,198 +336,52 @@ export class AdminService {
     input: UpdateTaskCatalogDto,
   ) {
     this.assertAdmin(currentUser);
-    await this.getTaskCatalogDetail(currentUser, taskCatalogId);
-    await this.assertSongExistsIfProvided(input.defaultSongId);
-    await this.assertEquipmentIdsExist(input.equipmentIds);
-
-    await this.prisma.$transaction(async (tx) => {
-      await tx.taskCatalogItem.update({
-        where: { id: taskCatalogId },
-        data: buildTaskCatalogUpdateScalarData(input),
-      });
-
-      if (input.mediaLinks) {
-        await tx.taskCatalogMediaLink.deleteMany({
-          where: { taskCatalogItemId: taskCatalogId },
-        });
-        await tx.taskCatalogItem.update({
-          where: { id: taskCatalogId },
-          data: {
-            mediaLinks: {
-              create: buildTaskCatalogMediaLinkCreates(input.mediaLinks),
-            },
-          },
-        });
-      }
-
-      if (input.equipmentIds) {
-        await tx.taskCatalogEquipment.deleteMany({
-          where: { taskCatalogItemId: taskCatalogId },
-        });
-        await tx.taskCatalogItem.update({
-          where: { id: taskCatalogId },
-          data: {
-            equipmentLinks: {
-              create: buildTaskCatalogEquipmentLinkCreates(input.equipmentIds),
-            },
-          },
-        });
-      }
-
-      if (input.difficultyLevels) {
-        await tx.taskCatalogDifficultyLevel.deleteMany({
-          where: { taskCatalogItemId: taskCatalogId },
-        });
-        await tx.taskCatalogItem.update({
-          where: { id: taskCatalogId },
-          data: {
-            difficultyLevels: {
-              create: buildTaskCatalogDifficultyLevelCreates(input.difficultyLevels),
-            },
-          },
-        });
-      }
-    });
-
-    return this.getTaskCatalogDetail(currentUser, taskCatalogId);
+    return this.adminCatalogService.updateTaskCatalog(currentUser, taskCatalogId, input);
   }
 
   async deleteTaskCatalog(currentUser: AuthenticatedUser, taskCatalogId: string) {
     this.assertAdmin(currentUser);
-    await this.getTaskCatalogDetail(currentUser, taskCatalogId);
-    await this.prisma.taskCatalogItem.delete({ where: { id: taskCatalogId } });
-    return { success: true };
+    return this.adminCatalogService.deleteTaskCatalog(currentUser, taskCatalogId);
   }
 
   async listSongCatalog(currentUser: AuthenticatedUser) {
     this.assertAdmin(currentUser);
-
-    return this.prisma.songCatalogItem.findMany({
-      orderBy: [{ isActive: "desc" }, { title: "asc" }],
-      include: {
-        audioMedia: true,
-        videoMedia: true,
-      },
-    });
+    return this.adminCatalogService.listSongCatalog(currentUser);
   }
 
   async getSongCatalogDetail(currentUser: AuthenticatedUser, songId: string) {
     this.assertAdmin(currentUser);
-
-    const song = await this.prisma.songCatalogItem.findUnique({
-      where: { id: songId },
-      include: {
-        audioMedia: true,
-        videoMedia: true,
-      },
-    });
-
-    if (!song) {
-      throw new NotFoundException("Dal vagy mondoka nem talalhato.");
-    }
-
-    return song;
+    return this.adminCatalogService.getSongCatalogDetail(currentUser, songId);
   }
 
   async createSongCatalog(currentUser: AuthenticatedUser, input: CreateSongCatalogDto) {
     this.assertAdmin(currentUser);
-
-    return this.prisma.songCatalogItem.create({
-      data: {
-        title: input.title,
-        lyrics: input.lyrics,
-        notes: input.notes,
-        isActive: input.isActive ?? true,
-        audioMedia: buildSongAudioMediaCreateRelation(input.audioExternalUrl),
-        videoMedia: buildSongVideoMediaCreateRelation(input.videoExternalUrl),
-      },
-      include: {
-        audioMedia: true,
-        videoMedia: true,
-      },
-    });
+    return this.adminCatalogService.createSongCatalog(currentUser, input);
   }
 
   async updateSongCatalog(currentUser: AuthenticatedUser, songId: string, input: UpdateSongCatalogDto) {
     this.assertAdmin(currentUser);
-    await this.getSongCatalogDetail(currentUser, songId);
-
-    return this.prisma.songCatalogItem.update({
-      where: { id: songId },
-      data: {
-        title: input.title,
-        lyrics: input.lyrics,
-        notes: input.notes,
-        isActive: input.isActive,
-        audioMedia: buildSongAudioMediaUpdateRelation(input.audioExternalUrl),
-        videoMedia: buildSongVideoMediaUpdateRelation(input.videoExternalUrl),
-      },
-      include: {
-        audioMedia: true,
-        videoMedia: true,
-      },
-    });
+    return this.adminCatalogService.updateSongCatalog(currentUser, songId, input);
   }
 
   async deleteSongCatalog(currentUser: AuthenticatedUser, songId: string) {
     this.assertAdmin(currentUser);
-    await this.getSongCatalogDetail(currentUser, songId);
-    await this.prisma.songCatalogItem.delete({ where: { id: songId } });
-    return { success: true };
+    return this.adminCatalogService.deleteSongCatalog(currentUser, songId);
   }
 
   async listEquipmentCatalog(currentUser: AuthenticatedUser) {
     this.assertAdmin(currentUser);
-
-    return this.prisma.equipmentCatalogItem.findMany({
-      orderBy: [{ isActive: "desc" }, { name: "asc" }],
-      include: {
-        iconMedia: true,
-        _count: {
-          select: {
-            taskLinks: true,
-          },
-        },
-      },
-    });
+    return this.adminCatalogService.listEquipmentCatalog(currentUser);
   }
 
   async getEquipmentCatalogDetail(currentUser: AuthenticatedUser, equipmentId: string) {
     this.assertAdmin(currentUser);
-
-    const equipment = await this.prisma.equipmentCatalogItem.findUnique({
-      where: { id: equipmentId },
-      include: {
-        iconMedia: true,
-        _count: {
-          select: {
-            taskLinks: true,
-          },
-        },
-      },
-    });
-
-    if (!equipment) {
-      throw new NotFoundException("Segedeszkoz nem talalhato.");
-    }
-
-    return equipment;
+    return this.adminCatalogService.getEquipmentCatalogDetail(currentUser, equipmentId);
   }
 
   async createEquipmentCatalog(currentUser: AuthenticatedUser, input: CreateEquipmentCatalogDto) {
     this.assertAdmin(currentUser);
-
-    return this.prisma.equipmentCatalogItem.create({
-      data: {
-        name: input.name,
-        description: input.description,
-        isActive: input.isActive ?? true,
-        iconMedia: buildEquipmentIconMediaCreateRelation(input.iconExternalUrl),
-      },
-      include: {
-        iconMedia: true,
-      },
-    });
+    return this.adminCatalogService.createEquipmentCatalog(currentUser, input);
   }
 
   async updateEquipmentCatalog(
@@ -583,94 +390,12 @@ export class AdminService {
     input: UpdateEquipmentCatalogDto,
   ) {
     this.assertAdmin(currentUser);
-    await this.getEquipmentCatalogDetail(currentUser, equipmentId);
-
-    return this.prisma.equipmentCatalogItem.update({
-      where: { id: equipmentId },
-      data: {
-        name: input.name,
-        description: input.description,
-        isActive: input.isActive,
-        iconMedia: buildEquipmentIconMediaUpdateRelation(input.iconExternalUrl),
-      },
-      include: {
-        iconMedia: true,
-      },
-    });
+    return this.adminCatalogService.updateEquipmentCatalog(currentUser, equipmentId, input);
   }
 
   async deleteEquipmentCatalog(currentUser: AuthenticatedUser, equipmentId: string) {
     this.assertAdmin(currentUser);
-    await this.getEquipmentCatalogDetail(currentUser, equipmentId);
-    await this.prisma.equipmentCatalogItem.delete({ where: { id: equipmentId } });
-    return { success: true };
-  }
-
-  private taskCatalogInclude() {
-    return {
-      defaultSong: {
-        include: {
-          audioMedia: true,
-          videoMedia: true,
-        },
-      },
-      mediaLinks: {
-        orderBy: { sortOrder: "asc" as const },
-        include: {
-          mediaAsset: true,
-        },
-      },
-      equipmentLinks: {
-        include: {
-          equipmentCatalogItem: {
-            include: {
-              iconMedia: true,
-            },
-          },
-        },
-      },
-      difficultyLevels: {
-        orderBy: { sortOrder: "asc" as const },
-      },
-      _count: {
-        select: {
-          routineTasks: true,
-        },
-      },
-    };
-  }
-
-  private async assertSongExistsIfProvided(songId?: string) {
-    if (!songId) {
-      return;
-    }
-
-    const song = await this.prisma.songCatalogItem.findUnique({
-      where: { id: songId },
-      select: { id: true },
-    });
-
-    if (!song) {
-      throw new NotFoundException("A megadott dal vagy mondoka nem talalhato.");
-    }
-  }
-
-  private async assertEquipmentIdsExist(equipmentIds?: string[]) {
-    if (!equipmentIds?.length) {
-      return;
-    }
-
-    const count = await this.prisma.equipmentCatalogItem.count({
-      where: {
-        id: {
-          in: equipmentIds,
-        },
-      },
-    });
-
-    if (count !== new Set(equipmentIds).size) {
-      throw new NotFoundException("Az egyik megadott segedeszkoz nem talalhato.");
-    }
+    return this.adminCatalogService.deleteEquipmentCatalog(currentUser, equipmentId);
   }
 
   private assertAdmin(currentUser: AuthenticatedUser) {
