@@ -13,82 +13,14 @@ export class AdminActivityService {
         ...(parentId ? { child: { ownerId: parentId } } : {}),
       },
       orderBy: { createdAt: "desc" },
-      include: {
-        child: {
-          include: {
-            owner: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        tasks: {
-          orderBy: { sortOrder: "asc" },
-        },
-        periods: {
-          orderBy: { startsOn: "asc" },
-        },
-        _count: {
-          select: {
-            sessions: true,
-          },
-        },
-      },
+      include: this.routineListInclude(),
     });
   }
 
   async getRoutineDetail(_currentUser: AuthenticatedUser, routineId: string) {
     const routine = await this.prisma.routine.findUnique({
       where: { id: routineId },
-      include: {
-        child: {
-          include: {
-            owner: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        tasks: {
-          orderBy: { sortOrder: "asc" },
-          include: {
-            mediaLinks: {
-              orderBy: { sortOrder: "asc" },
-              include: {
-                mediaAsset: true,
-              },
-            },
-          },
-        },
-        periods: {
-          orderBy: { startsOn: "asc" },
-        },
-        sessions: {
-          orderBy: { createdAt: "desc" },
-          take: 20,
-        },
-        trainerAssignments: {
-          where: { revokedAt: null },
-          include: {
-            trainer: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-      },
+      include: this.routineDetailInclude(),
     });
 
     if (!routine) {
@@ -111,29 +43,7 @@ export class AdminActivityService {
         ...(parentId ? { child: { ownerId: parentId } } : {}),
       },
       orderBy: { createdAt: "desc" },
-      include: {
-        child: {
-          include: {
-            owner: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        routine: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        taskTimings: {
-          orderBy: { sortOrder: "asc" },
-        },
-      },
+      include: this.sessionListInclude(),
       take: 50,
     });
   }
@@ -141,33 +51,7 @@ export class AdminActivityService {
   async getSessionDetail(_currentUser: AuthenticatedUser, sessionId: string) {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
-      include: {
-        child: {
-          include: {
-            owner: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        routine: {
-          include: {
-            tasks: {
-              orderBy: { sortOrder: "asc" },
-            },
-          },
-        },
-        taskTimings: {
-          orderBy: { sortOrder: "asc" },
-          include: {
-            task: true,
-          },
-        },
-      },
+      include: this.sessionDetailInclude(),
     });
 
     if (!session) {
@@ -175,5 +59,137 @@ export class AdminActivityService {
     }
 
     return session;
+  }
+
+  private routineListInclude() {
+    return {
+      child: {
+        include: {
+          owner: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      tasks: {
+        orderBy: { sortOrder: "asc" as const },
+      },
+      periods: {
+        orderBy: { startsOn: "asc" as const },
+      },
+      _count: {
+        select: {
+          sessions: true,
+        },
+      },
+    };
+  }
+
+  private routineDetailInclude() {
+    return {
+      child: {
+        include: {
+          owner: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      tasks: {
+        orderBy: { sortOrder: "asc" as const },
+        include: {
+          mediaLinks: {
+            orderBy: { sortOrder: "asc" as const },
+            include: {
+              mediaAsset: true,
+            },
+          },
+        },
+      },
+      periods: {
+        orderBy: { startsOn: "asc" as const },
+      },
+      sessions: {
+        orderBy: { createdAt: "desc" as const },
+        take: 20,
+      },
+      trainerAssignments: {
+        where: { revokedAt: null },
+        include: {
+          trainer: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    };
+  }
+
+  private sessionListInclude() {
+    return {
+      child: {
+        include: {
+          owner: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      routine: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      taskTimings: {
+        orderBy: { sortOrder: "asc" as const },
+      },
+    };
+  }
+
+  private sessionDetailInclude() {
+    return {
+      child: {
+        include: {
+          owner: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      routine: {
+        include: {
+          tasks: {
+            orderBy: { sortOrder: "asc" as const },
+          },
+        },
+      },
+      taskTimings: {
+        orderBy: { sortOrder: "asc" as const },
+        include: {
+          task: true,
+        },
+      },
+    };
   }
 }
