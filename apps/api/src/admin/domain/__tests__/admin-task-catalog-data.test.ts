@@ -5,7 +5,7 @@ import {
   buildTaskCatalogUpdateScalarData,
 } from "../admin-task-catalog-data";
 
-test("create data defaults isActive to true and preserves scalar fields", () => {
+test("create data defaults isActive to true, preserves scalar fields, and omits undefined optionals", () => {
   const result = buildTaskCatalogCreateData({
     title: "Labda",
     summary: "osszegzes",
@@ -34,13 +34,28 @@ test("create data preserves explicit isActive false", () => {
 
   assert.deepEqual(result, {
     title: "Labda",
-    summary: undefined,
-    instructions: undefined,
-    focusPoints: undefined,
-    demoVideoUrl: undefined,
-    defaultSongId: undefined,
     isActive: false,
   });
+  assert.equal("summary" in result, false);
+  assert.equal("instructions" in result, false);
+  assert.equal("focusPoints" in result, false);
+  assert.equal("demoVideoUrl" in result, false);
+  assert.equal("defaultSongId" in result, false);
+});
+
+test("create defaultSongId preserves explicit values and omits undefined", () => {
+  assert.deepEqual(buildTaskCatalogCreateData({ title: "Labda" }), {
+    title: "Labda",
+    isActive: true,
+  });
+  assert.deepEqual(
+    buildTaskCatalogCreateData({ title: "Labda", defaultSongId: "song-3" }),
+    {
+      title: "Labda",
+      defaultSongId: "song-3",
+      isActive: true,
+    },
+  );
 });
 
 test("update defaultSongId preserves undefined, maps empty string to null, and keeps valid ids", () => {

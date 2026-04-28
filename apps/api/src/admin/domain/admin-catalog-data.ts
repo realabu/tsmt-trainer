@@ -13,6 +13,42 @@ type AdminDifficultyLevelInput = {
   sortOrder?: number;
 };
 
+function buildOptionalMediaCreateRelation(
+  kind: MediaKind,
+  externalUrl: string | null | undefined,
+) {
+  if (!externalUrl) {
+    return undefined;
+  }
+
+  return {
+    create: {
+      kind,
+      externalUrl,
+    },
+  };
+}
+
+function buildOptionalMediaUpdateRelation(
+  kind: MediaKind,
+  externalUrl: string | null | undefined,
+) {
+  if (externalUrl === undefined) {
+    return undefined;
+  }
+
+  if (externalUrl) {
+    return {
+      create: {
+        kind,
+        externalUrl,
+      },
+    };
+  }
+
+  return { disconnect: true };
+}
+
 export function buildTaskCatalogMediaLinkCreates(mediaLinks: AdminCatalogMediaInput[] = []) {
   return mediaLinks.map((media, index) => ({
     label: media.label,
@@ -37,91 +73,25 @@ export function buildTaskCatalogDifficultyLevelCreates(
 }
 
 export function buildSongAudioMediaCreateRelation(audioExternalUrl: string | null | undefined) {
-  if (!audioExternalUrl) {
-    return undefined;
-  }
-
-  return {
-    create: {
-      kind: MediaKind.AUDIO,
-      externalUrl: audioExternalUrl,
-    },
-  };
+  return buildOptionalMediaCreateRelation(MediaKind.AUDIO, audioExternalUrl);
 }
 
 export function buildSongAudioMediaUpdateRelation(audioExternalUrl: string | null | undefined) {
-  if (audioExternalUrl === undefined) {
-    return undefined;
-  }
-
-  if (audioExternalUrl) {
-    return {
-      create: {
-        kind: MediaKind.AUDIO,
-        externalUrl: audioExternalUrl,
-      },
-    };
-  }
-
-  return { disconnect: true };
+  return buildOptionalMediaUpdateRelation(MediaKind.AUDIO, audioExternalUrl);
 }
 
 export function buildSongVideoMediaCreateRelation(videoExternalUrl: string | null | undefined) {
-  if (!videoExternalUrl) {
-    return undefined;
-  }
-
-  return {
-    create: {
-      kind: MediaKind.VIDEO,
-      externalUrl: videoExternalUrl,
-    },
-  };
+  return buildOptionalMediaCreateRelation(MediaKind.VIDEO, videoExternalUrl);
 }
 
 export function buildSongVideoMediaUpdateRelation(videoExternalUrl: string | null | undefined) {
-  if (videoExternalUrl === undefined) {
-    return undefined;
-  }
-
-  if (videoExternalUrl) {
-    return {
-      create: {
-        kind: MediaKind.VIDEO,
-        externalUrl: videoExternalUrl,
-      },
-    };
-  }
-
-  return { disconnect: true };
+  return buildOptionalMediaUpdateRelation(MediaKind.VIDEO, videoExternalUrl);
 }
 
 export function buildEquipmentIconMediaCreateRelation(iconExternalUrl: string | null | undefined) {
-  if (!iconExternalUrl) {
-    return undefined;
-  }
-
-  return {
-    create: {
-      kind: MediaKind.IMAGE,
-      externalUrl: iconExternalUrl,
-    },
-  };
+  return buildOptionalMediaCreateRelation(MediaKind.IMAGE, iconExternalUrl);
 }
 
 export function buildEquipmentIconMediaUpdateRelation(iconExternalUrl: string | null | undefined) {
-  if (iconExternalUrl === undefined) {
-    return undefined;
-  }
-
-  if (iconExternalUrl) {
-    return {
-      create: {
-        kind: MediaKind.IMAGE,
-        externalUrl: iconExternalUrl,
-      },
-    };
-  }
-
-  return { disconnect: true };
+  return buildOptionalMediaUpdateRelation(MediaKind.IMAGE, iconExternalUrl);
 }
