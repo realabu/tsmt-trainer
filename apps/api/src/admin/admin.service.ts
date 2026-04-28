@@ -389,61 +389,63 @@ export class AdminService {
     await this.assertSongExistsIfProvided(input.defaultSongId);
     await this.assertEquipmentIdsExist(input.equipmentIds);
 
-    await this.prisma.taskCatalogItem.update({
-      where: { id: taskCatalogId },
-      data: {
-        title: input.title,
-        summary: input.summary,
-        instructions: input.instructions,
-        focusPoints: input.focusPoints,
-        demoVideoUrl: input.demoVideoUrl,
-        defaultSongId:
-          input.defaultSongId === undefined ? undefined : input.defaultSongId || null,
-        isActive: input.isActive,
-      },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.taskCatalogItem.update({
+        where: { id: taskCatalogId },
+        data: {
+          title: input.title,
+          summary: input.summary,
+          instructions: input.instructions,
+          focusPoints: input.focusPoints,
+          demoVideoUrl: input.demoVideoUrl,
+          defaultSongId:
+            input.defaultSongId === undefined ? undefined : input.defaultSongId || null,
+          isActive: input.isActive,
+        },
+      });
+
+      if (input.mediaLinks) {
+        await tx.taskCatalogMediaLink.deleteMany({
+          where: { taskCatalogItemId: taskCatalogId },
+        });
+        await tx.taskCatalogItem.update({
+          where: { id: taskCatalogId },
+          data: {
+            mediaLinks: {
+              create: buildTaskCatalogMediaLinkCreates(input.mediaLinks),
+            },
+          },
+        });
+      }
+
+      if (input.equipmentIds) {
+        await tx.taskCatalogEquipment.deleteMany({
+          where: { taskCatalogItemId: taskCatalogId },
+        });
+        await tx.taskCatalogItem.update({
+          where: { id: taskCatalogId },
+          data: {
+            equipmentLinks: {
+              create: buildTaskCatalogEquipmentLinkCreates(input.equipmentIds),
+            },
+          },
+        });
+      }
+
+      if (input.difficultyLevels) {
+        await tx.taskCatalogDifficultyLevel.deleteMany({
+          where: { taskCatalogItemId: taskCatalogId },
+        });
+        await tx.taskCatalogItem.update({
+          where: { id: taskCatalogId },
+          data: {
+            difficultyLevels: {
+              create: buildTaskCatalogDifficultyLevelCreates(input.difficultyLevels),
+            },
+          },
+        });
+      }
     });
-
-    if (input.mediaLinks) {
-      await this.prisma.taskCatalogMediaLink.deleteMany({
-        where: { taskCatalogItemId: taskCatalogId },
-      });
-      await this.prisma.taskCatalogItem.update({
-        where: { id: taskCatalogId },
-        data: {
-          mediaLinks: {
-            create: buildTaskCatalogMediaLinkCreates(input.mediaLinks),
-          },
-        },
-      });
-    }
-
-    if (input.equipmentIds) {
-      await this.prisma.taskCatalogEquipment.deleteMany({
-        where: { taskCatalogItemId: taskCatalogId },
-      });
-      await this.prisma.taskCatalogItem.update({
-        where: { id: taskCatalogId },
-        data: {
-          equipmentLinks: {
-            create: buildTaskCatalogEquipmentLinkCreates(input.equipmentIds),
-          },
-        },
-      });
-    }
-
-    if (input.difficultyLevels) {
-      await this.prisma.taskCatalogDifficultyLevel.deleteMany({
-        where: { taskCatalogItemId: taskCatalogId },
-      });
-      await this.prisma.taskCatalogItem.update({
-        where: { id: taskCatalogId },
-        data: {
-          difficultyLevels: {
-            create: buildTaskCatalogDifficultyLevelCreates(input.difficultyLevels),
-          },
-        },
-      });
-    }
 
     return this.getTaskCatalogDetail(currentUser, taskCatalogId);
   }
