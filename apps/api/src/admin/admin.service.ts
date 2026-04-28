@@ -7,7 +7,14 @@ import { MediaKind, UserRole } from "@prisma/client";
 import { hash } from "bcryptjs";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../common/prisma.service";
-import { buildAdminCatalogMediaCreate } from "./domain/admin-catalog-media";
+import {
+  buildEquipmentIconMediaRelation,
+  buildSongAudioMediaRelation,
+  buildSongVideoMediaRelation,
+  buildTaskCatalogDifficultyLevelCreates,
+  buildTaskCatalogEquipmentLinkCreates,
+  buildTaskCatalogMediaLinkCreates,
+} from "./domain/admin-catalog-data";
 import {
   CreateEquipmentCatalogDto,
   CreateSongCatalogDto,
@@ -356,22 +363,13 @@ export class AdminService {
         defaultSongId: input.defaultSongId,
         isActive: input.isActive ?? true,
         mediaLinks: {
-          create: (input.mediaLinks ?? []).map((media, index) => ({
-            label: media.label,
-            ...buildAdminCatalogMediaCreate(media, index),
-          })),
+          create: buildTaskCatalogMediaLinkCreates(input.mediaLinks),
         },
         equipmentLinks: {
-          create: (input.equipmentIds ?? []).map((equipmentCatalogItemId) => ({
-            equipmentCatalogItemId,
-          })),
+          create: buildTaskCatalogEquipmentLinkCreates(input.equipmentIds),
         },
         difficultyLevels: {
-          create: (input.difficultyLevels ?? []).map((level, index) => ({
-            name: level.name,
-            description: level.description,
-            sortOrder: level.sortOrder ?? index,
-          })),
+          create: buildTaskCatalogDifficultyLevelCreates(input.difficultyLevels),
         },
       },
       include: this.taskCatalogInclude(),
@@ -410,10 +408,7 @@ export class AdminService {
         where: { id: taskCatalogId },
         data: {
           mediaLinks: {
-            create: input.mediaLinks.map((media, index) => ({
-              label: media.label,
-              ...buildAdminCatalogMediaCreate(media, index),
-            })),
+            create: buildTaskCatalogMediaLinkCreates(input.mediaLinks),
           },
         },
       });
@@ -427,9 +422,7 @@ export class AdminService {
         where: { id: taskCatalogId },
         data: {
           equipmentLinks: {
-            create: input.equipmentIds.map((equipmentCatalogItemId) => ({
-              equipmentCatalogItemId,
-            })),
+            create: buildTaskCatalogEquipmentLinkCreates(input.equipmentIds),
           },
         },
       });
@@ -443,11 +436,7 @@ export class AdminService {
         where: { id: taskCatalogId },
         data: {
           difficultyLevels: {
-            create: input.difficultyLevels.map((level, index) => ({
-              name: level.name,
-              description: level.description,
-              sortOrder: level.sortOrder ?? index,
-            })),
+            create: buildTaskCatalogDifficultyLevelCreates(input.difficultyLevels),
           },
         },
       });
@@ -502,22 +491,8 @@ export class AdminService {
         lyrics: input.lyrics,
         notes: input.notes,
         isActive: input.isActive ?? true,
-        audioMedia: input.audioExternalUrl
-          ? {
-              create: {
-                kind: MediaKind.AUDIO,
-                externalUrl: input.audioExternalUrl,
-              },
-            }
-          : undefined,
-        videoMedia: input.videoExternalUrl
-          ? {
-              create: {
-                kind: MediaKind.VIDEO,
-                externalUrl: input.videoExternalUrl,
-              },
-            }
-          : undefined,
+        audioMedia: buildSongAudioMediaRelation(input.audioExternalUrl),
+        videoMedia: buildSongVideoMediaRelation(input.videoExternalUrl),
       },
       include: {
         audioMedia: true,
@@ -537,28 +512,8 @@ export class AdminService {
         lyrics: input.lyrics,
         notes: input.notes,
         isActive: input.isActive,
-        audioMedia:
-          input.audioExternalUrl === undefined
-            ? undefined
-            : input.audioExternalUrl
-              ? {
-                  create: {
-                    kind: MediaKind.AUDIO,
-                    externalUrl: input.audioExternalUrl,
-                  },
-                }
-              : { disconnect: true },
-        videoMedia:
-          input.videoExternalUrl === undefined
-            ? undefined
-            : input.videoExternalUrl
-              ? {
-                  create: {
-                    kind: MediaKind.VIDEO,
-                    externalUrl: input.videoExternalUrl,
-                  },
-                }
-              : { disconnect: true },
+        audioMedia: buildSongAudioMediaRelation(input.audioExternalUrl),
+        videoMedia: buildSongVideoMediaRelation(input.videoExternalUrl),
       },
       include: {
         audioMedia: true,
@@ -620,14 +575,7 @@ export class AdminService {
         name: input.name,
         description: input.description,
         isActive: input.isActive ?? true,
-        iconMedia: input.iconExternalUrl
-          ? {
-              create: {
-                kind: MediaKind.IMAGE,
-                externalUrl: input.iconExternalUrl,
-              },
-            }
-          : undefined,
+        iconMedia: buildEquipmentIconMediaRelation(input.iconExternalUrl),
       },
       include: {
         iconMedia: true,
@@ -649,17 +597,7 @@ export class AdminService {
         name: input.name,
         description: input.description,
         isActive: input.isActive,
-        iconMedia:
-          input.iconExternalUrl === undefined
-            ? undefined
-            : input.iconExternalUrl
-              ? {
-                  create: {
-                    kind: MediaKind.IMAGE,
-                    externalUrl: input.iconExternalUrl,
-                  },
-                }
-              : { disconnect: true },
+        iconMedia: buildEquipmentIconMediaRelation(input.iconExternalUrl),
       },
       include: {
         iconMedia: true,
