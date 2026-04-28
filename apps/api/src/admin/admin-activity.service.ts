@@ -8,10 +8,7 @@ export class AdminActivityService {
 
   async listRoutines(_currentUser: AuthenticatedUser, parentId?: string, childId?: string) {
     return this.prisma.routine.findMany({
-      where: {
-        ...(childId ? { childId } : {}),
-        ...(parentId ? { child: { ownerId: parentId } } : {}),
-      },
+      where: this.buildRoutineWhere(parentId, childId),
       orderBy: { createdAt: "desc" },
       include: this.routineListInclude(),
     });
@@ -37,11 +34,7 @@ export class AdminActivityService {
     routineId?: string,
   ) {
     return this.prisma.session.findMany({
-      where: {
-        ...(childId ? { childId } : {}),
-        ...(routineId ? { routineId } : {}),
-        ...(parentId ? { child: { ownerId: parentId } } : {}),
-      },
+      where: this.buildSessionWhere(parentId, childId, routineId),
       orderBy: { createdAt: "desc" },
       include: this.sessionListInclude(),
       take: 50,
@@ -59,6 +52,21 @@ export class AdminActivityService {
     }
 
     return session;
+  }
+
+  private buildRoutineWhere(parentId?: string, childId?: string) {
+    return {
+      ...(childId ? { childId } : {}),
+      ...(parentId ? { child: { ownerId: parentId } } : {}),
+    };
+  }
+
+  private buildSessionWhere(parentId?: string, childId?: string, routineId?: string) {
+    return {
+      ...(childId ? { childId } : {}),
+      ...(routineId ? { routineId } : {}),
+      ...(parentId ? { child: { ownerId: parentId } } : {}),
+    };
   }
 
   private routineListInclude() {
