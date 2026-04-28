@@ -3,11 +3,11 @@ import type { CreateTaskCatalogDto, UpdateTaskCatalogDto } from "../dto";
 export function buildTaskCatalogCreateData(input: CreateTaskCatalogDto) {
   return {
     title: input.title,
-    summary: input.summary,
-    instructions: input.instructions,
-    focusPoints: input.focusPoints,
-    demoVideoUrl: input.demoVideoUrl,
-    defaultSongId: input.defaultSongId,
+    ...(input.summary !== undefined ? { summary: input.summary } : {}),
+    ...(input.instructions !== undefined ? { instructions: input.instructions } : {}),
+    ...(input.focusPoints !== undefined ? { focusPoints: input.focusPoints } : {}),
+    ...(input.demoVideoUrl !== undefined ? { demoVideoUrl: input.demoVideoUrl } : {}),
+    ...(input.defaultSongId !== undefined ? { defaultSongId: input.defaultSongId } : {}),
     isActive: input.isActive ?? true,
   };
 }
