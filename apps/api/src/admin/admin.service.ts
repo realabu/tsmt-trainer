@@ -19,6 +19,10 @@ import {
   buildTaskCatalogMediaLinkCreates,
 } from "./domain/admin-catalog-data";
 import {
+  buildTaskCatalogCreateData,
+  buildTaskCatalogUpdateScalarData,
+} from "./domain/admin-task-catalog-data";
+import {
   CreateEquipmentCatalogDto,
   CreateSongCatalogDto,
   CreateTaskCatalogDto,
@@ -358,13 +362,7 @@ export class AdminService {
 
     return this.prisma.taskCatalogItem.create({
       data: {
-        title: input.title,
-        summary: input.summary,
-        instructions: input.instructions,
-        focusPoints: input.focusPoints,
-        demoVideoUrl: input.demoVideoUrl,
-        defaultSongId: input.defaultSongId,
-        isActive: input.isActive ?? true,
+        ...buildTaskCatalogCreateData(input),
         mediaLinks: {
           create: buildTaskCatalogMediaLinkCreates(input.mediaLinks),
         },
@@ -392,16 +390,7 @@ export class AdminService {
     await this.prisma.$transaction(async (tx) => {
       await tx.taskCatalogItem.update({
         where: { id: taskCatalogId },
-        data: {
-          title: input.title,
-          summary: input.summary,
-          instructions: input.instructions,
-          focusPoints: input.focusPoints,
-          demoVideoUrl: input.demoVideoUrl,
-          defaultSongId:
-            input.defaultSongId === undefined ? undefined : input.defaultSongId || null,
-          isActive: input.isActive,
-        },
+        data: buildTaskCatalogUpdateScalarData(input),
       });
 
       if (input.mediaLinks) {
