@@ -1,7 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import { UserRole } from "@prisma/client";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../common/prisma.service";
+import { AdminActivityService } from "./admin-activity.service";
 import { AdminCatalogService } from "./admin-catalog.service";
 import { AdminUserService } from "./admin-user.service";
 import {
@@ -18,6 +19,7 @@ import {
 export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly adminActivityService: AdminActivityService,
     private readonly adminCatalogService: AdminCatalogService,
     private readonly adminUserService: AdminUserService,
   ) {}
@@ -49,98 +51,12 @@ export class AdminService {
 
   async listRoutines(currentUser: AuthenticatedUser, parentId?: string, childId?: string) {
     this.assertAdmin(currentUser);
-
-    return this.prisma.routine.findMany({
-      where: {
-        ...(childId ? { childId } : {}),
-        ...(parentId ? { child: { ownerId: parentId } } : {}),
-      },
-      orderBy: { createdAt: "desc" },
-      include: {
-        child: {
-          include: {
-            owner: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        tasks: {
-          orderBy: { sortOrder: "asc" },
-        },
-        periods: {
-          orderBy: { startsOn: "asc" },
-        },
-        _count: {
-          select: {
-            sessions: true,
-          },
-        },
-      },
-    });
+    return this.adminActivityService.listRoutines(currentUser, parentId, childId);
   }
 
   async getRoutineDetail(currentUser: AuthenticatedUser, routineId: string) {
     this.assertAdmin(currentUser);
-
-    const routine = await this.prisma.routine.findUnique({
-      where: { id: routineId },
-      include: {
-        child: {
-          include: {
-            owner: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        tasks: {
-          orderBy: { sortOrder: "asc" },
-          include: {
-            mediaLinks: {
-              orderBy: { sortOrder: "asc" },
-              include: {
-                mediaAsset: true,
-              },
-            },
-          },
-        },
-        periods: {
-          orderBy: { startsOn: "asc" },
-        },
-        sessions: {
-          orderBy: { createdAt: "desc" },
-          take: 20,
-        },
-        trainerAssignments: {
-          where: { revokedAt: null },
-          include: {
-            trainer: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!routine) {
-      throw new NotFoundException("Feladatsor nem talalhato.");
-    }
-
-    return routine;
+    return this.adminActivityService.getRoutineDetail(currentUser, routineId);
   }
 
   async listSessions(
@@ -150,80 +66,12 @@ export class AdminService {
     routineId?: string,
   ) {
     this.assertAdmin(currentUser);
-
-    return this.prisma.session.findMany({
-      where: {
-        ...(childId ? { childId } : {}),
-        ...(routineId ? { routineId } : {}),
-        ...(parentId ? { child: { ownerId: parentId } } : {}),
-      },
-      orderBy: { createdAt: "desc" },
-      include: {
-        child: {
-          include: {
-            owner: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        routine: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        taskTimings: {
-          orderBy: { sortOrder: "asc" },
-        },
-      },
-      take: 50,
-    });
+    return this.adminActivityService.listSessions(currentUser, parentId, childId, routineId);
   }
 
   async getSessionDetail(currentUser: AuthenticatedUser, sessionId: string) {
     this.assertAdmin(currentUser);
-
-    const session = await this.prisma.session.findUnique({
-      where: { id: sessionId },
-      include: {
-        child: {
-          include: {
-            owner: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        routine: {
-          include: {
-            tasks: {
-              orderBy: { sortOrder: "asc" },
-            },
-          },
-        },
-        taskTimings: {
-          orderBy: { sortOrder: "asc" },
-          include: {
-            task: true,
-          },
-        },
-      },
-    });
-
-    if (!session) {
-      throw new NotFoundException("Session nem talalhato.");
-    }
-
-    return session;
+    return this.adminActivityService.getSessionDetail(currentUser, sessionId);
   }
 
   async listTaskCatalog(currentUser: AuthenticatedUser) {
