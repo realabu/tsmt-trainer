@@ -8,9 +8,12 @@ import { hash } from "bcryptjs";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../common/prisma.service";
 import {
-  buildEquipmentIconMediaRelation,
-  buildSongAudioMediaRelation,
-  buildSongVideoMediaRelation,
+  buildEquipmentIconMediaCreateRelation,
+  buildEquipmentIconMediaUpdateRelation,
+  buildSongAudioMediaCreateRelation,
+  buildSongAudioMediaUpdateRelation,
+  buildSongVideoMediaCreateRelation,
+  buildSongVideoMediaUpdateRelation,
   buildTaskCatalogDifficultyLevelCreates,
   buildTaskCatalogEquipmentLinkCreates,
   buildTaskCatalogMediaLinkCreates,
@@ -491,8 +494,8 @@ export class AdminService {
         lyrics: input.lyrics,
         notes: input.notes,
         isActive: input.isActive ?? true,
-        audioMedia: buildSongAudioMediaRelation(input.audioExternalUrl),
-        videoMedia: buildSongVideoMediaRelation(input.videoExternalUrl),
+        audioMedia: buildSongAudioMediaCreateRelation(input.audioExternalUrl),
+        videoMedia: buildSongVideoMediaCreateRelation(input.videoExternalUrl),
       },
       include: {
         audioMedia: true,
@@ -512,8 +515,8 @@ export class AdminService {
         lyrics: input.lyrics,
         notes: input.notes,
         isActive: input.isActive,
-        audioMedia: buildSongAudioMediaRelation(input.audioExternalUrl),
-        videoMedia: buildSongVideoMediaRelation(input.videoExternalUrl),
+        audioMedia: buildSongAudioMediaUpdateRelation(input.audioExternalUrl),
+        videoMedia: buildSongVideoMediaUpdateRelation(input.videoExternalUrl),
       },
       include: {
         audioMedia: true,
@@ -575,7 +578,7 @@ export class AdminService {
         name: input.name,
         description: input.description,
         isActive: input.isActive ?? true,
-        iconMedia: buildEquipmentIconMediaRelation(input.iconExternalUrl),
+        iconMedia: buildEquipmentIconMediaCreateRelation(input.iconExternalUrl),
       },
       include: {
         iconMedia: true,
@@ -597,7 +600,7 @@ export class AdminService {
         name: input.name,
         description: input.description,
         isActive: input.isActive,
-        iconMedia: buildEquipmentIconMediaRelation(input.iconExternalUrl),
+        iconMedia: buildEquipmentIconMediaUpdateRelation(input.iconExternalUrl),
       },
       include: {
         iconMedia: true,

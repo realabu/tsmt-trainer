@@ -2,9 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { MediaKind } from "@prisma/client";
 import {
-  buildEquipmentIconMediaRelation,
-  buildSongAudioMediaRelation,
-  buildSongVideoMediaRelation,
+  buildEquipmentIconMediaCreateRelation,
+  buildEquipmentIconMediaUpdateRelation,
+  buildSongAudioMediaCreateRelation,
+  buildSongAudioMediaUpdateRelation,
+  buildSongVideoMediaCreateRelation,
+  buildSongVideoMediaUpdateRelation,
   buildTaskCatalogDifficultyLevelCreates,
   buildTaskCatalogEquipmentLinkCreates,
   buildTaskCatalogMediaLinkCreates,
@@ -67,17 +70,20 @@ test("difficulty level create data uses explicit sortOrder and index fallback", 
   ]);
 });
 
-test("song audio and video relation returns undefined, create, and disconnect correctly", () => {
-  assert.equal(buildSongAudioMediaRelation(undefined), undefined);
-  assert.deepEqual(buildSongAudioMediaRelation("https://example.com/audio.mp3"), {
+test("song create relations return undefined for undefined/null/empty and create for truthy values", () => {
+  assert.equal(buildSongAudioMediaCreateRelation(undefined), undefined);
+  assert.equal(buildSongAudioMediaCreateRelation(null), undefined);
+  assert.equal(buildSongAudioMediaCreateRelation(""), undefined);
+  assert.deepEqual(buildSongAudioMediaCreateRelation("https://example.com/audio.mp3"), {
     create: {
       kind: MediaKind.AUDIO,
       externalUrl: "https://example.com/audio.mp3",
     },
   });
-  assert.deepEqual(buildSongAudioMediaRelation(null), { disconnect: true });
-  assert.deepEqual(buildSongVideoMediaRelation(""), { disconnect: true });
-  assert.deepEqual(buildSongVideoMediaRelation("https://example.com/video.mp4"), {
+  assert.equal(buildSongVideoMediaCreateRelation(undefined), undefined);
+  assert.equal(buildSongVideoMediaCreateRelation(null), undefined);
+  assert.equal(buildSongVideoMediaCreateRelation(""), undefined);
+  assert.deepEqual(buildSongVideoMediaCreateRelation("https://example.com/video.mp4"), {
     create: {
       kind: MediaKind.VIDEO,
       externalUrl: "https://example.com/video.mp4",
@@ -85,14 +91,47 @@ test("song audio and video relation returns undefined, create, and disconnect co
   });
 });
 
-test("equipment icon relation returns undefined, create, and disconnect correctly", () => {
-  assert.equal(buildEquipmentIconMediaRelation(undefined), undefined);
-  assert.deepEqual(buildEquipmentIconMediaRelation("https://example.com/icon.png"), {
+test("song update relations return undefined/create/disconnect correctly", () => {
+  assert.equal(buildSongAudioMediaUpdateRelation(undefined), undefined);
+  assert.deepEqual(buildSongAudioMediaUpdateRelation("https://example.com/audio.mp3"), {
+    create: {
+      kind: MediaKind.AUDIO,
+      externalUrl: "https://example.com/audio.mp3",
+    },
+  });
+  assert.deepEqual(buildSongAudioMediaUpdateRelation(null), { disconnect: true });
+  assert.deepEqual(buildSongAudioMediaUpdateRelation(""), { disconnect: true });
+  assert.equal(buildSongVideoMediaUpdateRelation(undefined), undefined);
+  assert.deepEqual(buildSongVideoMediaUpdateRelation("https://example.com/video.mp4"), {
+    create: {
+      kind: MediaKind.VIDEO,
+      externalUrl: "https://example.com/video.mp4",
+    },
+  });
+  assert.deepEqual(buildSongVideoMediaUpdateRelation(null), { disconnect: true });
+  assert.deepEqual(buildSongVideoMediaUpdateRelation(""), { disconnect: true });
+});
+
+test("equipment icon create relation returns undefined for undefined/null/empty and create for truthy values", () => {
+  assert.equal(buildEquipmentIconMediaCreateRelation(undefined), undefined);
+  assert.equal(buildEquipmentIconMediaCreateRelation(null), undefined);
+  assert.equal(buildEquipmentIconMediaCreateRelation(""), undefined);
+  assert.deepEqual(buildEquipmentIconMediaCreateRelation("https://example.com/icon.png"), {
     create: {
       kind: MediaKind.IMAGE,
       externalUrl: "https://example.com/icon.png",
     },
   });
-  assert.deepEqual(buildEquipmentIconMediaRelation(null), { disconnect: true });
-  assert.deepEqual(buildEquipmentIconMediaRelation(""), { disconnect: true });
+});
+
+test("equipment icon update relation returns undefined/create/disconnect correctly", () => {
+  assert.equal(buildEquipmentIconMediaUpdateRelation(undefined), undefined);
+  assert.deepEqual(buildEquipmentIconMediaUpdateRelation("https://example.com/icon.png"), {
+    create: {
+      kind: MediaKind.IMAGE,
+      externalUrl: "https://example.com/icon.png",
+    },
+  });
+  assert.deepEqual(buildEquipmentIconMediaUpdateRelation(null), { disconnect: true });
+  assert.deepEqual(buildEquipmentIconMediaUpdateRelation(""), { disconnect: true });
 });

@@ -36,7 +36,20 @@ export function buildTaskCatalogDifficultyLevelCreates(
   }));
 }
 
-export function buildSongAudioMediaRelation(audioExternalUrl: string | null | undefined) {
+export function buildSongAudioMediaCreateRelation(audioExternalUrl: string | null | undefined) {
+  if (!audioExternalUrl) {
+    return undefined;
+  }
+
+  return {
+    create: {
+      kind: MediaKind.AUDIO,
+      externalUrl: audioExternalUrl,
+    },
+  };
+}
+
+export function buildSongAudioMediaUpdateRelation(audioExternalUrl: string | null | undefined) {
   if (audioExternalUrl === undefined) {
     return undefined;
   }
@@ -53,7 +66,20 @@ export function buildSongAudioMediaRelation(audioExternalUrl: string | null | un
   return { disconnect: true };
 }
 
-export function buildSongVideoMediaRelation(videoExternalUrl: string | null | undefined) {
+export function buildSongVideoMediaCreateRelation(videoExternalUrl: string | null | undefined) {
+  if (!videoExternalUrl) {
+    return undefined;
+  }
+
+  return {
+    create: {
+      kind: MediaKind.VIDEO,
+      externalUrl: videoExternalUrl,
+    },
+  };
+}
+
+export function buildSongVideoMediaUpdateRelation(videoExternalUrl: string | null | undefined) {
   if (videoExternalUrl === undefined) {
     return undefined;
   }
@@ -70,7 +96,20 @@ export function buildSongVideoMediaRelation(videoExternalUrl: string | null | un
   return { disconnect: true };
 }
 
-export function buildEquipmentIconMediaRelation(iconExternalUrl: string | null | undefined) {
+export function buildEquipmentIconMediaCreateRelation(iconExternalUrl: string | null | undefined) {
+  if (!iconExternalUrl) {
+    return undefined;
+  }
+
+  return {
+    create: {
+      kind: MediaKind.IMAGE,
+      externalUrl: iconExternalUrl,
+    },
+  };
+}
+
+export function buildEquipmentIconMediaUpdateRelation(iconExternalUrl: string | null | undefined) {
   if (iconExternalUrl === undefined) {
     return undefined;
   }
