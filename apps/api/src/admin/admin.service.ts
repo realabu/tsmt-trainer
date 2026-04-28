@@ -1,7 +1,6 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { UserRole } from "@prisma/client";
 import type { AuthenticatedUser } from "../auth/auth.types";
-import { PrismaService } from "../common/prisma.service";
 import { AdminActivityService } from "./admin-activity.service";
 import { AdminCatalogService } from "./admin-catalog.service";
 import { AdminUserService } from "./admin-user.service";
@@ -18,7 +17,6 @@ import {
 @Injectable()
 export class AdminService {
   constructor(
-    private readonly prisma: PrismaService,
     private readonly adminActivityService: AdminActivityService,
     private readonly adminCatalogService: AdminCatalogService,
     private readonly adminUserService: AdminUserService,
