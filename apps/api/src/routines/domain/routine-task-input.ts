@@ -22,6 +22,45 @@ export type ResolvedRoutineTaskInput = {
   mediaLinks: RoutineTaskMediaLinkInput[];
 };
 
+export type RoutineTaskResolvedValueInput = {
+  sortOrder?: number;
+  catalogTaskId?: string;
+  catalogDifficultyLevelId?: string;
+  repetitionCount?: number;
+  repetitionUnitCount?: number;
+  customImageExternalUrl?: string;
+  mediaLinks?: RoutineTaskMediaLinkInput[];
+};
+
+export type RoutineTaskDisplayValueInput = {
+  title: string;
+  details: string | null | undefined;
+  coachText: string | null | undefined;
+};
+
+export function buildResolvedRoutineTaskInput(
+  input: RoutineTaskResolvedValueInput,
+  defaultSortOrder: number,
+  displayFields: RoutineTaskDisplayValueInput,
+  resolvedSongId: string | null | undefined,
+  repetitionsLabel: string | null,
+): ResolvedRoutineTaskInput {
+  return {
+    sortOrder: input.sortOrder ?? defaultSortOrder,
+    catalogTaskId: input.catalogTaskId || null,
+    catalogDifficultyLevelId: input.catalogDifficultyLevelId || null,
+    songId: resolvedSongId ?? null,
+    title: displayFields.title,
+    details: displayFields.details,
+    coachText: displayFields.coachText,
+    repetitionsLabel,
+    repetitionCount: input.repetitionCount ?? null,
+    repetitionUnitCount: input.repetitionUnitCount ?? null,
+    customImageExternalUrl: input.customImageExternalUrl || null,
+    mediaLinks: input.mediaLinks ?? [],
+  };
+}
+
 export function buildRoutineTaskMediaLinkCreates(mediaLinks: RoutineTaskMediaLinkInput[]) {
   return mediaLinks.map((media, mediaIndex) => ({
     label: media.label,

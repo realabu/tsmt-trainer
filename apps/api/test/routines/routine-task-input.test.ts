@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { MediaKind } from "@prisma/client";
 import {
+  buildResolvedRoutineTaskInput,
   buildRoutineTaskCreateData,
   buildRoutineTaskMediaLinkCreates,
 } from "../../src/routines/domain/routine-task-input";
@@ -106,4 +107,90 @@ test("media links are shaped in the same order", () => {
 
 test("empty media links behavior remains unchanged", () => {
   assert.deepEqual(buildRoutineTaskMediaLinkCreates([]), []);
+});
+
+test("resolved task input preserves current null, undefined, and fallback behavior", () => {
+  const result = buildResolvedRoutineTaskInput(
+    {
+      sortOrder: undefined,
+      catalogTaskId: "",
+      catalogDifficultyLevelId: undefined,
+      repetitionCount: undefined,
+      repetitionUnitCount: 10,
+      customImageExternalUrl: "",
+      mediaLinks: undefined,
+    },
+    4,
+    {
+      title: "Labda feldobas",
+      details: undefined,
+      coachText: "",
+    },
+    undefined,
+    null,
+  );
+
+  assert.deepEqual(result, {
+    sortOrder: 4,
+    catalogTaskId: null,
+    catalogDifficultyLevelId: null,
+    songId: null,
+    title: "Labda feldobas",
+    details: undefined,
+    coachText: "",
+    repetitionsLabel: null,
+    repetitionCount: null,
+    repetitionUnitCount: 10,
+    customImageExternalUrl: null,
+    mediaLinks: [],
+  });
+});
+
+test("resolved task input preserves explicit values exactly", () => {
+  const result = buildResolvedRoutineTaskInput(
+    {
+      sortOrder: 7,
+      catalogTaskId: "catalog-1",
+      catalogDifficultyLevelId: "difficulty-1",
+      repetitionCount: 2,
+      repetitionUnitCount: 10,
+      customImageExternalUrl: "https://example.com/custom.jpg",
+      mediaLinks: [
+        {
+          kind: "IMAGE",
+          label: "Mutatott kep",
+          externalUrl: "https://example.com/image.jpg",
+        },
+      ],
+    },
+    4,
+    {
+      title: "Labda feldobas",
+      details: "",
+      coachText: null,
+    },
+    "song-1",
+    "2x10",
+  );
+
+  assert.deepEqual(result, {
+    sortOrder: 7,
+    catalogTaskId: "catalog-1",
+    catalogDifficultyLevelId: "difficulty-1",
+    songId: "song-1",
+    title: "Labda feldobas",
+    details: "",
+    coachText: null,
+    repetitionsLabel: "2x10",
+    repetitionCount: 2,
+    repetitionUnitCount: 10,
+    customImageExternalUrl: "https://example.com/custom.jpg",
+    mediaLinks: [
+      {
+        kind: "IMAGE",
+        label: "Mutatott kep",
+        externalUrl: "https://example.com/image.jpg",
+      },
+    ],
+  });
 });

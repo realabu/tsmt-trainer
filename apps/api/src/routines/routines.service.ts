@@ -16,6 +16,7 @@ import {
 } from "./domain/routine-scalar-data";
 import { buildRoutineTaskDisplayFields } from "./domain/routine-task-display";
 import {
+  buildResolvedRoutineTaskInput,
   buildRoutineTaskCreateData,
   buildRoutineTaskMediaLinkCreates,
   type ResolvedRoutineTaskInput,
@@ -210,24 +211,21 @@ export class RoutinesService {
       throw new BadRequestException("Minden rutin feladathoz kell cim vagy katalogus forras.");
     }
 
-    return {
-      sortOrder: input.sortOrder ?? sortOrder,
-      catalogTaskId: input.catalogTaskId || null,
-      catalogDifficultyLevelId: input.catalogDifficultyLevelId || null,
-      songId: resolvedSongId ?? null,
-      title,
-      details: displayFields.details,
-      coachText: displayFields.coachText,
-      repetitionsLabel: normalizeRepetitionsLabel(
+    return buildResolvedRoutineTaskInput(
+      input,
+      sortOrder,
+      {
+        title,
+        details: displayFields.details,
+        coachText: displayFields.coachText,
+      },
+      resolvedSongId,
+      normalizeRepetitionsLabel(
         input.repetitionsLabel,
         input.repetitionCount,
         input.repetitionUnitCount,
       ),
-      repetitionCount: input.repetitionCount ?? null,
-      repetitionUnitCount: input.repetitionUnitCount ?? null,
-      customImageExternalUrl: input.customImageExternalUrl || null,
-      mediaLinks: input.mediaLinks ?? [],
-    };
+    );
   }
 
   async listByChild(currentUser: AuthenticatedUser, childId?: string) {
