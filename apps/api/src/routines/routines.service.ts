@@ -10,6 +10,10 @@ import {
 import { parseRoutineTaskMediaKind } from "./domain/media-kind";
 import { calculateRoutineProgressPeriods } from "./domain/routine-progress";
 import { buildRoutinePeriodInputData } from "./domain/routine-period-input";
+import {
+  buildRoutineCreateScalarData,
+  buildRoutineUpdateScalarData,
+} from "./domain/routine-scalar-data";
 import { buildRoutineTaskDisplayFields } from "./domain/routine-task-display";
 import {
   buildRoutineTaskCreateData,
@@ -271,9 +275,7 @@ export class RoutinesService {
 
     return this.prisma.routine.create({
       data: {
-        childId: input.childId,
-        name: input.name,
-        description: input.description,
+        ...buildRoutineCreateScalarData(input),
         tasks: {
           create: resolvedTasks.map((task) => buildRoutineTaskCreateData(task)),
         },
@@ -335,10 +337,7 @@ export class RoutinesService {
     await this.getById(currentUser, routineId);
     return this.prisma.routine.update({
       where: { id: routineId },
-      data: {
-        name: input.name,
-        description: input.description,
-      },
+      data: buildRoutineUpdateScalarData(input),
     });
   }
 
