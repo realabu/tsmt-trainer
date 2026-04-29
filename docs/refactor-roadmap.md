@@ -424,6 +424,32 @@ Add operational hardening after architectural risk is reduced.
 - add quality gates gradually
 - only enforce checks that the repository can pass consistently
 
+## Admin Backend Checkpoint
+
+Admin backend stabilization has reached a meaningful checkpoint:
+- `AdminService` is now a thin authorization facade
+- `AdminCatalogService` owns catalog admin logic
+- `AdminUserService` owns user/family admin logic
+- `AdminActivityService` owns routine/session admin activity logic
+- `AdminActivityService` now has small include/where helpers for query readability
+- basic `AdminActivityService` tests exist
+- basic `AdminService` facade boundary tests exist
+
+This does not mean the admin backend is “finished”, but it is now in a much safer state for future work than the original single-service hotspot.
+
+## Next Recommended Domain
+
+### Routine Creation / Update Domain
+
+Recommended next focus:
+- routine creation/update logic in the routines backend
+
+Why this should come next:
+- it contains central business logic
+- it has high product value
+- it connects directly to sessions, progress, trainer workflows, and future subscription-related behavior
+- it is a good candidate for the same behavior-preserving, small-PR refactor pattern used in the sessions and admin work
+
 ## Files / Modules to Refactor First
 
 ### First-wave backend
