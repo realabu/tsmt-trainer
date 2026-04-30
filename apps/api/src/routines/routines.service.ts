@@ -9,7 +9,11 @@ import {
 } from "./domain/routine-delete-impact";
 import { parseRoutineTaskMediaKind } from "./domain/media-kind";
 import { calculateRoutineProgressPeriods } from "./domain/routine-progress";
-import { buildRoutinePeriodInputData } from "./domain/routine-period-input";
+import {
+  buildRoutinePeriodCreateData,
+  buildRoutinePeriodInputData,
+  buildRoutinePeriodUpdateData,
+} from "./domain/routine-period-input";
 import {
   buildRoutineCreateScalarData,
   buildRoutineUpdateScalarData,
@@ -659,10 +663,7 @@ export class RoutinesService {
     await this.getOwnedRoutine(currentUser, routineId);
 
     return this.prisma.routinePeriod.create({
-      data: {
-        routineId,
-        ...buildRoutinePeriodInputData(input),
-      },
+      data: buildRoutinePeriodCreateData(routineId, input),
     });
   }
 
@@ -671,9 +672,7 @@ export class RoutinesService {
 
     return this.prisma.routinePeriod.update({
       where: { id: periodId },
-      data: {
-        ...buildRoutinePeriodInputData(input),
-      },
+      data: buildRoutinePeriodUpdateData(input),
     });
   }
 
