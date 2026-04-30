@@ -20,7 +20,7 @@ The routines backend is the next recommended refactor domain because it is both:
 - high-value product-wise
 
 Facts visible in the repository:
-- [apps/api/src/routines/routines.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/routines/routines.service.ts) is still the largest backend hotspot at roughly 874 lines
+- [apps/api/src/routines/routines.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/routines/routines.service.ts) is still the largest backend hotspot at roughly 870 lines
 - the architecture audit classifies routines as `Risky`
 - the service remains responsible for multiple distinct workflows
 - the routines domain connects directly to:
@@ -85,10 +85,39 @@ Several pure extractions already exist:
 - `routine-task-display.ts`
 - `routine-task-song.ts`
 - `routine-period-input.ts`
+- `routine-scalar-data.ts`
 - `repetition-label.ts`
 - `media-kind.ts`
 
 This means the next work should continue from the existing extraction pattern, not restart the design.
+
+## Checkpoint After #44–#49
+
+Completed PRs:
+- `#44` routine create/update service-level safety-net tests
+- `#45` routine scalar data helper extraction
+- `#46` routine task data shaping extraction
+- `#47` period CRUD service-level safety-net tests
+- `#48` period create/update data helper extraction
+- `#49` task CRUD minimal service-level safety-net tests
+
+What is now safer:
+- top-level routine create/update behavior has service-level safety coverage
+- period create/update/remove behavior has service-level safety coverage
+- task create/update/remove behavior has a first service-level safety-net for the minimal non-catalog path
+- routine, task, and period top-level scalar/data shaping are more explicit in the routines domain helper area
+
+What still remains risky:
+- `RoutinesService` is still the main backend hotspot
+- the current largest remaining hotspot is task CRUD, especially `createTask(...)` and `updateTask(...)`
+- task CRUD safety coverage currently locks the minimal non-catalog path only
+- catalog-connected task flows involving catalog task, difficulty, song, custom image, and media paths are not yet fully covered at service level
+
+Recommended next decision point:
+- inspect task CRUD payload/orchestration extraction candidates before making the next behavior-preserving refactor PR
+- prefer one small task CRUD payload helper extraction after that inspection
+- do not jump directly to a broad orchestration boundary
+- do not mix in progress, delete-impact, or catalog search changes without separate inspection
 
 ## Target Shape (High-Level Only)
 
@@ -114,96 +143,67 @@ This plan does **not** define final sub-services or a final architecture split.
 
 ## Concrete PR Plan
 
-### PR 1: Extract Routine Create/Update Scalar Shaping
+### Completed So Far
+- routine create/update service safety-net
+- routine scalar data helper extraction
+- routine task data shaping extraction
+- period CRUD service safety-net
+- period create/update data helper extraction
+- task CRUD minimal service safety-net
+
+### Next Likely Step: Inspect Task CRUD Payload / Orchestration Candidates
 - Goal:
-  - reduce inline routine create/update data shaping inside `RoutinesService`
+  - identify the smallest safe extraction target inside `createTask(...)` and `updateTask(...)`
 - Files affected:
   - `apps/api/src/routines/routines.service.ts`
-  - one new small helper file under `apps/api/src/routines/domain/`
-  - one focused test file under `apps/api/test/routines/`
-- What is extracted:
-  - pure shaping of top-level routine create/update scalar data
-  - for example: `name`, `description`, and other non-relation routine fields
+  - `apps/api/src/routines/domain/routine-task-input.ts`
+  - routines task CRUD tests for reference
+- What is inspected:
+  - current Prisma payload assembly
+  - connect/disconnect/create/update relation branches
+  - minimal covered path versus uncovered catalog-connected paths
 - What is NOT changed:
-  - Prisma query structure
-  - API response shape
-  - task/period handling
-  - progress logic
+  - no production behavior
+  - no Prisma query semantics
+  - no ownership checks
 - Why it is safe:
-  - scalar mapping is deterministic
-  - no query rewrite required
-  - follows the same helper pattern already used in admin and routines helpers
+  - keeps the next refactor choice evidence-based instead of forcing a broad abstraction
 
-### PR 2: Extract Routine Task Create/Update Orchestration Inputs Further
+### Likely PR After Inspection: Extract One Small Task CRUD Payload Helper
 - Goal:
-  - reduce how much task create/update mapping and relation shaping still lives inline in the service
+  - reduce inline task create/update payload assembly without moving ownership checks, catalog lookup, or Prisma orchestration out of `RoutinesService`
 - Files affected:
   - `apps/api/src/routines/routines.service.ts`
   - `apps/api/src/routines/domain/routine-task-input.ts`
   - related routines tests
 - What is extracted:
-  - additional pure shaping around task create/update payload assembly
-  - especially the parts already downstream of `resolveTaskInput(...)`
+  - one small deterministic payload-shaping slice only
+  - likely around current Prisma `data` branches downstream of `resolveTaskInput(...)`
 - What is NOT changed:
   - `resolveTaskInput(...)` validation semantics
   - catalog lookup behavior
   - song fallback behavior
   - media ordering behavior
+  - task CRUD ownership checks
 - Why it is safe:
-  - this builds on existing helpers instead of introducing a new abstraction style
-  - behavior can be locked with small unit tests
+  - builds on the new task CRUD safety-net before attempting any broader move
 
-### PR 3: Extract Period CRUD Data / Validation Helpers
+### Still Later: Consider a Small Orchestration Boundary
 - Goal:
-  - make period create/update paths easier to reason about without touching progress math
+  - shrink one remaining routines hotspot only after task CRUD payload shaping and coverage are stronger
 - Files affected:
   - `apps/api/src/routines/routines.service.ts`
-  - `apps/api/src/routines/domain/routine-period-input.ts`
-  - related routines tests
-- What is extracted:
-  - any remaining pure period input/data shaping and normalization still embedded in the service
-- What is NOT changed:
-  - period ownership lookup
-  - progress endpoint behavior
-  - delete impact behavior
-- Why it is safe:
-  - period shaping is narrow and deterministic
-  - this does not require cross-domain movement
-
-### PR 4: Introduce a Focused Routine Create/Update Test Harness
-- Goal:
-  - increase confidence before deeper orchestration cleanup
-- Files affected:
-  - new or expanded test files under `apps/api/test/routines/`
-- What is extracted:
-  - no production extraction required in this PR unless a tiny type/helper adjustment is needed
-  - this PR primarily adds coverage around create/update routine behavior
-- What is NOT changed:
-  - runtime behavior
-  - API shape
-  - Prisma orchestration
-- Why it is safe:
-  - test-focused PR
-  - supports later refactors with low regression risk
-
-### PR 5: Extract One Small Routines Orchestration Boundary
-- Goal:
-  - begin shrinking `RoutinesService` orchestration clusters after helper/test groundwork is stronger
-- Files affected:
-  - `apps/api/src/routines/routines.service.ts`
-  - one new backend helper/module under `apps/api/src/routines/`
+  - possibly one new focused helper/module under `apps/api/src/routines/`
   - targeted tests
 - What is extracted:
   - one cohesive orchestration boundary only
-  - preferred target: routine create/update branch, not delete impact or progress
 - What is NOT changed:
   - controller
   - DTOs
   - Prisma query semantics
-  - sessions domain behavior
+  - progress/delete-impact/catalog search behavior
 - Why it is safe:
-  - by this point, scalar shaping and key helper logic should already be isolated
-  - this keeps the first orchestration split narrow and reviewable
+  - only appropriate after the current task CRUD hotspot is better isolated and better covered
 
 ## Constraints
 
