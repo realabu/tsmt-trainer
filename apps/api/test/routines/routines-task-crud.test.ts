@@ -8,6 +8,9 @@ type RoutineTaskHarnessConfig = {
   ownedRoutine?: { id: string; childId: string } | null;
   ownedTask?: { id: string; routineId: string; customImageMediaId: string | null } | null;
   aggregateMaxSortOrder?: number | null;
+  catalogTask?: Record<string, unknown> | null;
+  difficultyLevel?: Record<string, unknown> | null;
+  song?: { id: string } | null;
   createResult?: Record<string, unknown>;
   updateResult?: Record<string, unknown>;
   deleteResult?: Record<string, unknown>;
@@ -60,6 +63,9 @@ function createRoutinesTaskHarness(config: RoutineTaskHarnessConfig = {}) {
     routineFindFirst: [] as Array<Record<string, unknown>>,
     routineTaskFindFirst: [] as Array<Record<string, unknown>>,
     routineTaskAggregate: [] as Array<Record<string, unknown>>,
+    taskCatalogItemFindFirst: [] as Array<Record<string, unknown>>,
+    taskCatalogDifficultyLevelFindUnique: [] as Array<Record<string, unknown>>,
+    songCatalogItemFindFirst: [] as Array<Record<string, unknown>>,
     routineTaskCreate: [] as Array<Record<string, unknown>>,
     routineTaskUpdate: [] as Array<Record<string, unknown>>,
     routineTaskDelete: [] as Array<Record<string, unknown>>,
@@ -76,6 +82,30 @@ function createRoutinesTaskHarness(config: RoutineTaskHarnessConfig = {}) {
               id: "routine-1",
               childId: "child-1",
             };
+      },
+    },
+    taskCatalogItem: {
+      findFirst: async (args: Record<string, unknown>) => {
+        calls.taskCatalogItemFindFirst.push(args);
+        return "catalogTask" in config
+          ? config.catalogTask
+          : null;
+      },
+    },
+    taskCatalogDifficultyLevel: {
+      findUnique: async (args: Record<string, unknown>) => {
+        calls.taskCatalogDifficultyLevelFindUnique.push(args);
+        return "difficultyLevel" in config
+          ? config.difficultyLevel
+          : null;
+      },
+    },
+    songCatalogItem: {
+      findFirst: async (args: Record<string, unknown>) => {
+        calls.songCatalogItemFindFirst.push(args);
+        return "song" in config
+          ? config.song
+          : null;
       },
     },
     routineTask: {
@@ -220,6 +250,151 @@ test("createTask uses owned routine lookup, max sort order query, and current Pr
     id: "task-1",
     title: "Labda feldobas",
     details: null,
+    coachText: null,
+    repetitionsLabel: null,
+    repetitionCount: null,
+    repetitionUnitCount: null,
+  });
+});
+
+test("createTask preserves current catalog-connected create path with difficulty and default song fallback", async () => {
+  const { calls, service, currentUser } = createRoutinesTaskHarness({
+    aggregateMaxSortOrder: 4,
+    catalogTask: {
+      id: "catalog-1",
+      title: "Katalogus feladat",
+      summary: "Mintaleiras",
+      defaultSongId: "song-1",
+      defaultSong: { id: "song-1", title: "Mondoka" },
+      difficultyLevels: [
+        {
+          id: "difficulty-1",
+          taskCatalogItemId: "catalog-1",
+        },
+      ],
+    },
+    difficultyLevel: {
+      id: "difficulty-1",
+      taskCatalogItemId: "catalog-1",
+    },
+    song: { id: "song-1" },
+    createResult: {
+      id: "task-2",
+      title: "Katalogus feladat",
+      details: "Mintaleiras",
+      coachText: null,
+      repetitionsLabel: null,
+      repetitionCount: null,
+      repetitionUnitCount: null,
+    },
+  });
+
+  const result = await service.createTask(
+    currentUser,
+    "routine-1",
+    {
+      sortOrder: 3,
+      catalogTaskId: "catalog-1",
+      catalogDifficultyLevelId: "difficulty-1",
+    } as any,
+  );
+
+  assert.deepEqual(calls.routineFindFirst, [
+    {
+      where: {
+        id: "routine-1",
+        child: {
+          ownerId: "parent-1",
+        },
+      },
+      select: {
+        id: true,
+        childId: true,
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogItemFindFirst, [
+    {
+      where: {
+        id: "catalog-1",
+        isActive: true,
+      },
+      include: {
+        defaultSong: true,
+        difficultyLevels: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogDifficultyLevelFindUnique, [
+    {
+      where: { id: "difficulty-1" },
+    },
+  ]);
+
+  assert.deepEqual(calls.songCatalogItemFindFirst, [
+    {
+      where: {
+        id: "song-1",
+        isActive: true,
+      },
+      select: { id: true },
+    },
+  ]);
+
+  assert.deepEqual(calls.routineTaskAggregate, [
+    {
+      where: { routineId: "routine-1" },
+      _max: { sortOrder: true },
+    },
+  ]);
+
+  assert.deepEqual(calls.routineTaskCreate, [
+    {
+      data: {
+        routine: {
+          connect: {
+            id: "routine-1",
+          },
+        },
+        sortOrder: 3,
+        title: "Katalogus feladat",
+        details: "Mintaleiras",
+        coachText: null,
+        repetitionsLabel: null,
+        repetitionCount: null,
+        repetitionUnitCount: null,
+        catalogTask: {
+          connect: {
+            id: "catalog-1",
+          },
+        },
+        catalogDifficultyLevel: {
+          connect: {
+            id: "difficulty-1",
+          },
+        },
+        song: {
+          connect: {
+            id: "song-1",
+          },
+        },
+        customImageMedia: undefined,
+        mediaLinks: {
+          create: [],
+        },
+      },
+      include: createRoutineTaskIncludeExpectation(),
+    },
+  ]);
+
+  assert.deepEqual(result, {
+    id: "task-2",
+    title: "Katalogus feladat",
+    details: "Mintaleiras",
     coachText: null,
     repetitionsLabel: null,
     repetitionCount: null,
