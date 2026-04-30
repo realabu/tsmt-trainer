@@ -13,3 +13,19 @@ export function buildRoutinePeriodInputData(input: RoutinePeriodInput) {
     weeklyTargetCount: input.weeklyTargetCount,
   };
 }
+
+export function buildRoutinePeriodCreateData(
+  routineId: string,
+  input: RoutinePeriodInput,
+) {
+  return {
+    routineId,
+    ...buildRoutinePeriodInputData(input),
+  };
+}
+
+export function buildRoutinePeriodUpdateData(input: RoutinePeriodInput) {
+  return {
+    ...buildRoutinePeriodInputData(input),
+  };
+}
