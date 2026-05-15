@@ -104,3 +104,56 @@ export function buildRoutineTaskCreateData(
     },
   };
 }
+
+export function buildRoutineTaskCrudCreateData(
+  routineId: string,
+  sortOrder: number,
+  task: ResolvedRoutineTaskInput,
+) {
+  return {
+    routine: {
+      connect: {
+        id: routineId,
+      },
+    },
+    sortOrder,
+    title: task.title,
+    details: task.details,
+    coachText: task.coachText,
+    repetitionsLabel: task.repetitionsLabel,
+    repetitionCount: task.repetitionCount,
+    repetitionUnitCount: task.repetitionUnitCount,
+    catalogTask: task.catalogTaskId
+      ? {
+          connect: {
+            id: task.catalogTaskId,
+          },
+        }
+      : undefined,
+    catalogDifficultyLevel: task.catalogDifficultyLevelId
+      ? {
+          connect: {
+            id: task.catalogDifficultyLevelId,
+          },
+        }
+      : undefined,
+    song: task.songId
+      ? {
+          connect: {
+            id: task.songId,
+          },
+        }
+      : undefined,
+    customImageMedia: task.customImageExternalUrl
+      ? {
+          create: {
+            kind: MediaKind.IMAGE,
+            externalUrl: task.customImageExternalUrl,
+          },
+        }
+      : undefined,
+    mediaLinks: {
+      create: buildRoutineTaskMediaLinkCreates(task.mediaLinks),
+    },
+  };
+}
