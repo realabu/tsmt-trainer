@@ -501,6 +501,153 @@ test("updateTask uses owned task lookup and preserves current Prisma update shap
   });
 });
 
+test("updateTask preserves current catalog-connected update path with difficulty and default song fallback", async () => {
+  const { calls, service, currentUser } = createRoutinesTaskHarness({
+    ownedTask: {
+      id: "task-1",
+      routineId: "routine-1",
+      customImageMediaId: null,
+    },
+    catalogTask: {
+      id: "catalog-1",
+      title: "Katalogus feladat",
+      summary: "Frissitett mintaleiras",
+      defaultSongId: "song-1",
+      defaultSong: { id: "song-1", title: "Mondoka" },
+      difficultyLevels: [
+        {
+          id: "difficulty-1",
+          taskCatalogItemId: "catalog-1",
+        },
+      ],
+    },
+    difficultyLevel: {
+      id: "difficulty-1",
+      taskCatalogItemId: "catalog-1",
+    },
+    song: { id: "song-1" },
+    updateResult: {
+      id: "task-1",
+      title: "Katalogus feladat",
+      details: "Frissitett mintaleiras",
+      coachText: null,
+      repetitionsLabel: null,
+      repetitionCount: null,
+      repetitionUnitCount: null,
+    },
+  });
+
+  const result = await service.updateTask(
+    currentUser,
+    "task-1",
+    {
+      sortOrder: 3,
+      catalogTaskId: "catalog-1",
+      catalogDifficultyLevelId: "difficulty-1",
+    } as any,
+  );
+
+  assert.deepEqual(calls.routineTaskFindFirst, [
+    {
+      where: {
+        id: "task-1",
+        routine: {
+          child: {
+            ownerId: "parent-1",
+          },
+        },
+      },
+      select: {
+        id: true,
+        routineId: true,
+        customImageMediaId: true,
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogItemFindFirst, [
+    {
+      where: {
+        id: "catalog-1",
+        isActive: true,
+      },
+      include: {
+        defaultSong: true,
+        difficultyLevels: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogDifficultyLevelFindUnique, [
+    {
+      where: { id: "difficulty-1" },
+    },
+  ]);
+
+  assert.deepEqual(calls.songCatalogItemFindFirst, [
+    {
+      where: {
+        id: "song-1",
+        isActive: true,
+      },
+      select: { id: true },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskMediaLinkDeleteMany, [
+    {
+      where: { taskId: "task-1" },
+    },
+  ]);
+
+  assert.deepEqual(calls.routineTaskUpdate, [
+    {
+      where: { id: "task-1" },
+      data: {
+        sortOrder: 3,
+        title: "Katalogus feladat",
+        details: "Frissitett mintaleiras",
+        coachText: null,
+        repetitionsLabel: null,
+        repetitionCount: null,
+        repetitionUnitCount: null,
+        catalogTask: {
+          connect: {
+            id: "catalog-1",
+          },
+        },
+        catalogDifficultyLevel: {
+          connect: {
+            id: "difficulty-1",
+          },
+        },
+        song: {
+          connect: {
+            id: "song-1",
+          },
+        },
+        customImageMedia: undefined,
+        mediaLinks: {
+          create: [],
+        },
+      },
+      include: createRoutineTaskIncludeExpectation(),
+    },
+  ]);
+
+  assert.deepEqual(result, {
+    id: "task-1",
+    title: "Katalogus feladat",
+    details: "Frissitett mintaleiras",
+    coachText: null,
+    repetitionsLabel: null,
+    repetitionCount: null,
+    repetitionUnitCount: null,
+  });
+});
+
 test("updateTask throws when task is not owned by current user", async () => {
   const { service, currentUser } = createRoutinesTaskHarness({
     ownedTask: null,
