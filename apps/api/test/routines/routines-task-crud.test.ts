@@ -548,6 +548,95 @@ test("createTask preserves explicit songId override over catalog default song fa
   });
 });
 
+test("createTask throws when explicit songId override is missing", async () => {
+  const { calls, service, currentUser } = createRoutinesTaskHarness({
+    catalogTask: {
+      id: "catalog-1",
+      title: "Katalogus feladat",
+      summary: "Mintaleiras",
+      defaultSongId: "song-default",
+      defaultSong: { id: "song-default", title: "Alap mondoka" },
+      difficultyLevels: [
+        {
+          id: "difficulty-1",
+          taskCatalogItemId: "catalog-1",
+        },
+      ],
+    },
+    difficultyLevel: {
+      id: "difficulty-1",
+      taskCatalogItemId: "catalog-1",
+    },
+    song: null,
+  });
+
+  await assert.rejects(
+    service.createTask(
+      currentUser,
+      "routine-1",
+      {
+        sortOrder: 3,
+        catalogTaskId: "catalog-1",
+        catalogDifficultyLevelId: "difficulty-1",
+        songId: "song-missing",
+      } as any,
+    ),
+    (error: unknown) => {
+      assert.ok(error instanceof NotFoundException);
+      assert.equal(error.message, "A rutin feladathoz megadott dal vagy mondoka nem talalhato.");
+      return true;
+    },
+  );
+
+  assert.deepEqual(calls.routineFindFirst, [
+    {
+      where: {
+        id: "routine-1",
+        child: {
+          ownerId: "parent-1",
+        },
+      },
+      select: {
+        id: true,
+        childId: true,
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogItemFindFirst, [
+    {
+      where: {
+        id: "catalog-1",
+        isActive: true,
+      },
+      include: {
+        defaultSong: true,
+        difficultyLevels: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogDifficultyLevelFindUnique, [
+    {
+      where: { id: "difficulty-1" },
+    },
+  ]);
+
+  assert.deepEqual(calls.songCatalogItemFindFirst, [
+    {
+      where: {
+        id: "song-missing",
+        isActive: true,
+      },
+      select: { id: true },
+    },
+  ]);
+  assert.deepEqual(calls.routineTaskAggregate, []);
+  assert.deepEqual(calls.routineTaskCreate, []);
+});
+
 test("createTask throws when selected difficulty belongs to another catalog task", async () => {
   const { calls, service, currentUser } = createRoutinesTaskHarness({
     catalogTask: {
