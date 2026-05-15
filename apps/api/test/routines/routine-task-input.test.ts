@@ -7,6 +7,7 @@ import {
   buildRoutineTaskCrudUpdateData,
   buildRoutineTaskCreateData,
   buildRoutineTaskMediaLinkCreates,
+  isRoutineTaskDifficultyCompatibleWithCatalogTask,
 } from "../../src/routines/domain/routine-task-input";
 
 test("task create mapping preserves explicit fields exactly", () => {
@@ -195,6 +196,34 @@ test("resolved task input preserves explicit values exactly", () => {
       },
     ],
   });
+});
+
+test("task difficulty compatibility returns true when difficulty belongs to catalog task", () => {
+  assert.equal(
+    isRoutineTaskDifficultyCompatibleWithCatalogTask("catalog-1", "catalog-1"),
+    true,
+  );
+});
+
+test("task difficulty compatibility returns false for a different catalog task", () => {
+  assert.equal(
+    isRoutineTaskDifficultyCompatibleWithCatalogTask("catalog-1", "catalog-other"),
+    false,
+  );
+});
+
+test("task difficulty compatibility returns false when catalog task is missing", () => {
+  assert.equal(
+    isRoutineTaskDifficultyCompatibleWithCatalogTask(null, "catalog-1"),
+    false,
+  );
+});
+
+test("task difficulty compatibility returns false when difficulty catalog reference is missing", () => {
+  assert.equal(
+    isRoutineTaskDifficultyCompatibleWithCatalogTask("catalog-1", undefined),
+    false,
+  );
 });
 
 test("task CRUD create data preserves current relation connect/create shape", () => {

@@ -61,6 +61,17 @@ export function buildResolvedRoutineTaskInput(
   };
 }
 
+export function isRoutineTaskDifficultyCompatibleWithCatalogTask(
+  catalogTaskId: string | null | undefined,
+  difficultyTaskCatalogItemId: string | null | undefined,
+): boolean {
+  return Boolean(
+    catalogTaskId &&
+      difficultyTaskCatalogItemId &&
+      catalogTaskId === difficultyTaskCatalogItemId,
+  );
+}
+
 export function buildRoutineTaskMediaLinkCreates(mediaLinks: RoutineTaskMediaLinkInput[]) {
   return mediaLinks.map((media, mediaIndex) => ({
     label: media.label,
