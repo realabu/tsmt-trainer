@@ -1,4 +1,4 @@
-import { MediaKind, Prisma, SessionStatus, type SongCatalogItem, type TaskCatalogDifficultyLevel, type TaskCatalogItem } from "@prisma/client";
+import { Prisma, SessionStatus, type SongCatalogItem, type TaskCatalogDifficultyLevel, type TaskCatalogItem } from "@prisma/client";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../common/prisma.service";
@@ -22,8 +22,8 @@ import { buildRoutineTaskDisplayFields } from "./domain/routine-task-display";
 import {
   buildResolvedRoutineTaskInput,
   buildRoutineTaskCrudCreateData,
+  buildRoutineTaskCrudUpdateData,
   buildRoutineTaskCreateData,
-  buildRoutineTaskMediaLinkCreates,
   type ResolvedRoutineTaskInput,
 } from "./domain/routine-task-input";
 import { normalizeRepetitionsLabel } from "./domain/repetition-label";
@@ -501,56 +501,10 @@ export class RoutinesService {
 
     const updated = await this.prisma.routineTask.update({
       where: { id: taskId },
-      data: {
-        sortOrder: resolvedTask.sortOrder,
-        title: resolvedTask.title,
-        details: resolvedTask.details,
-        coachText: resolvedTask.coachText,
-        repetitionsLabel: resolvedTask.repetitionsLabel,
-        repetitionCount: resolvedTask.repetitionCount,
-        repetitionUnitCount: resolvedTask.repetitionUnitCount,
-        catalogTask: resolvedTask.catalogTaskId
-          ? {
-              connect: {
-                id: resolvedTask.catalogTaskId,
-              },
-            }
-          : { disconnect: true },
-        catalogDifficultyLevel: resolvedTask.catalogDifficultyLevelId
-          ? {
-              connect: {
-                id: resolvedTask.catalogDifficultyLevelId,
-              },
-            }
-          : { disconnect: true },
-        song: resolvedTask.songId
-          ? {
-              connect: {
-                id: resolvedTask.songId,
-              },
-            }
-          : { disconnect: true },
-        customImageMedia: resolvedTask.customImageExternalUrl
-          ? task.customImageMediaId
-            ? {
-                update: {
-                  kind: MediaKind.IMAGE,
-                  externalUrl: resolvedTask.customImageExternalUrl,
-                },
-              }
-            : {
-                create: {
-                  kind: MediaKind.IMAGE,
-                  externalUrl: resolvedTask.customImageExternalUrl,
-                },
-              }
-          : task.customImageMediaId
-            ? { disconnect: true }
-            : undefined,
-        mediaLinks: {
-          create: buildRoutineTaskMediaLinkCreates(resolvedTask.mediaLinks),
-        },
-      } satisfies Prisma.RoutineTaskUpdateInput,
+      data: buildRoutineTaskCrudUpdateData(
+        resolvedTask,
+        task.customImageMediaId,
+      ) satisfies Prisma.RoutineTaskUpdateInput,
       include: this.routineTaskInclude(),
     });
 

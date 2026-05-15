@@ -4,6 +4,7 @@ import { MediaKind } from "@prisma/client";
 import {
   buildResolvedRoutineTaskInput,
   buildRoutineTaskCrudCreateData,
+  buildRoutineTaskCrudUpdateData,
   buildRoutineTaskCreateData,
   buildRoutineTaskMediaLinkCreates,
 } from "../../src/routines/domain/routine-task-input";
@@ -302,6 +303,129 @@ test("task CRUD create data preserves undefined relation branches for minimal pa
     catalogDifficultyLevel: undefined,
     song: undefined,
     customImageMedia: undefined,
+    mediaLinks: {
+      create: [],
+    },
+  });
+});
+
+test("task CRUD update data preserves disconnect branches for minimal path", () => {
+  const result = buildRoutineTaskCrudUpdateData(
+    {
+      sortOrder: 2,
+      catalogTaskId: null,
+      catalogDifficultyLevelId: null,
+      songId: null,
+      title: "Hinta",
+      details: null,
+      coachText: null,
+      repetitionsLabel: null,
+      repetitionCount: null,
+      repetitionUnitCount: null,
+      customImageExternalUrl: null,
+      mediaLinks: [],
+    },
+    null,
+  );
+
+  assert.deepEqual(result, {
+    sortOrder: 2,
+    title: "Hinta",
+    details: null,
+    coachText: null,
+    repetitionsLabel: null,
+    repetitionCount: null,
+    repetitionUnitCount: null,
+    catalogTask: { disconnect: true },
+    catalogDifficultyLevel: { disconnect: true },
+    song: { disconnect: true },
+    customImageMedia: undefined,
+    mediaLinks: {
+      create: [],
+    },
+  });
+});
+
+test("task CRUD update data preserves connect branches for catalog-connected path", () => {
+  const result = buildRoutineTaskCrudUpdateData(
+    {
+      sortOrder: 3,
+      catalogTaskId: "catalog-1",
+      catalogDifficultyLevelId: "difficulty-1",
+      songId: "song-1",
+      title: "Katalogus feladat",
+      details: "Mintaleiras",
+      coachText: null,
+      repetitionsLabel: null,
+      repetitionCount: null,
+      repetitionUnitCount: null,
+      customImageExternalUrl: null,
+      mediaLinks: [],
+    },
+    null,
+  );
+
+  assert.deepEqual(result, {
+    sortOrder: 3,
+    title: "Katalogus feladat",
+    details: "Mintaleiras",
+    coachText: null,
+    repetitionsLabel: null,
+    repetitionCount: null,
+    repetitionUnitCount: null,
+    catalogTask: {
+      connect: {
+        id: "catalog-1",
+      },
+    },
+    catalogDifficultyLevel: {
+      connect: {
+        id: "difficulty-1",
+      },
+    },
+    song: {
+      connect: {
+        id: "song-1",
+      },
+    },
+    customImageMedia: undefined,
+    mediaLinks: {
+      create: [],
+    },
+  });
+});
+
+test("task CRUD update data preserves existing custom image disconnect branch", () => {
+  const result = buildRoutineTaskCrudUpdateData(
+    {
+      sortOrder: 4,
+      catalogTaskId: null,
+      catalogDifficultyLevelId: null,
+      songId: null,
+      title: "Labda feldobas",
+      details: "",
+      coachText: null,
+      repetitionsLabel: "2x10",
+      repetitionCount: 2,
+      repetitionUnitCount: 10,
+      customImageExternalUrl: null,
+      mediaLinks: [],
+    },
+    "media-1",
+  );
+
+  assert.deepEqual(result, {
+    sortOrder: 4,
+    title: "Labda feldobas",
+    details: "",
+    coachText: null,
+    repetitionsLabel: "2x10",
+    repetitionCount: 2,
+    repetitionUnitCount: 10,
+    catalogTask: { disconnect: true },
+    catalogDifficultyLevel: { disconnect: true },
+    song: { disconnect: true },
+    customImageMedia: { disconnect: true },
     mediaLinks: {
       create: [],
     },
