@@ -24,6 +24,7 @@ import {
   buildRoutineTaskCrudCreateData,
   buildRoutineTaskCrudUpdateData,
   buildRoutineTaskCreateData,
+  isRoutineTaskDifficultyCompatibleWithCatalogTask,
   type ResolvedRoutineTaskInput,
 } from "./domain/routine-task-input";
 import { normalizeRepetitionsLabel } from "./domain/repetition-label";
@@ -183,7 +184,10 @@ export class RoutinesService {
 
     if (
       selectedDifficultyLevel &&
-      (!catalogTask || selectedDifficultyLevel.taskCatalogItemId !== catalogTask.id)
+      !isRoutineTaskDifficultyCompatibleWithCatalogTask(
+        catalogTask?.id,
+        selectedDifficultyLevel.taskCatalogItemId,
+      )
     ) {
       throw new BadRequestException(
         "A kivalasztott nehezsegi szint nem ehhez a katalogus taskhoz tartozik.",
