@@ -91,7 +91,7 @@ Several pure extractions already exist:
 
 This means the next work should continue from the existing extraction pattern, not restart the design.
 
-## Checkpoint After #44–#49
+## Checkpoint After #44–#55
 
 Completed PRs:
 - `#44` routine create/update service-level safety-net tests
@@ -100,24 +100,45 @@ Completed PRs:
 - `#47` period CRUD service-level safety-net tests
 - `#48` period create/update data helper extraction
 - `#49` task CRUD minimal service-level safety-net tests
+- `#51` catalog-connected `createTask(...)` service-level safety-net test
+- `#52` `createTask(...)` final Prisma data payload helper extraction
+- `#53` catalog-connected `updateTask(...)` service-level safety-net test
+- `#54` `updateTask(...)` final Prisma data payload helper extraction
+- `#55` task custom image and media service-level safety coverage
 
 What is now safer:
 - top-level routine create/update behavior has service-level safety coverage
 - period create/update/remove behavior has service-level safety coverage
-- task create/update/remove behavior has a first service-level safety-net for the minimal non-catalog path
+- task create/update/remove behavior has service-level safety-net coverage for the minimal non-catalog path
+- task CRUD now has catalog-connected `createTask(...)` and `updateTask(...)` positive-path coverage
+- task CRUD now has service-level coverage for custom image creation/update and non-empty media link creation
 - routine, task, and period top-level scalar/data shaping are more explicit in the routines domain helper area
+- `createTask(...)` and `updateTask(...)` final Prisma data payload shaping now lives in pure helpers
 
 What still remains risky:
 - `RoutinesService` is still the main backend hotspot
-- the current largest remaining hotspot is task CRUD, especially `createTask(...)` and `updateTask(...)`
-- task CRUD safety coverage currently locks the minimal non-catalog path only
-- catalog-connected task flows involving catalog task, difficulty, song, custom image, and media paths are not yet fully covered at service level
+- task CRUD is now in a stable checkpoint state, but it still depends on `resolveTaskInput(...)`
+- `resolveTaskInput(...)` still combines catalog lookup, difficulty validation, song fallback, display fallback, and resolved input assembly
+- catalog-connected task flows are better covered, but not every validation or media permutation has service-level coverage
 
 Recommended next decision point:
-- inspect task CRUD payload/orchestration extraction candidates before making the next behavior-preserving refactor PR
-- prefer one small task CRUD payload helper extraction after that inspection
+- inspect `resolveTaskInput(...)` decomposition candidates before making the next behavior-preserving refactor PR
+- do not jump directly into `resolveTaskInput(...)` refactoring before that inspection
 - do not jump directly to a broad orchestration boundary
 - do not mix in progress, delete-impact, or catalog search changes without separate inspection
+
+### Current Task CRUD State
+
+Task CRUD is now a stable checkpoint:
+- `createTask(...)` final Prisma data payload shaping is extracted into `buildRoutineTaskCrudCreateData(...)`
+- `updateTask(...)` final Prisma data payload shaping is extracted into `buildRoutineTaskCrudUpdateData(...)`
+- ownership checks remain in `RoutinesService`
+- `resolveTaskInput(...)` remains in `RoutinesService`
+- Prisma create, update, and delete calls remain in `RoutinesService`
+- `taskMediaLink.deleteMany(...)` remains in `RoutinesService`
+- `removeTask(...)` remains small and unchanged
+
+This means the next work should treat task CRUD payload shaping as complete for now.
 
 ## Target Shape (High-Level Only)
 
@@ -150,43 +171,52 @@ This plan does **not** define final sub-services or a final architecture split.
 - period CRUD service safety-net
 - period create/update data helper extraction
 - task CRUD minimal service safety-net
+- catalog-connected `createTask(...)` service safety-net
+- `createTask(...)` final Prisma data payload helper extraction
+- catalog-connected `updateTask(...)` service safety-net
+- `updateTask(...)` final Prisma data payload helper extraction
+- task custom image and media service safety-net
 
-### Next Likely Step: Inspect Task CRUD Payload / Orchestration Candidates
+### Next Likely Step: Inspect `resolveTaskInput(...)` Decomposition Candidates
 - Goal:
-  - identify the smallest safe extraction target inside `createTask(...)` and `updateTask(...)`
+  - identify the smallest safe extraction target inside `resolveTaskInput(...)`
 - Files affected:
   - `apps/api/src/routines/routines.service.ts`
   - `apps/api/src/routines/domain/routine-task-input.ts`
+  - `apps/api/src/routines/domain/routine-task-display.ts`
+  - `apps/api/src/routines/domain/routine-task-song.ts`
   - routines task CRUD tests for reference
 - What is inspected:
-  - current Prisma payload assembly
-  - connect/disconnect/create/update relation branches
-  - minimal covered path versus uncovered catalog-connected paths
+  - catalog task lookup behavior
+  - difficulty lookup and compatibility validation
+  - song fallback and song existence behavior
+  - title/display fallback behavior
+  - final resolved input assembly
 - What is NOT changed:
   - no production behavior
   - no Prisma query semantics
   - no ownership checks
+  - no DTO contract changes
 - Why it is safe:
   - keeps the next refactor choice evidence-based instead of forcing a broad abstraction
 
-### Likely PR After Inspection: Extract One Small Task CRUD Payload Helper
+### Likely PR After Inspection: Extract One Small `resolveTaskInput(...)` Helper
 - Goal:
-  - reduce inline task create/update payload assembly without moving ownership checks, catalog lookup, or Prisma orchestration out of `RoutinesService`
+  - reduce one deterministic slice of task input resolution while keeping Prisma reads and orchestration in `RoutinesService`
 - Files affected:
   - `apps/api/src/routines/routines.service.ts`
-  - `apps/api/src/routines/domain/routine-task-input.ts`
+  - one focused helper under `apps/api/src/routines/domain/`
   - related routines tests
 - What is extracted:
-  - one small deterministic payload-shaping slice only
-  - likely around current Prisma `data` branches downstream of `resolveTaskInput(...)`
+  - one small deterministic resolution or validation helper only
 - What is NOT changed:
-  - `resolveTaskInput(...)` validation semantics
+  - endpoint signatures
+  - ownership checks
   - catalog lookup behavior
   - song fallback behavior
-  - media ordering behavior
-  - task CRUD ownership checks
+  - Prisma query semantics
 - Why it is safe:
-  - builds on the new task CRUD safety-net before attempting any broader move
+  - builds on the stronger task CRUD service-level safety-net before touching the next hotspot
 
 ### Still Later: Consider a Small Orchestration Boundary
 - Goal:
@@ -214,6 +244,32 @@ The following constraints apply to all routines refactor PRs in this plan:
 - no cross-domain refactors
 - no silent behavior change
 - prefer one extraction or one test harness step per PR
+
+## Follow-up Register
+
+All items below are **non-blocking** for the next `resolveTaskInput(...)` inspection.
+
+- DTO/type mismatch around catalog fallback title optionality
+  - Next action: type/contract inspection, not an immediate refactor
+  - Blocking next inspection: no
+- explicit `songId` override path service-level coverage
+  - Next action: future targeted test PR
+  - Blocking next inspection: no
+- difficulty mismatch validation path service-level coverage
+  - Next action: future targeted test PR
+  - Blocking next inspection: no
+- remaining custom image create/update/disconnect permutations
+  - Next action: future targeted test PR only if touching media behavior
+  - Blocking next inspection: no
+- `getDeleteImpact(...)` orchestration
+  - Next action: future separate inspection
+  - Blocking next inspection: no
+- `getProgress(...)` orchestration
+  - Next action: future separate inspection
+  - Blocking next inspection: no
+- `searchTaskCatalog(...)` query shape
+  - Next action: future separate inspection
+  - Blocking next inspection: no
 
 ## Recommended Execution Style
 
