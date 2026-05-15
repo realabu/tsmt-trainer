@@ -402,6 +402,152 @@ test("createTask preserves current catalog-connected create path with difficulty
   });
 });
 
+test("createTask preserves explicit songId override over catalog default song fallback", async () => {
+  const { calls, service, currentUser } = createRoutinesTaskHarness({
+    aggregateMaxSortOrder: 4,
+    catalogTask: {
+      id: "catalog-1",
+      title: "Katalogus feladat",
+      summary: "Mintaleiras",
+      defaultSongId: "song-default",
+      defaultSong: { id: "song-default", title: "Alap mondoka" },
+      difficultyLevels: [
+        {
+          id: "difficulty-1",
+          taskCatalogItemId: "catalog-1",
+        },
+      ],
+    },
+    difficultyLevel: {
+      id: "difficulty-1",
+      taskCatalogItemId: "catalog-1",
+    },
+    song: { id: "song-explicit" },
+    createResult: {
+      id: "task-2",
+      title: "Katalogus feladat",
+      details: "Mintaleiras",
+      coachText: null,
+      repetitionsLabel: null,
+      repetitionCount: null,
+      repetitionUnitCount: null,
+    },
+  });
+
+  const result = await service.createTask(
+    currentUser,
+    "routine-1",
+    {
+      sortOrder: 3,
+      catalogTaskId: "catalog-1",
+      catalogDifficultyLevelId: "difficulty-1",
+      songId: "song-explicit",
+    } as any,
+  );
+
+  assert.deepEqual(calls.routineFindFirst, [
+    {
+      where: {
+        id: "routine-1",
+        child: {
+          ownerId: "parent-1",
+        },
+      },
+      select: {
+        id: true,
+        childId: true,
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogItemFindFirst, [
+    {
+      where: {
+        id: "catalog-1",
+        isActive: true,
+      },
+      include: {
+        defaultSong: true,
+        difficultyLevels: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogDifficultyLevelFindUnique, [
+    {
+      where: { id: "difficulty-1" },
+    },
+  ]);
+
+  assert.deepEqual(calls.songCatalogItemFindFirst, [
+    {
+      where: {
+        id: "song-explicit",
+        isActive: true,
+      },
+      select: { id: true },
+    },
+  ]);
+
+  assert.deepEqual(calls.routineTaskAggregate, [
+    {
+      where: { routineId: "routine-1" },
+      _max: { sortOrder: true },
+    },
+  ]);
+
+  assert.deepEqual(calls.routineTaskCreate, [
+    {
+      data: {
+        routine: {
+          connect: {
+            id: "routine-1",
+          },
+        },
+        sortOrder: 3,
+        title: "Katalogus feladat",
+        details: "Mintaleiras",
+        coachText: null,
+        repetitionsLabel: null,
+        repetitionCount: null,
+        repetitionUnitCount: null,
+        catalogTask: {
+          connect: {
+            id: "catalog-1",
+          },
+        },
+        catalogDifficultyLevel: {
+          connect: {
+            id: "difficulty-1",
+          },
+        },
+        song: {
+          connect: {
+            id: "song-explicit",
+          },
+        },
+        customImageMedia: undefined,
+        mediaLinks: {
+          create: [],
+        },
+      },
+      include: createRoutineTaskIncludeExpectation(),
+    },
+  ]);
+
+  assert.deepEqual(result, {
+    id: "task-2",
+    title: "Katalogus feladat",
+    details: "Mintaleiras",
+    coachText: null,
+    repetitionsLabel: null,
+    repetitionCount: null,
+    repetitionUnitCount: null,
+  });
+});
+
 test("createTask throws when selected difficulty belongs to another catalog task", async () => {
   const { calls, service, currentUser } = createRoutinesTaskHarness({
     catalogTask: {
