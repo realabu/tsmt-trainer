@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { NotFoundException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { MediaKind, UserRole } from "@prisma/client";
 import { RoutinesService } from "../../src/routines/routines.service";
 
@@ -400,6 +400,87 @@ test("createTask preserves current catalog-connected create path with difficulty
     repetitionCount: null,
     repetitionUnitCount: null,
   });
+});
+
+test("createTask throws when selected difficulty belongs to another catalog task", async () => {
+  const { calls, service, currentUser } = createRoutinesTaskHarness({
+    catalogTask: {
+      id: "catalog-1",
+      title: "Katalogus feladat",
+      summary: "Mintaleiras",
+      defaultSongId: "song-1",
+      defaultSong: { id: "song-1", title: "Mondoka" },
+      difficultyLevels: [
+        {
+          id: "difficulty-other",
+          taskCatalogItemId: "catalog-other",
+        },
+      ],
+    },
+    difficultyLevel: {
+      id: "difficulty-other",
+      taskCatalogItemId: "catalog-other",
+    },
+  });
+
+  await assert.rejects(
+    service.createTask(
+      currentUser,
+      "routine-1",
+      {
+        sortOrder: 3,
+        catalogTaskId: "catalog-1",
+        catalogDifficultyLevelId: "difficulty-other",
+      } as any,
+    ),
+    (error: unknown) => {
+      assert.ok(error instanceof BadRequestException);
+      assert.equal(
+        error.message,
+        "A kivalasztott nehezsegi szint nem ehhez a katalogus taskhoz tartozik.",
+      );
+      return true;
+    },
+  );
+
+  assert.deepEqual(calls.routineFindFirst, [
+    {
+      where: {
+        id: "routine-1",
+        child: {
+          ownerId: "parent-1",
+        },
+      },
+      select: {
+        id: true,
+        childId: true,
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogItemFindFirst, [
+    {
+      where: {
+        id: "catalog-1",
+        isActive: true,
+      },
+      include: {
+        defaultSong: true,
+        difficultyLevels: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogDifficultyLevelFindUnique, [
+    {
+      where: { id: "difficulty-other" },
+    },
+  ]);
+  assert.deepEqual(calls.songCatalogItemFindFirst, []);
+  assert.deepEqual(calls.routineTaskAggregate, []);
+  assert.deepEqual(calls.routineTaskCreate, []);
 });
 
 test("createTask preserves current custom image and media link create shape", async () => {
