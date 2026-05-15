@@ -91,7 +91,7 @@ Several pure extractions already exist:
 
 This means the next work should continue from the existing extraction pattern, not restart the design.
 
-## Checkpoint After #44–#55
+## Checkpoint After #44–#60
 
 Completed PRs:
 - `#44` routine create/update service-level safety-net tests
@@ -105,6 +105,11 @@ Completed PRs:
 - `#53` catalog-connected `updateTask(...)` service-level safety-net test
 - `#54` `updateTask(...)` final Prisma data payload helper extraction
 - `#55` task custom image and media service-level safety coverage
+- `#56` routines task CRUD checkpoint documentation
+- `#57` difficulty/catalog mismatch service-level safety coverage
+- `#58` pure task difficulty compatibility helper extraction
+- `#59` explicit `songId` override service-level safety coverage
+- `#60` missing explicit `songId` service-level safety coverage
 
 What is now safer:
 - top-level routine create/update behavior has service-level safety coverage
@@ -112,6 +117,10 @@ What is now safer:
 - task create/update/remove behavior has service-level safety-net coverage for the minimal non-catalog path
 - task CRUD now has catalog-connected `createTask(...)` and `updateTask(...)` positive-path coverage
 - task CRUD now has service-level coverage for custom image creation/update and non-empty media link creation
+- difficulty/catalog mismatch behavior now has service-level coverage
+- the difficulty compatibility decision now lives in a pure routines domain helper
+- explicit `songId` override now has service-level coverage proving it wins over catalog default song fallback
+- missing explicit `songId` behavior now has service-level coverage proving the current `NotFoundException` path stops before max sort aggregation and task creation
 - routine, task, and period top-level scalar/data shaping are more explicit in the routines domain helper area
 - `createTask(...)` and `updateTask(...)` final Prisma data payload shaping now lives in pure helpers
 
@@ -119,11 +128,12 @@ What still remains risky:
 - `RoutinesService` is still the main backend hotspot
 - task CRUD is now in a stable checkpoint state, but it still depends on `resolveTaskInput(...)`
 - `resolveTaskInput(...)` still combines catalog lookup, difficulty validation, song fallback, display fallback, and resolved input assembly
-- catalog-connected task flows are better covered, but not every validation or media permutation has service-level coverage
+- catalog-connected task flows are better covered, but missing catalog, missing difficulty, and missing title branches still need focused service-level safety coverage before broader extraction
 
 Recommended next decision point:
-- inspect `resolveTaskInput(...)` decomposition candidates before making the next behavior-preserving refactor PR
-- do not jump directly into `resolveTaskInput(...)` refactoring before that inspection
+- continue conservatively around `resolveTaskInput(...)`
+- prefer remaining missing catalog, missing difficulty, or missing title safety-net tests before broader extraction
+- only extract the smallest deterministic helper when the relevant behavior is already covered
 - do not jump directly to a broad orchestration boundary
 - do not mix in progress, delete-impact, or catalog search changes without separate inspection
 
@@ -176,31 +186,27 @@ This plan does **not** define final sub-services or a final architecture split.
 - catalog-connected `updateTask(...)` service safety-net
 - `updateTask(...)` final Prisma data payload helper extraction
 - task custom image and media service safety-net
+- difficulty/catalog mismatch service safety-net
+- pure difficulty compatibility helper extraction
+- explicit `songId` override service safety-net
+- missing explicit `songId` service safety-net
 
-### Next Likely Step: Inspect `resolveTaskInput(...)` Decomposition Candidates
+### Next Likely Step: Continue Conservative `resolveTaskInput(...)` Coverage
 - Goal:
-  - identify the smallest safe extraction target inside `resolveTaskInput(...)`
+  - lock the remaining small `resolveTaskInput(...)` validation branches before broader extraction
 - Files affected:
-  - `apps/api/src/routines/routines.service.ts`
-  - `apps/api/src/routines/domain/routine-task-input.ts`
-  - `apps/api/src/routines/domain/routine-task-display.ts`
-  - `apps/api/src/routines/domain/routine-task-song.ts`
-  - routines task CRUD tests for reference
-- What is inspected:
-  - catalog task lookup behavior
-  - difficulty lookup and compatibility validation
-  - song fallback and song existence behavior
-  - title/display fallback behavior
-  - final resolved input assembly
+  - `apps/api/test/routines/routines-task-crud.test.ts`
+- What is covered:
+  - one missing catalog, missing difficulty, or missing title branch at a time
 - What is NOT changed:
   - no production behavior
   - no Prisma query semantics
   - no ownership checks
   - no DTO contract changes
 - Why it is safe:
-  - keeps the next refactor choice evidence-based instead of forcing a broad abstraction
+  - continues the current safety-net-first sequence before moving more `resolveTaskInput(...)` logic
 
-### Likely PR After Inspection: Extract One Small `resolveTaskInput(...)` Helper
+### Likely PR After Coverage: Extract One Small `resolveTaskInput(...)` Helper
 - Goal:
   - reduce one deterministic slice of task input resolution while keeping Prisma reads and orchestration in `RoutinesService`
 - Files affected:
@@ -247,29 +253,32 @@ The following constraints apply to all routines refactor PRs in this plan:
 
 ## Follow-up Register
 
-All items below are **non-blocking** for the next `resolveTaskInput(...)` inspection.
+All items below are **non-blocking** for the next conservative `resolveTaskInput(...)` safety-net step.
 
 - DTO/type mismatch around catalog fallback title optionality
   - Next action: type/contract inspection, not an immediate refactor
-  - Blocking next inspection: no
-- explicit `songId` override path service-level coverage
-  - Next action: future targeted test PR
-  - Blocking next inspection: no
-- difficulty mismatch validation path service-level coverage
-  - Next action: future targeted test PR
-  - Blocking next inspection: no
+  - Blocking next step: no
+- missing catalog task behavior
+  - Next action: future targeted service-level test PR
+  - Blocking next step: no
+- missing difficulty level behavior
+  - Next action: future targeted service-level test PR
+  - Blocking next step: no
+- missing title after display/catalog fallback behavior
+  - Next action: future targeted service-level test PR
+  - Blocking next step: no
 - remaining custom image create/update/disconnect permutations
   - Next action: future targeted test PR only if touching media behavior
-  - Blocking next inspection: no
+  - Blocking next step: no
 - `getDeleteImpact(...)` orchestration
   - Next action: future separate inspection
-  - Blocking next inspection: no
+  - Blocking next step: no
 - `getProgress(...)` orchestration
   - Next action: future separate inspection
-  - Blocking next inspection: no
+  - Blocking next step: no
 - `searchTaskCatalog(...)` query shape
   - Next action: future separate inspection
-  - Blocking next inspection: no
+  - Blocking next step: no
 
 ## Recommended Execution Style
 
