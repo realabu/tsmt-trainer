@@ -21,6 +21,7 @@ import {
 import { buildRoutineTaskDisplayFields } from "./domain/routine-task-display";
 import {
   buildResolvedRoutineTaskInput,
+  buildRoutineTaskCrudCreateData,
   buildRoutineTaskCreateData,
   buildRoutineTaskMediaLinkCreates,
   type ResolvedRoutineTaskInput,
@@ -479,52 +480,11 @@ export class RoutinesService {
     });
 
     const created = await this.prisma.routineTask.create({
-      data: {
-        routine: {
-          connect: {
-            id: routineId,
-          },
-        },
-        sortOrder: resolvedTask.sortOrder || (currentMax._max.sortOrder ?? 0) + 1,
-        title: resolvedTask.title,
-        details: resolvedTask.details,
-        coachText: resolvedTask.coachText,
-        repetitionsLabel: resolvedTask.repetitionsLabel,
-        repetitionCount: resolvedTask.repetitionCount,
-        repetitionUnitCount: resolvedTask.repetitionUnitCount,
-        catalogTask: resolvedTask.catalogTaskId
-          ? {
-              connect: {
-                id: resolvedTask.catalogTaskId,
-              },
-            }
-          : undefined,
-        catalogDifficultyLevel: resolvedTask.catalogDifficultyLevelId
-          ? {
-              connect: {
-                id: resolvedTask.catalogDifficultyLevelId,
-              },
-            }
-          : undefined,
-        song: resolvedTask.songId
-          ? {
-              connect: {
-                id: resolvedTask.songId,
-              },
-            }
-          : undefined,
-        customImageMedia: resolvedTask.customImageExternalUrl
-          ? {
-              create: {
-                kind: MediaKind.IMAGE,
-                externalUrl: resolvedTask.customImageExternalUrl,
-              },
-            }
-          : undefined,
-        mediaLinks: {
-          create: buildRoutineTaskMediaLinkCreates(resolvedTask.mediaLinks),
-        },
-      } satisfies Prisma.RoutineTaskCreateInput,
+      data: buildRoutineTaskCrudCreateData(
+        routineId,
+        resolvedTask.sortOrder || (currentMax._max.sortOrder ?? 0) + 1,
+        resolvedTask,
+      ) satisfies Prisma.RoutineTaskCreateInput,
       include: this.routineTaskInclude(),
     });
 

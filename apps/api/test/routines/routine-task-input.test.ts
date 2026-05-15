@@ -3,6 +3,7 @@ import test from "node:test";
 import { MediaKind } from "@prisma/client";
 import {
   buildResolvedRoutineTaskInput,
+  buildRoutineTaskCrudCreateData,
   buildRoutineTaskCreateData,
   buildRoutineTaskMediaLinkCreates,
 } from "../../src/routines/domain/routine-task-input";
@@ -192,5 +193,117 @@ test("resolved task input preserves explicit values exactly", () => {
         externalUrl: "https://example.com/image.jpg",
       },
     ],
+  });
+});
+
+test("task CRUD create data preserves current relation connect/create shape", () => {
+  const result = buildRoutineTaskCrudCreateData("routine-1", 5, {
+    sortOrder: 7,
+    catalogTaskId: "catalog-1",
+    catalogDifficultyLevelId: "difficulty-1",
+    songId: "song-1",
+    title: "Labda feldobas",
+    details: "",
+    coachText: null,
+    repetitionsLabel: "2x10",
+    repetitionCount: 2,
+    repetitionUnitCount: 10,
+    customImageExternalUrl: "https://example.com/custom.jpg",
+    mediaLinks: [
+      {
+        kind: "IMAGE",
+        label: "Mutatott kep",
+        externalUrl: "https://example.com/image.jpg",
+      },
+    ],
+  });
+
+  assert.deepEqual(result, {
+    routine: {
+      connect: {
+        id: "routine-1",
+      },
+    },
+    sortOrder: 5,
+    title: "Labda feldobas",
+    details: "",
+    coachText: null,
+    repetitionsLabel: "2x10",
+    repetitionCount: 2,
+    repetitionUnitCount: 10,
+    catalogTask: {
+      connect: {
+        id: "catalog-1",
+      },
+    },
+    catalogDifficultyLevel: {
+      connect: {
+        id: "difficulty-1",
+      },
+    },
+    song: {
+      connect: {
+        id: "song-1",
+      },
+    },
+    customImageMedia: {
+      create: {
+        kind: MediaKind.IMAGE,
+        externalUrl: "https://example.com/custom.jpg",
+      },
+    },
+    mediaLinks: {
+      create: [
+        {
+          label: "Mutatott kep",
+          sortOrder: 0,
+          mediaAsset: {
+            create: {
+              kind: MediaKind.IMAGE,
+              externalUrl: "https://example.com/image.jpg",
+            },
+          },
+        },
+      ],
+    },
+  });
+});
+
+test("task CRUD create data preserves undefined relation branches for minimal path", () => {
+  const result = buildRoutineTaskCrudCreateData("routine-1", 1, {
+    sortOrder: 1,
+    catalogTaskId: null,
+    catalogDifficultyLevelId: null,
+    songId: null,
+    title: "Hinta",
+    details: null,
+    coachText: null,
+    repetitionsLabel: null,
+    repetitionCount: null,
+    repetitionUnitCount: null,
+    customImageExternalUrl: null,
+    mediaLinks: [],
+  });
+
+  assert.deepEqual(result, {
+    routine: {
+      connect: {
+        id: "routine-1",
+      },
+    },
+    sortOrder: 1,
+    title: "Hinta",
+    details: null,
+    coachText: null,
+    repetitionsLabel: null,
+    repetitionCount: null,
+    repetitionUnitCount: null,
+    catalogTask: undefined,
+    catalogDifficultyLevel: undefined,
+    song: undefined,
+    customImageMedia: undefined,
+    mediaLinks: {
+      create: [],
+    },
   });
 });
