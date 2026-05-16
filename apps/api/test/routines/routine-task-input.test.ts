@@ -8,6 +8,7 @@ import {
   buildRoutineTaskCreateData,
   buildRoutineTaskMediaLinkCreates,
   isRoutineTaskDifficultyCompatibleWithCatalogTask,
+  isRoutineTaskTitleUsable,
 } from "../../src/routines/domain/routine-task-input";
 
 test("task create mapping preserves explicit fields exactly", () => {
@@ -224,6 +225,22 @@ test("task difficulty compatibility returns false when difficulty catalog refere
     isRoutineTaskDifficultyCompatibleWithCatalogTask("catalog-1", undefined),
     false,
   );
+});
+
+test("task title usability returns true for a normal non-empty title", () => {
+  assert.equal(isRoutineTaskTitleUsable("Labda feldobas"), true);
+});
+
+test("task title usability returns false for null", () => {
+  assert.equal(isRoutineTaskTitleUsable(null), false);
+});
+
+test("task title usability returns false for undefined", () => {
+  assert.equal(isRoutineTaskTitleUsable(undefined), false);
+});
+
+test("task title usability returns false for empty string", () => {
+  assert.equal(isRoutineTaskTitleUsable(""), false);
 });
 
 test("task CRUD create data preserves current relation connect/create shape", () => {

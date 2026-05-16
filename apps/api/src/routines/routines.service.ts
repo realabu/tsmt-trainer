@@ -25,6 +25,7 @@ import {
   buildRoutineTaskCrudUpdateData,
   buildRoutineTaskCreateData,
   isRoutineTaskDifficultyCompatibleWithCatalogTask,
+  isRoutineTaskTitleUsable,
   type ResolvedRoutineTaskInput,
 } from "./domain/routine-task-input";
 import { normalizeRepetitionsLabel } from "./domain/repetition-label";
@@ -216,7 +217,7 @@ export class RoutinesService {
     const displayFields = buildRoutineTaskDisplayFields(input, catalogTask);
     const title = displayFields.title;
 
-    if (!title) {
+    if (!isRoutineTaskTitleUsable(title)) {
       throw new BadRequestException("Minden rutin feladathoz kell cim vagy katalogus forras.");
     }
 
