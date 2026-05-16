@@ -402,6 +402,63 @@ test("createTask preserves current catalog-connected create path with difficulty
   });
 });
 
+test("createTask throws when catalog task is missing", async () => {
+  const { calls, service, currentUser } = createRoutinesTaskHarness({
+    catalogTask: null,
+  });
+
+  await assert.rejects(
+    service.createTask(
+      currentUser,
+      "routine-1",
+      {
+        sortOrder: 3,
+        catalogTaskId: "catalog-missing",
+        catalogDifficultyLevelId: "difficulty-1",
+      } as any,
+    ),
+    (error: unknown) => {
+      assert.ok(error instanceof NotFoundException);
+      assert.equal(error.message, "Az egyik kivalasztott katalogus feladat nem talalhato.");
+      return true;
+    },
+  );
+
+  assert.deepEqual(calls.routineFindFirst, [
+    {
+      where: {
+        id: "routine-1",
+        child: {
+          ownerId: "parent-1",
+        },
+      },
+      select: {
+        id: true,
+        childId: true,
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogItemFindFirst, [
+    {
+      where: {
+        id: "catalog-missing",
+        isActive: true,
+      },
+      include: {
+        defaultSong: true,
+        difficultyLevels: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    },
+  ]);
+  assert.deepEqual(calls.taskCatalogDifficultyLevelFindUnique, []);
+  assert.deepEqual(calls.songCatalogItemFindFirst, []);
+  assert.deepEqual(calls.routineTaskAggregate, []);
+  assert.deepEqual(calls.routineTaskCreate, []);
+});
+
 test("createTask preserves explicit songId override over catalog default song fallback", async () => {
   const { calls, service, currentUser } = createRoutinesTaskHarness({
     aggregateMaxSortOrder: 4,
