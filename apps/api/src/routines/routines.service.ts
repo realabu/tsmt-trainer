@@ -19,6 +19,7 @@ import {
   buildRoutineUpdateScalarData,
 } from "./domain/routine-scalar-data";
 import { buildRoutineTaskDisplayFields } from "./domain/routine-task-display";
+import { buildRoutineTaskCatalogSearchWhere } from "./domain/routine-task-catalog-search";
 import {
   buildResolvedRoutineTaskInput,
   buildRoutineTaskCrudCreateData,
@@ -715,49 +716,8 @@ export class RoutinesService {
       throw new NotFoundException("Felhasznalo nem talalhato.");
     }
 
-    const q = query?.trim();
-
     return this.prisma.taskCatalogItem.findMany({
-      where: {
-        ...(q
-          ? ({
-              isActive: true,
-              OR: [
-                { title: { contains: q, mode: "insensitive" } },
-                { summary: { contains: q, mode: "insensitive" } },
-                { instructions: { contains: q, mode: "insensitive" } },
-                { focusPoints: { contains: q, mode: "insensitive" } },
-                { demoVideoUrl: { contains: q, mode: "insensitive" } },
-                {
-                  defaultSong: {
-                    is: {
-                      title: { contains: q, mode: "insensitive" },
-                    },
-                  },
-                },
-                {
-                  equipmentLinks: {
-                    some: {
-                      equipmentCatalogItem: {
-                        name: { contains: q, mode: "insensitive" },
-                      },
-                    },
-                  },
-                },
-                {
-                  difficultyLevels: {
-                    some: {
-                      OR: [
-                        { name: { contains: q, mode: "insensitive" } },
-                        { description: { contains: q, mode: "insensitive" } },
-                      ],
-                    },
-                  },
-                },
-              ],
-            })
-          : { isActive: true }),
-      },
+      where: buildRoutineTaskCatalogSearchWhere(query),
       orderBy: { title: "asc" },
       take: 20,
       include: {
