@@ -29,7 +29,10 @@ import {
   type ResolvedRoutineTaskInput,
 } from "./domain/routine-task-input";
 import { normalizeRepetitionsLabel } from "./domain/repetition-label";
-import { resolveRoutineTaskSongId } from "./domain/routine-task-song";
+import {
+  resolveRoutineTaskSongId,
+  shouldLookupRoutineTaskSong,
+} from "./domain/routine-task-song";
 import {
   CreateRoutineDto,
   CreateRoutinePeriodDto,
@@ -200,7 +203,7 @@ export class RoutinesService {
       catalogTask?.defaultSongId,
     );
 
-    if (resolvedSongId) {
+    if (shouldLookupRoutineTaskSong(resolvedSongId)) {
       const song = await this.prisma.songCatalogItem.findFirst({
         where: {
           id: resolvedSongId,
