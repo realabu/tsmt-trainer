@@ -91,7 +91,7 @@ Several pure extractions already exist:
 
 This means the next work should continue from the existing extraction pattern, not restart the design.
 
-## Checkpoint After #44–#65
+## Checkpoint After #44–#67
 
 Completed PRs:
 - `#44` routine create/update service-level safety-net tests
@@ -115,6 +115,8 @@ Completed PRs:
 - `#63` missing difficulty level service-level safety coverage
 - `#64` missing title after fallback service-level safety coverage
 - `#65` pure task title usability helper extraction
+- `#66` routines resolveTaskInput checkpoint documentation
+- `#67` pure task song lookup guard helper extraction
 
 What is now safer:
 - top-level routine create/update behavior has service-level safety coverage
@@ -130,21 +132,21 @@ What is now safer:
 - missing difficulty level behavior now has service-level coverage
 - missing title after display/catalog fallback behavior now has service-level coverage
 - the task title usability decision now lives in a pure routines domain helper
+- the task song lookup guard now lives in a pure routines domain helper while `songCatalogItem.findFirst(...)` remains in `RoutinesService`
 - routine, task, and period top-level scalar/data shaping are more explicit in the routines domain helper area
 - `createTask(...)` and `updateTask(...)` final Prisma data payload shaping now lives in pure helpers
 
 What still remains risky:
 - `RoutinesService` is still the main backend hotspot
 - task CRUD is now in a stable checkpoint state, but it still depends on `resolveTaskInput(...)`
-- `resolveTaskInput(...)` still combines catalog lookup, difficulty validation, song fallback, display fallback, and resolved input assembly
+- `resolveTaskInput(...)` still owns Prisma reads, validation branching, fallback sequencing, and final resolved input assembly
 - catalog-connected task flows are much better covered, but resolver orchestration and fallback rules still live together in one method
 
 Recommended next decision point:
-- continue conservatively around `resolveTaskInput(...)`
-- prefer only the next smallest pure extraction that is now backed by coverage
-- only extract the smallest deterministic helper when the relevant behavior is already covered
-- avoid moving Prisma reads or broad resolver orchestration
-- do not jump directly to a broad orchestration boundary
+- inspect whether any remaining pure deterministic `resolveTaskInput(...)` decision is still worth extracting
+- do not automatically continue extraction if the remaining gain is only cosmetic
+- reject changes that move Prisma reads, exception creation, lookup order, or broad resolver orchestration
+- keep any future `resolveTaskInput(...)` PR behavior-preserving and backed by existing or targeted coverage
 - do not mix in progress, delete-impact, or catalog search changes without separate inspection
 
 ### Current Task CRUD State
@@ -204,25 +206,27 @@ This plan does **not** define final sub-services or a final architecture split.
 - missing difficulty level service safety-net
 - missing title after fallback service safety-net
 - pure task title usability helper extraction
+- pure task song lookup guard helper extraction
 
-### Next Likely Step: Continue Conservative `resolveTaskInput(...)` Decomposition
+### Next Likely Step: Inspect Remaining `resolveTaskInput(...)` Value
 - Goal:
-  - reduce one tiny deterministic slice of `resolveTaskInput(...)` at a time
+  - decide whether another tiny pure extraction is still worth doing
 - Files affected:
   - `apps/api/src/routines/routines.service.ts`
-  - one focused helper under `apps/api/src/routines/domain/`
-  - related routines tests
-- What is extracted:
-  - one small pure validation or fallback decision only
+  - existing routines domain helper tests for reference
+- What is inspected:
+  - remaining inline decisions inside `resolveTaskInput(...)`
+  - whether extracting them would reduce real complexity or only shuffle code
+  - whether a candidate risks moving Prisma reads, exceptions, lookup order, or broad orchestration
 - What is NOT changed:
   - no production behavior
   - no Prisma query semantics
   - no ownership checks
   - no DTO contract changes
 - Why it is safe:
-  - the main `resolveTaskInput(...)` validation branches now have service-level safety coverage
+  - it prevents the refactor from sliding into low-value micro-extractions
 
-### Likely PR After Coverage: Extract One Small `resolveTaskInput(...)` Helper
+### Possible PR After Inspection: Extract One Small `resolveTaskInput(...)` Helper
 - Goal:
   - reduce one deterministic slice of task input resolution while keeping Prisma reads and orchestration in `RoutinesService`
 - Files affected:
