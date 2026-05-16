@@ -91,7 +91,7 @@ Several pure extractions already exist:
 
 This means the next work should continue from the existing extraction pattern, not restart the design.
 
-## Checkpoint After #44–#67
+## Checkpoint After #44–#70
 
 Completed PRs:
 - `#44` routine create/update service-level safety-net tests
@@ -117,6 +117,9 @@ Completed PRs:
 - `#65` pure task title usability helper extraction
 - `#66` routines resolveTaskInput checkpoint documentation
 - `#67` pure task song lookup guard helper extraction
+- `#68` routines checkpoint documentation through the task song lookup guard
+- `#69` `searchTaskCatalog(...)` service-level safety coverage
+- `#70` pure task catalog search `where` builder extraction
 
 What is now safer:
 - top-level routine create/update behavior has service-level safety coverage
@@ -133,6 +136,8 @@ What is now safer:
 - missing title after display/catalog fallback behavior now has service-level coverage
 - the task title usability decision now lives in a pure routines domain helper
 - the task song lookup guard now lives in a pure routines domain helper while `songCatalogItem.findFirst(...)` remains in `RoutinesService`
+- `searchTaskCatalog(...)` now has service-level safety coverage for the missing-user guard, blank query behavior, trimmed search query shape, include/order/take shape, and raw Prisma result passthrough
+- task catalog search `where` building now lives in the pure `buildRoutineTaskCatalogSearchWhere(...)` routines domain helper
 - routine, task, and period top-level scalar/data shaping are more explicit in the routines domain helper area
 - `createTask(...)` and `updateTask(...)` final Prisma data payload shaping now lives in pure helpers
 
@@ -141,13 +146,15 @@ What still remains risky:
 - task CRUD is now in a stable checkpoint state, but it still depends on `resolveTaskInput(...)`
 - `resolveTaskInput(...)` still owns Prisma reads, validation branching, fallback sequencing, and final resolved input assembly
 - catalog-connected task flows are much better covered, but resolver orchestration and fallback rules still live together in one method
+- `searchTaskCatalog(...)` still returns a raw Prisma include shape consumed directly by the frontend `TaskBuilder`
+- `searchTaskCatalog(...)` include shape, `orderBy`, `take`, Prisma execution, and result passthrough intentionally remain in `RoutinesService`
+- extracting task catalog search include/order/take should be avoided unless future inspection finds real value beyond cosmetic movement
 
 Recommended next decision point:
-- inspect whether any remaining pure deterministic `resolveTaskInput(...)` decision is still worth extracting
-- do not automatically continue extraction if the remaining gain is only cosmetic
-- reject changes that move Prisma reads, exception creation, lookup order, or broad resolver orchestration
-- keep any future `resolveTaskInput(...)` PR behavior-preserving and backed by existing or targeted coverage
-- do not mix in progress, delete-impact, or catalog search changes without separate inspection
+- do not automatically continue `searchTaskCatalog(...)` refactoring after the `where` extraction
+- inspect the next routines hotspot before writing code
+- likely candidates include progress, delete impact, or another documented follow-up, but the next PR should not be chosen without inspection
+- reject changes that move Prisma reads, exception creation, lookup order, raw response shape, or broad orchestration
 
 ### Current Task CRUD State
 
@@ -207,42 +214,43 @@ This plan does **not** define final sub-services or a final architecture split.
 - missing title after fallback service safety-net
 - pure task title usability helper extraction
 - pure task song lookup guard helper extraction
+- `searchTaskCatalog(...)` service safety-net
+- pure task catalog search `where` builder extraction
 
-### Next Likely Step: Inspect Remaining `resolveTaskInput(...)` Value
+### Next Likely Step: Inspect The Next Routines Hotspot
 - Goal:
-  - decide whether another tiny pure extraction is still worth doing
+  - choose the next behavior-preserving routines step based on inspection, not momentum
 - Files affected:
   - `apps/api/src/routines/routines.service.ts`
-  - existing routines domain helper tests for reference
+  - relevant routines domain helper tests for reference
 - What is inspected:
-  - remaining inline decisions inside `resolveTaskInput(...)`
-  - whether extracting them would reduce real complexity or only shuffle code
-  - whether a candidate risks moving Prisma reads, exceptions, lookup order, or broad orchestration
+  - whether `getProgress(...)`, delete-impact methods, or another documented follow-up has a small safe next step
+  - whether the candidate needs safety coverage before extraction
+  - whether a candidate risks moving Prisma reads, exceptions, lookup order, raw API shape, or broad orchestration
 - What is NOT changed:
   - no production behavior
   - no Prisma query semantics
   - no ownership checks
   - no DTO contract changes
 - Why it is safe:
-  - it prevents the refactor from sliding into low-value micro-extractions
+  - it prevents the refactor from sliding into low-value micro-extractions or broad orchestration moves
 
-### Possible PR After Inspection: Extract One Small `resolveTaskInput(...)` Helper
+### Possible PR After Inspection: Add Coverage Or Extract One Small Helper
 - Goal:
-  - reduce one deterministic slice of task input resolution while keeping Prisma reads and orchestration in `RoutinesService`
+  - reduce one deterministic slice of a selected hotspot only when coverage and inspection justify it
 - Files affected:
   - `apps/api/src/routines/routines.service.ts`
   - one focused helper under `apps/api/src/routines/domain/`
   - related routines tests
 - What is extracted:
-  - one small deterministic resolution or validation helper only
+  - one small deterministic helper only, or one service-level safety test if coverage should come first
 - What is NOT changed:
   - endpoint signatures
   - ownership checks
-  - catalog lookup behavior
-  - song fallback behavior
+  - raw response shape
   - Prisma query semantics
 - Why it is safe:
-  - builds on the stronger task CRUD service-level safety-net before touching the next hotspot
+  - keeps the current one-step-at-a-time pattern and avoids speculative structure
 
 ### Still Later: Consider a Small Orchestration Boundary
 - Goal:
@@ -273,7 +281,7 @@ The following constraints apply to all routines refactor PRs in this plan:
 
 ## Follow-up Register
 
-All items below are **non-blocking** for the next conservative `resolveTaskInput(...)` decomposition step.
+All items below are **non-blocking** for the next routines hotspot inspection.
 
 - DTO/type mismatch around catalog fallback title optionality
   - Next action: type/contract inspection, not an immediate refactor
@@ -290,8 +298,8 @@ All items below are **non-blocking** for the next conservative `resolveTaskInput
 - `getProgress(...)` orchestration
   - Next action: future separate inspection
   - Blocking next step: no
-- `searchTaskCatalog(...)` query shape
-  - Next action: future separate inspection
+- `searchTaskCatalog(...)` include/order/take/result passthrough
+  - Next action: leave in `RoutinesService` unless future inspection finds real value
   - Blocking next step: no
 
 ## Recommended Execution Style
