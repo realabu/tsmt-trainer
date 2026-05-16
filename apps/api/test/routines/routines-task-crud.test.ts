@@ -459,6 +459,81 @@ test("createTask throws when catalog task is missing", async () => {
   assert.deepEqual(calls.routineTaskCreate, []);
 });
 
+test("createTask throws when catalog difficulty level is missing", async () => {
+  const { calls, service, currentUser } = createRoutinesTaskHarness({
+    catalogTask: {
+      id: "catalog-1",
+      title: "Katalogus feladat",
+      summary: "Mintaleiras",
+      defaultSongId: "song-1",
+      defaultSong: { id: "song-1", title: "Mondoka" },
+      difficultyLevels: [
+        {
+          id: "difficulty-1",
+          taskCatalogItemId: "catalog-1",
+        },
+      ],
+    },
+    difficultyLevel: null,
+  });
+
+  await assert.rejects(
+    service.createTask(
+      currentUser,
+      "routine-1",
+      {
+        sortOrder: 3,
+        catalogTaskId: "catalog-1",
+        catalogDifficultyLevelId: "difficulty-missing",
+      } as any,
+    ),
+    (error: unknown) => {
+      assert.ok(error instanceof NotFoundException);
+      assert.equal(error.message, "A kivalasztott nehezsegi szint nem talalhato.");
+      return true;
+    },
+  );
+
+  assert.deepEqual(calls.routineFindFirst, [
+    {
+      where: {
+        id: "routine-1",
+        child: {
+          ownerId: "parent-1",
+        },
+      },
+      select: {
+        id: true,
+        childId: true,
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogItemFindFirst, [
+    {
+      where: {
+        id: "catalog-1",
+        isActive: true,
+      },
+      include: {
+        defaultSong: true,
+        difficultyLevels: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    },
+  ]);
+
+  assert.deepEqual(calls.taskCatalogDifficultyLevelFindUnique, [
+    {
+      where: { id: "difficulty-missing" },
+    },
+  ]);
+  assert.deepEqual(calls.songCatalogItemFindFirst, []);
+  assert.deepEqual(calls.routineTaskAggregate, []);
+  assert.deepEqual(calls.routineTaskCreate, []);
+});
+
 test("createTask preserves explicit songId override over catalog default song fallback", async () => {
   const { calls, service, currentUser } = createRoutinesTaskHarness({
     aggregateMaxSortOrder: 4,
