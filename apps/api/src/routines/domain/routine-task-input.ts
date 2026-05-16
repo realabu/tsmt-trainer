@@ -72,6 +72,12 @@ export function isRoutineTaskDifficultyCompatibleWithCatalogTask(
   );
 }
 
+export function isRoutineTaskTitleUsable(
+  title: string | null | undefined,
+): title is string {
+  return Boolean(title);
+}
+
 export function buildRoutineTaskMediaLinkCreates(mediaLinks: RoutineTaskMediaLinkInput[]) {
   return mediaLinks.map((media, mediaIndex) => ({
     label: media.label,
