@@ -6,3 +6,9 @@ export function resolveRoutineTaskSongId(
 
   return explicitSongId === undefined ? catalogDefaultSongId ?? undefined : explicitSongId;
 }
+
+export function shouldLookupRoutineTaskSong(
+  resolvedSongId: string | null | undefined,
+): resolvedSongId is string {
+  return Boolean(resolvedSongId);
+}
