@@ -534,6 +534,42 @@ test("createTask throws when catalog difficulty level is missing", async () => {
   assert.deepEqual(calls.routineTaskCreate, []);
 });
 
+test("createTask throws when title is missing after fallback", async () => {
+  const { calls, service, currentUser } = createRoutinesTaskHarness();
+
+  await assert.rejects(
+    service.createTask(
+      currentUser,
+      "routine-1",
+      {
+        sortOrder: 3,
+      } as any,
+    ),
+    (error: unknown) => {
+      assert.ok(error instanceof BadRequestException);
+      assert.equal(error.message, "Minden rutin feladathoz kell cim vagy katalogus forras.");
+      return true;
+    },
+  );
+
+  assert.deepEqual(calls.routineFindFirst, [
+    {
+      where: {
+        id: "routine-1",
+        child: {
+          ownerId: "parent-1",
+        },
+      },
+      select: {
+        id: true,
+        childId: true,
+      },
+    },
+  ]);
+  assert.deepEqual(calls.routineTaskAggregate, []);
+  assert.deepEqual(calls.routineTaskCreate, []);
+});
+
 test("createTask preserves explicit songId override over catalog default song fallback", async () => {
   const { calls, service, currentUser } = createRoutinesTaskHarness({
     aggregateMaxSortOrder: 4,
