@@ -612,6 +612,8 @@ Codex must stop and ask for architect decision if:
 - Baseline commit SHA:
   - `f7edc20790c4b558a8cdb159eb44a4b1272637ef`
 - Final experiment commit SHA:
+  - `5a0df7e03249a9caead52b016fbcffc2ffb26d14`
+- Step 3 implementation commit SHA:
   - `bf2c9bdac27a595852d5a38701a88427bd810b90`
 - Changed files:
   - `apps/api/src/routines/routine-delete-impact.service.ts`
