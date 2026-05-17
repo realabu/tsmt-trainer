@@ -20,7 +20,7 @@ The routines backend is the next recommended refactor domain because it is both:
 - high-value product-wise
 
 Facts visible in the repository:
-- [apps/api/src/routines/routines.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/routines/routines.service.ts) is still the largest backend hotspot at roughly 870 lines
+- [apps/api/src/routines/routines.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/routines/routines.service.ts) is still a major backend hotspot even after the first workflow-service extraction
 - the architecture audit classifies routines as `Risky`
 - the service remains responsible for multiple distinct workflows
 - the routines domain connects directly to:
@@ -91,7 +91,7 @@ Several pure extractions already exist:
 
 This means the next work should continue from the existing extraction pattern, not restart the design.
 
-## Checkpoint After #44–#77
+## Checkpoint After #44–#79
 
 Completed PRs:
 - `#44` routine create/update service-level safety-net tests
@@ -127,6 +127,12 @@ Completed PRs:
 - `#75` routine delete-impact service-level safety coverage
 - `#76` period delete-impact service-level safety coverage
 - `#77` task delete-impact service-level safety coverage
+- `#78` routines checkpoint documentation through delete-impact preview coverage
+- `#79` controlled routines domain completion experiment:
+  - added `docs/routines-domain-completion-experiment.md`
+  - added routine `remove(...)` safety coverage
+  - extracted `RoutineDeleteImpactService`
+  - kept controller/DTO/API/schema/delete semantics unchanged
 
 What is now safer:
 - top-level routine create/update behavior has service-level safety coverage
@@ -149,6 +155,8 @@ What is now safer:
 - final progress response assembly now lives in the pure `buildRoutineProgressResponse(...)` routines domain helper
 - delete-impact preview service coverage now exists for routine, period, and task previews
 - delete-impact preview coverage locks the current ownership lookups, count query shapes, not-found behavior, and response flow through the existing pure builders
+- routine `remove(...)` now has focused safety coverage for ownership lookup, `routine.delete(...)`, not-found behavior, and `{ success: true }`
+- delete-impact preview orchestration is now isolated behind the named `RoutineDeleteImpactService` workflow boundary
 - routine, task, and period top-level scalar/data shaping are more explicit in the routines domain helper area
 - `createTask(...)` and `updateTask(...)` final Prisma data payload shaping now lives in pure helpers
 
@@ -164,12 +172,29 @@ What still remains risky:
 - broader progress service extraction should be avoided unless future inspection finds real value beyond cosmetic movement
 - actual destructive delete methods and Prisma cascade behavior have not been changed by the delete-impact coverage
 - delete-impact coverage protects preview/query/response behavior, not delete semantics
-- broader delete-impact helper or service extraction should not be automatic
+- actual delete semantics and Prisma cascade behavior intentionally remain unchanged
+- `RoutinesService` still owns routine/task/period CRUD, resolver orchestration, progress, and catalog methods
+- `listSongCatalog(...)`, `listByChild(...)`, and `getById(...)` remain future inspection candidates only
+- broader service-boundary extraction should not be automatic
+
+Controlled experiment outcome:
+- `RoutineDeleteImpactService` is now the first extracted routines workflow service boundary.
+- Moved into `RoutineDeleteImpactService`:
+  - delete-impact preview lookup/count orchestration
+  - calls to existing pure delete-impact builders
+- Stayed in `RoutinesService`:
+  - public controller-facing facade methods for `getDeleteImpact(...)`, `getTaskDeleteImpact(...)`, and `getPeriodDeleteImpact(...)`
+  - actual delete methods: `remove(...)`, `removeTask(...)`, and `removePeriod(...)`
+  - routine/task/period CRUD
+  - `resolveTaskInput(...)`
+  - `getProgress(...)`
+  - `searchTaskCatalog(...)` and `listSongCatalog(...)`
 
 Recommended next decision point:
-- run an architect checkpoint before choosing more routines backend code
-- assess whether routines backend is now safe enough for feature work, needs a first service-boundary extraction, or should pause in favor of another production-readiness hotspot
-- reject changes that move Prisma reads, exception creation, lookup order, raw response shape, or broad orchestration
+- pause routines backend refactoring by default
+- do not continue service-boundary extraction automatically
+- inspect another production-readiness hotspot unless product work directly touches routines
+- if routines work resumes, start with inspection and reject changes that move Prisma reads, exception creation, lookup order, raw response shape, delete semantics, or broad orchestration without a scoped plan
 
 ### Current Task CRUD State
 
@@ -236,15 +261,17 @@ This plan does **not** define final sub-services or a final architecture split.
 - routine delete-impact service safety-net
 - period delete-impact service safety-net
 - task delete-impact service safety-net
+- controlled routines completion experiment
+- routine `remove(...)` safety-net
+- `RoutineDeleteImpactService` workflow boundary extraction
 
-### Next Likely Step: Architect Checkpoint
+### Next Likely Step: Pause Or Inspect Another Hotspot
 - Goal:
-  - decide whether routines backend should continue, pause, or move to a first service-boundary extraction
+  - avoid continuing routines refactor work by momentum
 - Files affected:
-  - docs or inspection notes only unless a follow-up PR is separately chosen
+  - docs or inspection notes only unless product work directly touches routines
 - What is inspected:
-  - remaining production risks after task CRUD, resolver, catalog search, progress, and delete-impact preview coverage
-  - whether the next highest-value step is a small boundary extraction, another hotspot, or quality-gate work
+  - another production-readiness hotspot, or a routines area only if feature work requires it
   - whether a candidate risks moving Prisma reads, exceptions, lookup order, raw API shape, delete semantics, or broad orchestration
 - What is NOT changed:
   - no production behavior
@@ -252,7 +279,7 @@ This plan does **not** define final sub-services or a final architecture split.
   - no ownership checks
   - no DTO contract changes
 - Why it is safe:
-  - it prevents the refactor from sliding into low-value micro-extractions after the main dangerous preview paths are covered
+  - it prevents the refactor from sliding into low-value service-boundary extraction after the first experiment succeeded
 
 ### Possible PR After Inspection: Add Coverage Or Extract One Small Helper
 - Goal:
@@ -312,13 +339,16 @@ All items below are **non-blocking** for the next routines hotspot inspection.
   - Next action: future targeted test PR only if touching media behavior
   - Blocking next step: no
 - delete-impact preview orchestration
-  - Next action: coverage exists for routine, period, and task previews; do not extract further without an architect checkpoint
+  - Next action: `RoutineDeleteImpactService` now owns preview orchestration; do not extract further without a new scoped plan
   - Blocking next step: no
 - `getProgress(...)` orchestration
   - Next action: leave Prisma read, ownership query, include/select/order shape, exception behavior, and calculation orchestration in `RoutinesService` unless future inspection finds real value
   - Blocking next step: no
 - `searchTaskCatalog(...)` include/order/take/result passthrough
   - Next action: leave in `RoutinesService` unless future inspection finds real value
+  - Blocking next step: no
+- `listSongCatalog(...)`, `listByChild(...)`, and `getById(...)`
+  - Next action: future inspection candidates only; do not refactor automatically
   - Blocking next step: no
 
 ## Recommended Execution Style
