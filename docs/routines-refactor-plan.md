@@ -91,7 +91,7 @@ Several pure extractions already exist:
 
 This means the next work should continue from the existing extraction pattern, not restart the design.
 
-## Checkpoint After #44–#73
+## Checkpoint After #44–#77
 
 Completed PRs:
 - `#44` routine create/update service-level safety-net tests
@@ -123,6 +123,10 @@ Completed PRs:
 - `#71` routines checkpoint documentation through task catalog search
 - `#72` `getProgress(...)` service-level safety coverage
 - `#73` pure progress response helper extraction
+- `#74` routines checkpoint documentation through progress response
+- `#75` routine delete-impact service-level safety coverage
+- `#76` period delete-impact service-level safety coverage
+- `#77` task delete-impact service-level safety coverage
 
 What is now safer:
 - top-level routine create/update behavior has service-level safety coverage
@@ -143,6 +147,8 @@ What is now safer:
 - task catalog search `where` building now lives in the pure `buildRoutineTaskCatalogSearchWhere(...)` routines domain helper
 - `getProgress(...)` now has service-level safety coverage for the ownership query, periods/sessions include/select/order shape, missing-routine exception, and current response structure
 - final progress response assembly now lives in the pure `buildRoutineProgressResponse(...)` routines domain helper
+- delete-impact preview service coverage now exists for routine, period, and task previews
+- delete-impact preview coverage locks the current ownership lookups, count query shapes, not-found behavior, and response flow through the existing pure builders
 - routine, task, and period top-level scalar/data shaping are more explicit in the routines domain helper area
 - `createTask(...)` and `updateTask(...)` final Prisma data payload shaping now lives in pure helpers
 
@@ -156,11 +162,13 @@ What still remains risky:
 - extracting task catalog search include/order/take should be avoided unless future inspection finds real value beyond cosmetic movement
 - `getProgress(...)` still intentionally owns the Prisma read, ownership query, periods/sessions include/select/order shape, missing-routine exception behavior, and progress calculation orchestration
 - broader progress service extraction should be avoided unless future inspection finds real value beyond cosmetic movement
+- actual destructive delete methods and Prisma cascade behavior have not been changed by the delete-impact coverage
+- delete-impact coverage protects preview/query/response behavior, not delete semantics
+- broader delete-impact helper or service extraction should not be automatic
 
 Recommended next decision point:
-- do not automatically continue `getProgress(...)` refactoring after the response helper extraction
-- inspect the next routines hotspot before writing code
-- likely next candidate may be delete impact, but implementation should not be chosen without inspection
+- run an architect checkpoint before choosing more routines backend code
+- assess whether routines backend is now safe enough for feature work, needs a first service-boundary extraction, or should pause in favor of another production-readiness hotspot
 - reject changes that move Prisma reads, exception creation, lookup order, raw response shape, or broad orchestration
 
 ### Current Task CRUD State
@@ -225,24 +233,26 @@ This plan does **not** define final sub-services or a final architecture split.
 - pure task catalog search `where` builder extraction
 - `getProgress(...)` service safety-net
 - pure progress response helper extraction
+- routine delete-impact service safety-net
+- period delete-impact service safety-net
+- task delete-impact service safety-net
 
-### Next Likely Step: Inspect The Next Routines Hotspot
+### Next Likely Step: Architect Checkpoint
 - Goal:
-  - choose the next behavior-preserving routines step based on inspection, not momentum
+  - decide whether routines backend should continue, pause, or move to a first service-boundary extraction
 - Files affected:
-  - `apps/api/src/routines/routines.service.ts`
-  - relevant routines domain helper tests for reference
+  - docs or inspection notes only unless a follow-up PR is separately chosen
 - What is inspected:
-  - whether delete-impact methods or another documented follow-up has a small safe next step
-  - whether the candidate needs safety coverage before extraction
-  - whether a candidate risks moving Prisma reads, exceptions, lookup order, raw API shape, or broad orchestration
+  - remaining production risks after task CRUD, resolver, catalog search, progress, and delete-impact preview coverage
+  - whether the next highest-value step is a small boundary extraction, another hotspot, or quality-gate work
+  - whether a candidate risks moving Prisma reads, exceptions, lookup order, raw API shape, delete semantics, or broad orchestration
 - What is NOT changed:
   - no production behavior
   - no Prisma query semantics
   - no ownership checks
   - no DTO contract changes
 - Why it is safe:
-  - it prevents the refactor from sliding into low-value micro-extractions or broad orchestration moves
+  - it prevents the refactor from sliding into low-value micro-extractions after the main dangerous preview paths are covered
 
 ### Possible PR After Inspection: Add Coverage Or Extract One Small Helper
 - Goal:
@@ -301,8 +311,8 @@ All items below are **non-blocking** for the next routines hotspot inspection.
 - remaining custom image create/update/disconnect permutations
   - Next action: future targeted test PR only if touching media behavior
   - Blocking next step: no
-- `getDeleteImpact(...)` orchestration
-  - Next action: future separate inspection
+- delete-impact preview orchestration
+  - Next action: coverage exists for routine, period, and task previews; do not extract further without an architect checkpoint
   - Blocking next step: no
 - `getProgress(...)` orchestration
   - Next action: leave Prisma read, ownership query, include/select/order shape, exception behavior, and calculation orchestration in `RoutinesService` unless future inspection finds real value
