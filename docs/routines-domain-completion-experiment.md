@@ -31,7 +31,7 @@ Current known stabilized areas:
 Current known remaining risks:
 - `RoutinesService` remains a large orchestration class at roughly 750 lines.
 - Actual destructive delete methods and Prisma cascade behavior have not been intentionally changed or fully reviewed in this refactor wave.
-- `listSongCatalog(...)` still has inline query normalization/search shape and no focused service safety test.
+- `listSongCatalog(...)` still has inline query normalization/search shape and no focused service safety test, but is deferred outside this experiment's main sequence.
 - `listByChild(...)` and `getById(...)` still return raw Prisma include shapes consumed by frontend flows.
 - Service-boundary extraction has not yet been attempted in routines after the safety-net buildup.
 - Some edge-path follow-ups remain intentionally non-blocking, including explicit song clear behavior against catalog defaults and remaining custom image permutations.
@@ -285,8 +285,12 @@ Why it matters:
 - This is the first realistic test of whether routines can safely move from helper extraction to service-boundary extraction.
 
 Acceptance criteria:
-- A new `RoutineDeleteImpactService` owns only preview methods and their Prisma reads.
-- `RoutinesService` remains the public facade and delegates.
+- `RoutinesService` keeps the controller-facing public methods:
+  - `getDeleteImpact(...)`
+  - `getTaskDeleteImpact(...)`
+  - `getPeriodDeleteImpact(...)`
+- Those public methods delegate to `RoutineDeleteImpactService`.
+- The preview implementation/query/count orchestration may move into `RoutineDeleteImpactService`.
 - Controller signatures and API shapes remain unchanged.
 - Existing service tests pass with minimal or no expectation changes.
 
@@ -300,28 +304,7 @@ Regression risks:
 - Provider wiring mistakes could break Nest injection.
 - Tests may need brittle constructor setup if the boundary is awkward.
 
-### Story C: Stabilize Catalog Song Search If Routines Work Continues
-
-Value:
-- `listSongCatalog(...)` is small and user-facing through task building.
-
-Why it matters:
-- It resembles `searchTaskCatalog(...)`, but remains less protected.
-
-Acceptance criteria:
-- A focused service safety test pins missing-user behavior, trimmed query shape, include shape, and passthrough result.
-- Optional pure `where` helper only if the safety test proves the extraction adds clarity.
-
-Out of scope:
-- Frontend task builder changes.
-- Song catalog admin changes.
-- API response mapping.
-
-Regression risks:
-- Changing raw include shape.
-- Changing search semantics for blank query.
-
-### Story D: Decide Whether To Pause Routines Backend Refactor
+### Story C: Decide Whether To Pause Routines Backend Refactor
 
 Value:
 - Avoids continuing to refactor after the highest-risk seams are guarded.
@@ -399,45 +382,7 @@ Regression risks:
   - Delete semantics.
   - Actual delete methods.
 
-### Subtask C1: Add `listSongCatalog(...)` Service Safety Test
-
-- Intended files:
-  - New or existing routines service test under `apps/api/test/routines/`.
-- Type:
-  - test-only.
-- Prerequisites:
-  - Architect chooses to continue routines after delete-impact decision.
-- Validation:
-  - `pnpm --filter @tsmt/api test:unit`
-  - `pnpm --filter @tsmt/api typecheck`
-- Rollback / stop condition:
-  - Stop if the test exposes unclear API expectations needing product decision.
-- Must not change:
-  - Include shape.
-  - Search semantics.
-  - Controller/DTO/API shape.
-
-### Subtask C2: Optional Song Catalog `where` Helper
-
-- Intended files:
-  - `apps/api/src/routines/domain/routine-song-catalog-search.ts` or equivalent.
-  - `apps/api/src/routines/routines.service.ts`
-  - helper tests.
-- Type:
-  - refactor-only with tests.
-- Prerequisites:
-  - Subtask C1 complete.
-- Validation:
-  - `pnpm --filter @tsmt/api test:unit`
-  - `pnpm --filter @tsmt/api typecheck`
-- Rollback / stop condition:
-  - Stop if helper is merely cosmetic or worsens readability.
-- Must not change:
-  - Prisma execution.
-  - Include/order shape.
-  - Raw result passthrough.
-
-### Subtask D1: Final Experiment Review
+### Subtask C1: Final Experiment Review
 
 - Intended files:
   - `docs/routines-domain-completion-experiment.md`
@@ -454,7 +399,18 @@ Regression risks:
 - Must not change:
   - Production code during review.
 
-## 8. Proposed PR / Commit Sequence Inside The Experiment
+## 8. Execution Gates
+
+- Gate 1:
+  - Architect approves this plan before any implementation starts.
+- Gate 2:
+  - After the routine delete service safety test, architect reviews whether the `RoutineDeleteImpactService` extraction is still justified.
+- Gate 3:
+  - Before extraction, Codex confirms expected files, moved responsibilities, and unchanged API/DTO/controller behavior.
+- Gate 4:
+  - After extraction, architect performs the final outcome review before any merge to main.
+
+## 9. Proposed PR / Commit Sequence Inside The Experiment
 
 ### Step 1: Plan Domain Completion
 
@@ -469,6 +425,9 @@ Regression risks:
 - Acceptance criteria:
   - Architect can approve, modify, or reject the experiment before code starts.
 
+Gate:
+- Gate 1 must pass before Step 2 starts.
+
 ### Step 2: Add Routine Delete Service Safety Test
 
 - Purpose:
@@ -482,6 +441,9 @@ Regression risks:
   - `pnpm --filter @tsmt/api typecheck`
 - Acceptance criteria:
   - Ownership lookup, delete call, and success response are covered.
+
+Gate:
+- Gate 2 decides whether Step 3 still has enough value.
 
 ### Step 3: Extract `RoutineDeleteImpactService`
 
@@ -499,41 +461,16 @@ Regression risks:
   - `pnpm --filter @tsmt/api typecheck`
   - `pnpm --filter @tsmt/api build`
 - Acceptance criteria:
-  - Only preview methods move.
+  - Controller-facing preview methods stay on `RoutinesService` and delegate.
+  - Preview implementation/query/count orchestration moves only if still justified.
   - RoutinesService remains API facade.
   - Query shapes and response shapes remain unchanged.
 
-### Step 4: Add `listSongCatalog(...)` Safety Test
+Gate:
+- Gate 3 must pass before Step 3 begins.
+- Gate 4 must pass after Step 3 before merge to main.
 
-- Purpose:
-  - Guard the remaining small catalog search path if the experiment continues.
-- Expected changed files:
-  - routines backend tests only.
-- Risk level:
-  - Low.
-- Validation:
-  - `pnpm --filter @tsmt/api test:unit`
-  - `pnpm --filter @tsmt/api typecheck`
-- Acceptance criteria:
-  - Missing-user behavior, trimmed query shape, include shape, and passthrough are covered.
-
-### Step 5: Optional Song Catalog `where` Helper
-
-- Purpose:
-  - Extract only if Step 4 shows the inline where-building is worth isolating.
-- Expected changed files:
-  - one domain helper
-  - routines service
-  - helper tests
-- Risk level:
-  - Low-medium.
-- Validation:
-  - `pnpm --filter @tsmt/api test:unit`
-  - `pnpm --filter @tsmt/api typecheck`
-- Acceptance criteria:
-  - Prisma execution and include/order/result passthrough stay in `RoutinesService`.
-
-### Step 6: Final Experiment Review
+### Step 4: Final Experiment Review
 
 - Purpose:
   - Decide whether the experiment branch should be merged, partially merged, continued, or discarded.
@@ -547,7 +484,20 @@ Regression risks:
 - Acceptance criteria:
   - Architect can make a merge decision with clear tradeoffs.
 
-## 9. Service-Boundary Decision
+This sequence intentionally excludes optional song catalog helper work. The main code goal is to test one real service-boundary extraction, not to continue small catalog helper extraction.
+
+## 10. Deferred Follow-Up Candidates
+
+These are outside the main experiment sequence:
+
+- `listSongCatalog(...)` service safety test:
+  - Useful later if task-building catalog search becomes a focus.
+  - Should pin missing-user behavior, trimmed query shape, include shape, and raw passthrough.
+- Optional song catalog `where` helper:
+  - Only worth considering after a safety test proves the inline query shaping is a real readability issue.
+  - Must not move Prisma execution, include/order shape, or result passthrough.
+
+## 11. Service-Boundary Decision
 
 The experiment should attempt one first real service-boundary extraction only if Steps 1 and 2 are accepted.
 
@@ -566,7 +516,10 @@ Why now:
 - It tests whether routines can safely move from pure helper extraction to workflow service extraction.
 
 What remains in `RoutinesService`:
-- Public method signatures.
+- Controller-facing public methods:
+  - `getDeleteImpact(...)`
+  - `getTaskDeleteImpact(...)`
+  - `getPeriodDeleteImpact(...)`
 - Controller-facing API facade.
 - Actual delete methods.
 - Routine/task/period CRUD.
@@ -574,10 +527,11 @@ What remains in `RoutinesService`:
 - Progress and catalog methods.
 
 What moves:
-- `getDeleteImpact(...)`
-- `getTaskDeleteImpact(...)`
-- `getPeriodDeleteImpact(...)`
-- Private count/query logic used only by these preview methods.
+- Preview implementation/query/count orchestration used by:
+  - `getDeleteImpact(...)`
+  - `getTaskDeleteImpact(...)`
+  - `getPeriodDeleteImpact(...)`
+- Only private logic needed for preview calculation.
 
 Tests that make it safe:
 - `routines-delete-impact-service.test.ts`
@@ -588,7 +542,7 @@ Rollback plan:
 - Keep safety tests if they remain useful and pass.
 - If provider wiring or constructor mocking gets noisy, stop and ask for architect decision rather than forcing the boundary.
 
-## 10. Final Outcome Review Criteria
+## 12. Final Outcome Review Criteria
 
 Judge the final experiment branch against baseline main and this target state:
 
@@ -617,7 +571,24 @@ Judge the final experiment branch against baseline main and this target state:
   - Partially merge if tests are valuable but service extraction is too noisy.
   - Discard if the boundary adds more complexity than it removes.
 
-## 11. Stop Conditions
+Final branch comparison checklist:
+- Baseline commit SHA.
+- Final experiment commit SHA.
+- Files changed.
+- Public API/controller/DTO unchanged confirmation.
+- Prisma schema unchanged confirmation.
+- Actual delete semantics unchanged confirmation.
+- List of Prisma reads moved, if any.
+- `RoutinesService` responsibility and LOC before/after summary.
+- Tests added or changed.
+- Validation commands and results.
+- Outcome decision:
+  - merge all
+  - partial merge
+  - continue experiment
+  - discard
+
+## 13. Stop Conditions
 
 Codex must stop and ask for architect decision if:
 
