@@ -54,7 +54,7 @@ function createRoutinesProgressHarness(config: ProgressHarnessConfig = {}) {
     },
   };
 
-  const service = new RoutinesService(prisma as never);
+  const service = new RoutinesService(prisma as never, {} as never);
   const currentUser = {
     sub: "parent-1",
     email: "parent@example.com",

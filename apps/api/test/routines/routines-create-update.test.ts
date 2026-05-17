@@ -17,6 +17,7 @@ function createRoutinesServiceHarness(config: RoutineServiceHarnessConfig = {}) 
     routineCreate: [] as Array<Record<string, unknown>>,
     routineFindFirst: [] as Array<Record<string, unknown>>,
     routineUpdate: [] as Array<Record<string, unknown>>,
+    routineDelete: [] as Array<Record<string, unknown>>,
   };
 
   const prisma = {
@@ -64,10 +65,14 @@ function createRoutinesServiceHarness(config: RoutineServiceHarnessConfig = {}) 
           }
         );
       },
+      delete: async (args: Record<string, unknown>) => {
+        calls.routineDelete.push(args);
+        return { id: "routine-1" };
+      },
     },
   };
 
-  const service = new RoutinesService(prisma as never);
+  const service = new RoutinesService(prisma as never, {} as never);
   const currentUser = {
     sub: "parent-1",
     email: "parent@example.com",
@@ -346,4 +351,107 @@ test("update throws when routine is not found through existing getById path", as
       return true;
     },
   );
+});
+
+test("remove preserves getById ownership lookup and routine delete query", async () => {
+  const { calls, service, currentUser } = createRoutinesServiceHarness();
+
+  const result = await service.remove(currentUser, "routine-1");
+
+  assert.equal(calls.routineFindFirst.length, 1);
+  assert.deepEqual(calls.routineFindFirst[0], {
+    where: {
+      id: "routine-1",
+      child: {
+        ownerId: "parent-1",
+      },
+    },
+    include: {
+      child: true,
+      tasks: {
+        orderBy: { sortOrder: "asc" },
+        include: {
+          catalogTask: {
+            include: {
+              defaultSong: true,
+              difficultyLevels: {
+                orderBy: { sortOrder: "asc" },
+              },
+              mediaLinks: {
+                orderBy: { sortOrder: "asc" },
+                include: {
+                  mediaAsset: true,
+                },
+              },
+              equipmentLinks: {
+                include: {
+                  equipmentCatalogItem: {
+                    include: {
+                      iconMedia: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          catalogDifficultyLevel: true,
+          song: {
+            include: {
+              audioMedia: true,
+              videoMedia: true,
+            },
+          },
+          customImageMedia: true,
+          mediaLinks: {
+            orderBy: { sortOrder: "asc" },
+            include: {
+              mediaAsset: true,
+            },
+          },
+        },
+      },
+      periods: {
+        orderBy: { startsOn: "asc" },
+      },
+      sessions: {
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        include: {
+          taskTimings: {
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      },
+      _count: {
+        select: {
+          sessions: true,
+        },
+      },
+    },
+  });
+
+  assert.deepEqual(calls.routineDelete, [
+    {
+      where: { id: "routine-1" },
+    },
+  ]);
+  assert.deepEqual(result, { success: true });
+});
+
+test("remove throws when routine is not found through existing getById path", async () => {
+  const { calls, service, currentUser } = createRoutinesServiceHarness({
+    routineById: null,
+  });
+
+  await assert.rejects(
+    service.remove(currentUser, "routine-404"),
+    (error: unknown) => {
+      assert.ok(error instanceof NotFoundException);
+      assert.equal(error.message, "Feladatsor nem talalhato.");
+      return true;
+    },
+  );
+
+  assert.equal(calls.routineFindFirst.length, 1);
+  assert.deepEqual(calls.routineDelete, []);
 });
