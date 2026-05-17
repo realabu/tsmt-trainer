@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { NotFoundException } from "@nestjs/common";
 import { SessionStatus, UserRole } from "@prisma/client";
-import { RoutinesService } from "../../src/routines/routines.service";
+import { RoutineDeleteImpactService } from "../../src/routines/routine-delete-impact.service";
 
 type DeleteImpactHarnessConfig = {
   routine?: Record<string, unknown> | null;
@@ -215,7 +215,7 @@ function createRoutinesDeleteImpactHarness(config: DeleteImpactHarnessConfig = {
     },
   };
 
-  const service = new RoutinesService(prisma as never);
+  const service = new RoutineDeleteImpactService(prisma as never);
   const currentUser = {
     sub: "parent-1",
     email: "parent@example.com",
