@@ -604,3 +604,132 @@ Codex must stop and ask for architect decision if:
 - The experiment starts touching frontend code.
 - The experiment starts touching sessions, children, admin, auth, subscriptions, or trainer domains.
 - The next step looks cosmetic rather than production-readiness driven.
+
+## 14. Final Outcome Review
+
+### Baseline And Final State
+
+- Baseline commit SHA:
+  - `f7edc20790c4b558a8cdb159eb44a4b1272637ef`
+- Final experiment commit SHA:
+  - `bf2c9bdac27a595852d5a38701a88427bd810b90`
+- Changed files:
+  - `apps/api/src/routines/routine-delete-impact.service.ts`
+  - `apps/api/src/routines/routines.module.ts`
+  - `apps/api/src/routines/routines.service.ts`
+  - `apps/api/test/routines/routines-create-update.test.ts`
+  - `apps/api/test/routines/routines-delete-impact-service.test.ts`
+  - `apps/api/test/routines/routines-period-crud.test.ts`
+  - `apps/api/test/routines/routines-progress-service.test.ts`
+  - `apps/api/test/routines/routines-task-catalog-search.test.ts`
+  - `apps/api/test/routines/routines-task-crud.test.ts`
+  - `docs/routines-domain-completion-experiment.md`
+- Executed steps:
+  - Step 1 created this planning document.
+  - Step 2 added focused `remove(...)` safety coverage for routine delete behavior.
+  - Step 3 extracted delete-impact preview implementation into `RoutineDeleteImpactService`.
+
+### Public API And Behavior Safety
+
+- No controller changes were made.
+- No DTO changes were made.
+- No API response shape changes are intended.
+- No Prisma schema changes were made.
+- No delete semantics changes were made.
+- Actual delete methods stayed in `RoutinesService`:
+  - `remove(...)`
+  - `removeTask(...)`
+  - `removePeriod(...)`
+
+### Boundary Extraction Assessment
+
+The extraction achieved the intended boundary.
+
+- Public controller-facing preview methods remain on `RoutinesService`:
+  - `getDeleteImpact(...)`
+  - `getTaskDeleteImpact(...)`
+  - `getPeriodDeleteImpact(...)`
+- `RoutinesService` now delegates those methods to `RoutineDeleteImpactService`.
+- Preview lookup/count orchestration moved into `RoutineDeleteImpactService`.
+- Actual delete methods did not move.
+- Routine/task/period CRUD, `resolveTaskInput(...)`, progress, catalog search, and unrelated routines logic did not move.
+
+### Query And Prisma Safety
+
+Prisma reads/counts moved into `RoutineDeleteImpactService`:
+
+- `routine.findFirst(...)` for routine delete-impact preview ownership lookup.
+- `routineTask.count(...)` for routine task count.
+- `taskMediaLink.count(...)` for routine and task media-link counts.
+- `routinePeriod.count(...)` for routine period count.
+- `session.count(...)` for routine session count and period completed-session count.
+- `sessionTaskTiming.count(...)` for routine and task timing counts.
+- `routineAssignment.count(...)` for trainer assignment count.
+- `badgeAward.count(...)` for routine/period badge-detachment counts.
+- `routineTask.findFirst(...)` for task delete-impact preview ownership lookup.
+- `routinePeriod.findFirst(...)` for period delete-impact preview ownership lookup.
+
+The query/count/include/select shapes are intended to be unchanged. They are covered by `routines-delete-impact-service.test.ts`, including lookup filters, include/select shape, count scopes, period-id badge scope, not-found messages, and output shape.
+
+### Tests And Validation
+
+Tests added or changed:
+
+- Added `remove(...)` routine delete safety coverage in `routines-create-update.test.ts`.
+- Moved delete-impact service tests to instantiate `RoutineDeleteImpactService` directly.
+- Updated unrelated `RoutinesService` test harnesses mechanically for the new constructor dependency.
+
+Validation after Step 3:
+
+- `pnpm --filter @tsmt/api test:unit` passed.
+- `pnpm --filter @tsmt/api typecheck` passed.
+- `pnpm --filter @tsmt/api build` passed.
+- `git diff --check` passed.
+
+Test changes were reasonable, not brittle. The only broad-looking test changes are constructor setup updates caused by the new injected dependency; expectations remained focused on existing behavior.
+
+### RoutinesService Before And After
+
+- `RoutinesService` baseline line count:
+  - approximately `754` lines.
+- `RoutinesService` final line count:
+  - approximately `564` lines.
+- New `RoutineDeleteImpactService` line count:
+  - approximately `215` lines.
+
+The experiment reduced `RoutinesService` cognitive load by removing a cohesive destructive-preview workflow. It did not make `RoutinesService` small, and it still owns multiple major responsibilities: routine CRUD, task CRUD, period CRUD, resolver orchestration, progress, catalog methods, and actual delete methods.
+
+### Production-Readiness Impact
+
+- Destructive-preview safety improved because preview behavior is now both covered and isolated.
+- AI maintainability improved because delete-impact preview orchestration has a named service boundary.
+- Future feature work is safer around delete-impact previews because query/count orchestration is easier to locate.
+- This improved real maintainability, not only line count, because the moved code is cohesive and destructive-action adjacent.
+- The extraction still carries some boundary cost: `RoutinesService` now has one more injected dependency, and existing test harnesses need a stub when they do not exercise delete-impact preview methods.
+
+### Merge Recommendation
+
+Recommendation: merge all.
+
+Justification:
+
+- The experiment stayed within the approved scope.
+- The extracted boundary is cohesive and reversible.
+- Public API, DTOs, controllers, Prisma schema, and delete semantics remained unchanged.
+- The moved Prisma reads/counts were already pinned by service-level tests.
+- Validation passed.
+- The added dependency and test harness setup cost is acceptable relative to the responsibility reduction.
+
+### Follow-Up Recommendations
+
+Immediately after merge:
+
+- Update `docs/routines-refactor-plan.md` to record the experiment outcome and the new `RoutineDeleteImpactService` boundary.
+- Pause routines backend refactoring by default.
+- Run an architect checkpoint before any further routines service-boundary extraction.
+- Prefer inspecting another production-readiness hotspot before continuing routines work, unless product work directly touches routines.
+
+If routines work continues later:
+
+- Treat `listSongCatalog(...)`, `listByChild(...)`, and `getById(...)` as inspection candidates, not automatic refactor targets.
+- Do not move actual delete methods or cascade behavior without a separate destructive-action plan.
