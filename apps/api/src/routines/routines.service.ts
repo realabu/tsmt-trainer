@@ -8,7 +8,10 @@ import {
   buildRoutineTaskDeleteImpact,
 } from "./domain/routine-delete-impact";
 import { parseRoutineTaskMediaKind } from "./domain/media-kind";
-import { calculateRoutineProgressPeriods } from "./domain/routine-progress";
+import {
+  buildRoutineProgressResponse,
+  calculateRoutineProgressPeriods,
+} from "./domain/routine-progress";
 import {
   buildRoutinePeriodCreateData,
   buildRoutinePeriodInputData,
@@ -704,11 +707,10 @@ export class RoutinesService {
       sessions: routine.sessions,
     });
 
-    return {
+    return buildRoutineProgressResponse({
       routineId: routine.id,
-      periodCount: periods.length,
       periods,
-    };
+    });
   }
 
   async searchTaskCatalog(currentUser: AuthenticatedUser, query?: string) {

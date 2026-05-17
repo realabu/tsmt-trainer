@@ -10,6 +10,8 @@ type RoutineProgressSessionInput = {
   completedAt: Date | null;
 };
 
+type RoutineProgressPeriodOutput = ReturnType<typeof calculateRoutineProgressPeriods>[number];
+
 export function calculateRoutineProgressPeriods(input: {
   periods: RoutineProgressPeriodInput[];
   sessions: RoutineProgressSessionInput[];
@@ -50,6 +52,17 @@ export function calculateRoutineProgressPeriods(input: {
       weeks,
     };
   });
+}
+
+export function buildRoutineProgressResponse(input: {
+  routineId: string;
+  periods: RoutineProgressPeriodOutput[];
+}) {
+  return {
+    routineId: input.routineId,
+    periodCount: input.periods.length,
+    periods: input.periods,
+  };
 }
 
 function buildWeeklyBuckets(startsOn: Date, endsOn: Date) {
