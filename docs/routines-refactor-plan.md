@@ -91,7 +91,7 @@ Several pure extractions already exist:
 
 This means the next work should continue from the existing extraction pattern, not restart the design.
 
-## Checkpoint After #44–#70
+## Checkpoint After #44–#73
 
 Completed PRs:
 - `#44` routine create/update service-level safety-net tests
@@ -120,6 +120,9 @@ Completed PRs:
 - `#68` routines checkpoint documentation through the task song lookup guard
 - `#69` `searchTaskCatalog(...)` service-level safety coverage
 - `#70` pure task catalog search `where` builder extraction
+- `#71` routines checkpoint documentation through task catalog search
+- `#72` `getProgress(...)` service-level safety coverage
+- `#73` pure progress response helper extraction
 
 What is now safer:
 - top-level routine create/update behavior has service-level safety coverage
@@ -138,6 +141,8 @@ What is now safer:
 - the task song lookup guard now lives in a pure routines domain helper while `songCatalogItem.findFirst(...)` remains in `RoutinesService`
 - `searchTaskCatalog(...)` now has service-level safety coverage for the missing-user guard, blank query behavior, trimmed search query shape, include/order/take shape, and raw Prisma result passthrough
 - task catalog search `where` building now lives in the pure `buildRoutineTaskCatalogSearchWhere(...)` routines domain helper
+- `getProgress(...)` now has service-level safety coverage for the ownership query, periods/sessions include/select/order shape, missing-routine exception, and current response structure
+- final progress response assembly now lives in the pure `buildRoutineProgressResponse(...)` routines domain helper
 - routine, task, and period top-level scalar/data shaping are more explicit in the routines domain helper area
 - `createTask(...)` and `updateTask(...)` final Prisma data payload shaping now lives in pure helpers
 
@@ -149,11 +154,13 @@ What still remains risky:
 - `searchTaskCatalog(...)` still returns a raw Prisma include shape consumed directly by the frontend `TaskBuilder`
 - `searchTaskCatalog(...)` include shape, `orderBy`, `take`, Prisma execution, and result passthrough intentionally remain in `RoutinesService`
 - extracting task catalog search include/order/take should be avoided unless future inspection finds real value beyond cosmetic movement
+- `getProgress(...)` still intentionally owns the Prisma read, ownership query, periods/sessions include/select/order shape, missing-routine exception behavior, and progress calculation orchestration
+- broader progress service extraction should be avoided unless future inspection finds real value beyond cosmetic movement
 
 Recommended next decision point:
-- do not automatically continue `searchTaskCatalog(...)` refactoring after the `where` extraction
+- do not automatically continue `getProgress(...)` refactoring after the response helper extraction
 - inspect the next routines hotspot before writing code
-- likely candidates include progress, delete impact, or another documented follow-up, but the next PR should not be chosen without inspection
+- likely next candidate may be delete impact, but implementation should not be chosen without inspection
 - reject changes that move Prisma reads, exception creation, lookup order, raw response shape, or broad orchestration
 
 ### Current Task CRUD State
@@ -216,6 +223,8 @@ This plan does **not** define final sub-services or a final architecture split.
 - pure task song lookup guard helper extraction
 - `searchTaskCatalog(...)` service safety-net
 - pure task catalog search `where` builder extraction
+- `getProgress(...)` service safety-net
+- pure progress response helper extraction
 
 ### Next Likely Step: Inspect The Next Routines Hotspot
 - Goal:
@@ -224,7 +233,7 @@ This plan does **not** define final sub-services or a final architecture split.
   - `apps/api/src/routines/routines.service.ts`
   - relevant routines domain helper tests for reference
 - What is inspected:
-  - whether `getProgress(...)`, delete-impact methods, or another documented follow-up has a small safe next step
+  - whether delete-impact methods or another documented follow-up has a small safe next step
   - whether the candidate needs safety coverage before extraction
   - whether a candidate risks moving Prisma reads, exceptions, lookup order, raw API shape, or broad orchestration
 - What is NOT changed:
@@ -296,7 +305,7 @@ All items below are **non-blocking** for the next routines hotspot inspection.
   - Next action: future separate inspection
   - Blocking next step: no
 - `getProgress(...)` orchestration
-  - Next action: future separate inspection
+  - Next action: leave Prisma read, ownership query, include/select/order shape, exception behavior, and calculation orchestration in `RoutinesService` unless future inspection finds real value
   - Blocking next step: no
 - `searchTaskCatalog(...)` include/order/take/result passthrough
   - Next action: leave in `RoutinesService` unless future inspection finds real value
