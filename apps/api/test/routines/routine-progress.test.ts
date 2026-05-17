@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { calculateRoutineProgressPeriods } from "../../src/routines/domain/routine-progress";
+import {
+  buildRoutineProgressResponse,
+  calculateRoutineProgressPeriods,
+} from "../../src/routines/domain/routine-progress";
 
 test("returns one period with zero completed sessions when nothing was completed", () => {
   const periods = calculateRoutineProgressPeriods({
@@ -122,4 +125,33 @@ test("ignores completed sessions outside the period boundaries", () => {
 
   assert.equal(periods[0]?.totalCompletedSessions, 1);
   assert.equal(periods[0]?.weeks[0]?.completedSessions, 1);
+});
+
+test("builds routine progress response with routine id, period count, and periods", () => {
+  const periods = calculateRoutineProgressPeriods({
+    periods: [
+      {
+        id: "period-1",
+        name: "Elso idoszak",
+        startsOn: new Date(2026, 3, 6, 0, 0, 0, 0),
+        endsOn: new Date(2026, 3, 12, 23, 59, 59, 999),
+        weeklyTargetCount: 3,
+      },
+    ],
+    sessions: [],
+  });
+
+  assert.deepEqual(buildRoutineProgressResponse({ routineId: "routine-1", periods }), {
+    routineId: "routine-1",
+    periodCount: 1,
+    periods,
+  });
+});
+
+test("builds routine progress response with zero period count for empty periods", () => {
+  assert.deepEqual(buildRoutineProgressResponse({ routineId: "routine-empty", periods: [] }), {
+    routineId: "routine-empty",
+    periodCount: 0,
+    periods: [],
+  });
 });
