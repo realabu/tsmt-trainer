@@ -6,6 +6,7 @@ import { RoutinesService } from "../../src/routines/routines.service";
 
 type DeleteImpactHarnessConfig = {
   routine?: Record<string, unknown> | null;
+  task?: Record<string, unknown> | null;
   period?: Record<string, unknown> | null;
   counts?: {
     taskCount?: number;
@@ -70,10 +71,38 @@ function createPeriodDeleteImpactLookupExpectation(periodId = "period-1") {
   };
 }
 
+function createTaskDeleteImpactLookupExpectation(taskId = "task-1") {
+  return {
+    where: {
+      id: taskId,
+      routine: {
+        child: {
+          ownerId: "parent-1",
+        },
+      },
+    },
+    include: {
+      routine: {
+        select: {
+          id: true,
+          name: true,
+          child: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
 function createRoutinesDeleteImpactHarness(config: DeleteImpactHarnessConfig = {}) {
   const counts = config.counts ?? {};
   const calls = {
     routineFindFirst: [] as Array<Record<string, unknown>>,
+    routineTaskFindFirst: [] as Array<Record<string, unknown>>,
     routinePeriodFindFirst: [] as Array<Record<string, unknown>>,
     routineTaskCount: [] as Array<Record<string, unknown>>,
     taskMediaLinkCount: [] as Array<Record<string, unknown>>,
@@ -106,6 +135,23 @@ function createRoutinesDeleteImpactHarness(config: DeleteImpactHarnessConfig = {
       },
     },
     routineTask: {
+      findFirst: async (args: Record<string, unknown>) => {
+        calls.routineTaskFindFirst.push(args);
+        return "task" in config
+          ? config.task
+          : {
+              id: "task-1",
+              title: "Labda feldobas",
+              routine: {
+                id: "routine-1",
+                name: "Esti feladatsor",
+                child: {
+                  firstName: "Anna",
+                  lastName: "Teszt",
+                },
+              },
+            };
+      },
       count: async (args: Record<string, unknown>) => {
         calls.routineTaskCount.push(args);
         return counts.taskCount ?? 4;
@@ -403,6 +449,89 @@ test("getPeriodDeleteImpact returns current period delete impact shape from coun
     ],
     notes: [
       "5 befejezett torna marad meg, de a torolt idoszak tobbe nem fog megjelenni a haladasi nezetekben.",
+    ],
+  });
+});
+
+test("getTaskDeleteImpact throws NotFoundException when task is missing or not owned", async () => {
+  const { calls, currentUser, service } = createRoutinesDeleteImpactHarness({
+    task: null,
+  });
+
+  await assert.rejects(
+    () => service.getTaskDeleteImpact(currentUser, "task-404"),
+    (error: unknown) => {
+      assert.ok(error instanceof NotFoundException);
+      assert.equal(error.message, "Feladat nem talalhato.");
+      return true;
+    },
+  );
+
+  assert.deepEqual(calls.routineTaskFindFirst, [
+    createTaskDeleteImpactLookupExpectation("task-404"),
+  ]);
+  assert.deepEqual(calls.taskMediaLinkCount, []);
+  assert.deepEqual(calls.sessionTaskTimingCount, []);
+});
+
+test("getTaskDeleteImpact uses current ownership lookup and task-scoped count queries", async () => {
+  const { calls, currentUser, service } = createRoutinesDeleteImpactHarness();
+
+  await service.getTaskDeleteImpact(currentUser, "task-1");
+
+  assert.deepEqual(calls.routineTaskFindFirst, [
+    createTaskDeleteImpactLookupExpectation(),
+  ]);
+  assert.deepEqual(calls.taskMediaLinkCount, [
+    {
+      where: {
+        taskId: "task-1",
+      },
+    },
+  ]);
+  assert.deepEqual(calls.sessionTaskTimingCount, [
+    {
+      where: {
+        taskId: "task-1",
+      },
+    },
+  ]);
+});
+
+test("getTaskDeleteImpact returns current task delete impact shape from count values", async () => {
+  const { currentUser, service } = createRoutinesDeleteImpactHarness({
+    task: {
+      id: "task-2",
+      title: "Karika atlepes",
+      routine: {
+        id: "routine-2",
+        name: "Reggeli feladatsor",
+        child: {
+          firstName: "Bence",
+          lastName: "Minta",
+        },
+      },
+    },
+    counts: {
+      taskMediaLinkCount: 4,
+      sessionTaskTimingCount: 9,
+    },
+  });
+
+  const result = await service.getTaskDeleteImpact(currentUser, "task-2");
+
+  assert.deepEqual(result, {
+    entityType: "task",
+    entityId: "task-2",
+    entityLabel: "Karika atlepes",
+    parentLabel: "Bence Minta / Reggeli feladatsor",
+    deletes: [
+      { label: "Feladat media kapcsolat", count: 4 },
+      { label: "Reszido bejegyzes", count: 9 },
+    ],
+    detaches: [],
+    notes: [
+      "A feladat torlesevel a korabbi tornakhoz rogzitett ehhez tartozo reszidok is torlodnek.",
     ],
   });
 });
