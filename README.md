@@ -26,9 +26,9 @@ Monorepo alap egy API-first TSMT webalkalmazáshoz.
 5. `pnpm db:seed`
 6. `pnpm dev`
 
-## Következő implementációs fókusz
+## Aktuális technikai fókusz
 
-- Valódi auth folyamat
-- Prisma-alapú CRUD végpontok
-- Session runner UI összekötése az API-val
-- Weekly progress és badge awarding logika
+- A routines backend refaktor checkpoint lezárult, további routines munka csak célzott inspection után induljon.
+- A következő backend inspection jelölt a sessions lifecycle / badge orchestration.
+- Fontos további jelöltek: frontend destruktív flow-k, training runner session flow, minimális e2e/smoke quality gate.
+- CI/higiénia: `pnpm check:generated`, `pnpm typecheck`, `pnpm test`, app buildok.

@@ -10,7 +10,7 @@ The engineering objective is not premature elegance. It is:
 - small, reviewable changes with low regression risk
 - gradual movement toward cleaner architecture without stopping delivery
 
-This guide is intentionally pragmatic and reflects the current codebase reality as of April 2026.
+This guide is intentionally pragmatic and reflects the current codebase reality as of May 2026.
 
 ## Stability Before Sophistication
 Stability comes before architectural sophistication.
@@ -34,11 +34,15 @@ The main maintainability risk today is not the folder structure. It is that too 
 Current high-risk files include:
 - `apps/api/src/routines/routines.service.ts`
 - `apps/api/src/sessions/sessions.service.ts`
-- `apps/api/src/admin/admin.service.ts`
 - `apps/web/components/routines-manager.tsx`
 - `apps/web/components/training-runner.tsx`
 - `apps/web/components/parent-dashboard.tsx`
 - `apps/web/components/admin-catalog-manager.tsx`
+
+Recent checkpoint:
+- routines backend refactoring is paused by default after `RoutineDeleteImpactService` was extracted
+- admin backend has already been split into focused services; admin frontend remains the larger admin hotspot
+- generated output is guarded by `pnpm check:generated`
 
 Assumptions:
 - functionality and product concepts will continue changing materially
@@ -259,7 +263,8 @@ Security direction:
 
 ## Testing Strategy
 Current reality:
-- there is little or no effective automated test coverage
+- focused unit and service-level tests exist for several extracted auth, admin, sessions, routines, and frontend helper paths
+- coverage is still uneven around end-to-end user flows, large frontend components, and some ownership-sensitive backend paths
 - typecheck catches some issues, but not domain regressions
 
 Target strategy:
@@ -324,17 +329,19 @@ Minimum quality gates for merged work:
 
 Practical repository-specific gates:
 1. `pnpm typecheck`
-2. `pnpm build` for touched apps when feasible
-3. if Prisma schema changed:
+2. `pnpm check:generated`
+3. `pnpm build` for touched apps when feasible
+4. if Prisma schema changed:
    - `pnpm db:generate`
    - migration reviewed
    - migration applied locally
    - seed/import scripts sanity checked if affected
-4. if auth, badges, progress, deletion impact, or import logic changed:
+5. if auth, badges, progress, deletion impact, or import logic changed:
    - targeted tests must exist or be added in that same workstream
 
 ## Pre-PR Quality Gate
 Before opening a PR, run:
+- `pnpm check:generated`
 - `pnpm typecheck`
 - `pnpm test`
 
@@ -378,29 +385,26 @@ Minimum AI task close-out should say:
 - what remains as follow-up
 
 ## Refactor Priorities in Recommended Order
-Do not refactor everything at once. Use this order.
+Do not refactor everything at once. Use this order as a guide, then choose the next workstream by current production-readiness inspection.
 
-1. Extract pure progress and badge logic from large backend services
+1. Inspect and stabilize sessions lifecycle and badge orchestration before changing session behavior
    - target: `apps/api/src/sessions/sessions.service.ts`
-   - target: `apps/api/src/routines/routines.service.ts`
 
-2. Split routine backend into clearer use cases
-   - routine CRUD
-   - task CRUD
-   - period CRUD
-   - catalog search/import logic
+2. Keep routines backend paused by default
+   - `RoutineDeleteImpactService` is now the first routines workflow service boundary
+   - return to routines only for product-driven work or a scoped production-risk inspection
 
 3. Split large frontend dashboard and manager components
    - `apps/web/components/parent-dashboard.tsx`
    - `apps/web/components/routines-manager.tsx`
    - `apps/web/components/training-runner.tsx`
 
-4. Introduce backend repository/calculator separation where logic is unstable but important
-   - especially badges, progress, delete impact, catalog matching
+4. Introduce backend service/calculator separation where logic is unstable but important
+   - especially sessions badges/progress, ownership-sensitive flows, and destructive previews
 
 5. Introduce test coverage for critical domain rules before any broad architectural rewrite
 
-6. After the above, clean up admin and trainer flows
+6. Keep admin backend stable; inspect admin frontend or trainer flows only when product work resumes there
 
 ## What Should NOT Be Refactored Yet
 Do not do these yet:
@@ -444,13 +448,15 @@ Bad examples:
 ## Immediate Next Refactor Candidates
 These are the best next candidates given the current code:
 - backend:
-  - split routine progress calculation from `apps/api/src/routines/routines.service.ts`
-  - split badge awarding from `apps/api/src/sessions/sessions.service.ts`
-  - split delete impact calculation from children/routines services
+  - inspect session finish / badge orchestration in `apps/api/src/sessions/sessions.service.ts`
+  - add focused safety coverage for sessions only after inspection identifies the first risk
+  - inspect children or trainer ownership/destructive flows only if product work resumes there
 - frontend:
   - split selection/fetch logic out of `apps/web/components/parent-dashboard.tsx`
   - split standby, active, and completed states out of `apps/web/components/training-runner.tsx`
   - split editor state and destructive flows out of `apps/web/components/routines-manager.tsx`
+- quality:
+  - design a minimal smoke/e2e quality gate before relying on manual checks for critical flows
 
 ## Engineering Workflow Expectations
 - prefer feature branches or focused commits
