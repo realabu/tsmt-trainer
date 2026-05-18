@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "check:generated": "node scripts/check-generated-artifacts.mjs",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "pnpm --filter @tsmt/api test:unit && pnpm --filter @tsmt/web test:unit",
