@@ -22,6 +22,7 @@ type BadgeAwardTestConfig = {
   distinctCompletedRoutineCount?: number;
   completedTaskCount?: number;
   previousBestRecord?: { totalSeconds: number | null } | null;
+  existingBadgeAward?: { id: string } | null;
   routine?: {
     id: string;
     periods: Array<{
@@ -37,6 +38,8 @@ type BadgeAwardTestConfig = {
 
 function createSessionsServiceHarness(config: BadgeAwardTestConfig) {
   const badgeAwardCreates: Array<Record<string, unknown>> = [];
+  const badgeAwardFindFirstCalls: Array<Record<string, unknown>> = [];
+  const sessionCountCalls: Array<Record<string, unknown>> = [];
   const completedAtByRange = new Map<string, number>();
 
   if (config.completedInWeek !== undefined) {
@@ -88,6 +91,8 @@ function createSessionsServiceHarness(config: BadgeAwardTestConfig) {
       },
       update: async () => ({ id: "session-1" }),
       count: async (args: any) => {
+        sessionCountCalls.push(args);
+
         if (args?.where?.completedAt?.gte && args?.where?.completedAt?.lte) {
           const startsOn = args.where.completedAt.gte as Date;
           const endsOn = args.where.completedAt.lte as Date;
@@ -127,7 +132,10 @@ function createSessionsServiceHarness(config: BadgeAwardTestConfig) {
       findUnique: async () => config.routine ?? null,
     },
     badgeAward: {
-      findFirst: async () => null,
+      findFirst: async (args: Record<string, unknown>) => {
+        badgeAwardFindFirstCalls.push(args);
+        return config.existingBadgeAward ?? null;
+      },
       create: async ({ data }: { data: Record<string, unknown> }) => {
         badgeAwardCreates.push(data);
         return data;
@@ -142,7 +150,7 @@ function createSessionsServiceHarness(config: BadgeAwardTestConfig) {
     role: UserRole.PARENT,
   };
 
-  return { service, currentUser, badgeAwardCreates };
+  return { service, currentUser, badgeAwardCreates, badgeAwardFindFirstCalls, sessionCountCalls };
 }
 
 test("finish awards FIRST_SESSION badge with expected contextKey and reason", async () => {
@@ -341,6 +349,98 @@ test("finish awards WEEKLY_GOAL_COMPLETED badge with periodId when matching peri
     routineId: "routine-1",
     periodId: "period-1",
     badgeDefinitionId: "badge-weekly",
+    contextKey: identifiers.contextKey,
+    reason: identifiers.reason,
+  });
+});
+
+test("finish does not create duplicate badge award when existing contextKey award is found", async () => {
+  const { service, currentUser, badgeAwardCreates, badgeAwardFindFirstCalls } =
+    createSessionsServiceHarness({
+      badgeDefinitions: [
+        {
+          id: "badge-first",
+          triggerType: BadgeTriggerType.FIRST_SESSION,
+        },
+      ],
+      completedSessionsCount: 1,
+      existingBadgeAward: { id: "award-existing" },
+    });
+
+  await service.finish(currentUser, "session-1", {
+    completedAt: "2026-04-08T12:00:00.000Z",
+  });
+
+  assert.deepEqual(badgeAwardFindFirstCalls[0], {
+    where: {
+      childId: "child-1",
+      badgeDefinitionId: "badge-first",
+      contextKey: "first-session",
+    },
+    select: {
+      id: true,
+    },
+  });
+  assert.equal(badgeAwardCreates.length, 0);
+});
+
+test("finish awards PERIOD_TARGET_COMPLETED badge with periodId when period target is met", async () => {
+  const completedAt = new Date("2026-04-08T12:00:00.000Z");
+  const period = {
+    id: "period-1",
+    startsOn: new Date("2026-04-08T00:00:00.000Z"),
+    endsOn: new Date("2026-04-08T23:59:59.999Z"),
+    weeklyTargetCount: 7,
+  };
+  const { service, currentUser, badgeAwardCreates, sessionCountCalls } =
+    createSessionsServiceHarness({
+      badgeDefinitions: [
+        {
+          id: "badge-period",
+          triggerType: BadgeTriggerType.PERIOD_TARGET_COMPLETED,
+        },
+      ],
+      routine: {
+        id: "routine-1",
+        periods: [period],
+      },
+      completedInPeriod: 10,
+    });
+
+  await service.finish(currentUser, "session-1", {
+    completedAt: completedAt.toISOString(),
+  });
+
+  const identifiers = buildBadgeAwardIdentifiers({
+    type: "period-target",
+    routineId: "routine-1",
+    periodId: "period-1",
+  });
+  assert.deepEqual(
+    sessionCountCalls.find((call) => {
+      return (
+        (call as any).where?.completedAt?.gte?.getTime() === period.startsOn.getTime() &&
+        (call as any).where?.completedAt?.lte?.getTime() === period.endsOn.getTime()
+      );
+    }),
+    {
+      where: {
+        childId: "child-1",
+        routineId: "routine-1",
+        status: SessionStatus.COMPLETED,
+        completedAt: {
+          gte: period.startsOn,
+          lte: period.endsOn,
+        },
+      },
+    },
+  );
+  assert.equal(badgeAwardCreates.length, 1);
+  assert.deepEqual(badgeAwardCreates[0], {
+    childId: "child-1",
+    routineId: "routine-1",
+    periodId: "period-1",
+    badgeDefinitionId: "badge-period",
     contextKey: identifiers.contextKey,
     reason: identifiers.reason,
   });
