@@ -27,11 +27,10 @@ This roadmap does **not** authorize broad rewrites. It exists to guide future wo
 
 ### Backend hotspots
 - `apps/api/src/routines/routines.service.ts`
-  - too many responsibilities: routine CRUD, task CRUD, period CRUD, progress-related behavior, catalog integration
+  - still sizable, but the routines backend has reached a checkpoint: task/period/progress/search/delete-impact preview paths have safety coverage and `RoutineDeleteImpactService` now owns delete-impact preview orchestration
+  - pause further routines refactoring by default unless product work or inspection identifies a concrete risk
 - `apps/api/src/sessions/sessions.service.ts`
   - session lifecycle + timing + completion + badge/progress behavior are too coupled
-- `apps/api/src/admin/admin.service.ts`
-  - admin orchestration and domain logic are too mixed
 - `apps/api/src/auth/auth.service.ts`
   - still small enough to work, but auth/profile/token concerns should be treated as a stability-first domain
 
@@ -46,9 +45,9 @@ This roadmap does **not** authorize broad rewrites. It exists to guide future wo
   - multiple catalog domains are managed in a single component
 
 ### Cross-cutting pain points
-- very limited test coverage for critical business logic
-- no durable CI quality ladder yet
-- delete impact, badge awarding, and progress calculations are important but not yet isolated enough
+- limited integration/e2e coverage for critical user flows
+- CI quality gates exist, including generated-artifact hygiene, but no browser/API smoke gate yet
+- badge awarding and session lifecycle orchestration remain important backend risks
 - auth/session logic is partly centralized, but still needs clearer stability rules before deeper refactors
 
 ## Target End-State
@@ -266,12 +265,9 @@ Split routines domain into coherent sub-responsibilities without changing behavi
 - `apps/api/src/routines/dto.ts`
 
 ### Likely extraction targets
-- routine CRUD use cases
-- task CRUD use cases
-- period CRUD use cases
-- progress calculation
-- delete impact calculation
-- task catalog search / import matching
+- checkpoint reached for task/period payload shaping, progress response assembly, task catalog search where-building, and delete-impact preview service extraction
+- future routines work should be selected by inspection, not continued automatically
+- possible future inspection candidates only: `listSongCatalog(...)`, `listByChild(...)`, `getById(...)`, or specific product-driven CRUD/change paths
 
 ### Behavior-preserving refactor scope
 - preserve current routine/task/period behavior
@@ -279,12 +275,12 @@ Split routines domain into coherent sub-responsibilities without changing behavi
 - preserve current progress math
 
 ### Entry criteria
-- sessions badge/progress logic extracted enough to reduce cross-domain coupling
+- a concrete product need or production risk justifies returning to routines
 
 ### Exit criteria
-- `routines.service.ts` is reduced materially in scope
-- progress calculation is testable outside service orchestration
-- task and period CRUD are clearer, with less incidental logic sharing
+- no further routines extraction proceeds without scoped inspection
+- controller/API/delete semantics remain stable
+- the routines plan remains the authoritative domain-specific reference
 
 ### Risks
 - regressions in progress numbers
@@ -292,9 +288,9 @@ Split routines domain into coherent sub-responsibilities without changing behavi
 - regressions in task/period editing flows
 
 ### Mitigation
-- separate extraction of progress first
-- separate extraction of delete impact second
 - keep CRUD handler changes small
+- avoid moving Prisma reads or delete semantics without explicit approval
+- prefer safety tests before any future routines boundary extraction
 
 ### Suggested tests in this phase
 - period progress calculation tests
@@ -437,18 +433,24 @@ Admin backend stabilization has reached a meaningful checkpoint:
 
 This does not mean the admin backend is “finished”, but it is now in a much safer state for future work than the original single-service hotspot.
 
-## Next Recommended Domain
+## Routines Backend Checkpoint
 
-### Routine Creation / Update Domain
+Routines backend stabilization has reached a meaningful checkpoint:
+- routine create/update, period CRUD, task CRUD, task catalog search, progress response assembly, and delete-impact preview paths now have focused safety coverage
+- task, period, progress, search, and resolver decisions have small pure helpers where they provide clear value
+- `RoutineDeleteImpactService` is the first extracted routines workflow service boundary
+- `RoutinesService` remains the public facade for delete-impact preview methods
+- actual delete methods and delete semantics remain in `RoutinesService`
 
-Recommended next focus:
-- routine creation/update logic in the routines backend
+Routines are paused by default. Future routines work should start with inspection and should be tied to product work or a concrete production-readiness risk.
 
-Why this should come next:
-- it contains central business logic
-- it has high product value
-- it connects directly to sessions, progress, trainer workflows, and future subscription-related behavior
-- it is a good candidate for the same behavior-preserving, small-PR refactor pattern used in the sessions and admin work
+## Next Recommended Work Selection
+
+Recommended posture:
+- do not continue routines by momentum
+- select the next workstream by production-readiness inspection
+- likely next backend inspection candidate: sessions lifecycle and badge orchestration in `apps/api/src/sessions/sessions.service.ts`
+- other strong candidates: frontend destructive flows, training runner/session UI behavior, and a minimal e2e/smoke quality gate
 
 ## Files / Modules to Refactor First
 
@@ -490,9 +492,8 @@ Leave these mostly untouched until earlier phases reduce risk:
 - routine record award tests
 
 ### Phase 3
-- progress calculation tests
-- delete impact tests
-- task/period update rule tests
+- keep routines tests current when routines behavior changes
+- add further routines tests only for product-driven changes or explicitly inspected risks
 
 ### Phase 4
 - parent dashboard selection tests
@@ -508,6 +509,7 @@ Leave these mostly untouched until earlier phases reduce risk:
 
 ### Stage 1
 - `pnpm typecheck`
+- `pnpm check:generated`
 
 ### Stage 2
 - app build checks:
@@ -545,29 +547,26 @@ Leave these mostly untouched until earlier phases reduce risk:
 - docs updated when architectural expectations change
 
 ## Top 5 Immediate Next Tasks
-1. Extract frontend auth/session responsibilities into a clearly documented client boundary without changing behavior.
-2. Extract badge context key generation and related pure helpers from `apps/api/src/sessions/sessions.service.ts`.
-3. Extract period/weekly progress calculation from `apps/api/src/routines/routines.service.ts`.
-4. Extract parent dashboard selection and loading logic into a dedicated hook from `apps/web/components/parent-dashboard.tsx`.
-5. Add initial unit tests for one extracted critical rule module.
+1. Inspect `apps/api/src/sessions/sessions.service.ts` session finish / badge orchestration before choosing a backend PR.
+2. Plan the smallest reliable e2e/smoke quality gate for auth, routine selection, and session runner happy path.
+3. Audit frontend destructive confirmation flows before changing `routines-manager` or dashboard behavior.
+4. Inspect `apps/web/components/training-runner.tsx` mutation/session lifecycle flow before extracting more UI structure.
+5. Keep docs and AI guidance current after each domain shift so stale plans do not drive future Codex work.
 
-## Recommended First Refactor Task
-Extract auth/session client behavior boundaries from:
-- `apps/web/lib/api.ts`
-- `apps/web/lib/auth-storage.ts`
-- `apps/web/lib/use-auth-user.ts`
-- `apps/web/components/auth-panel.tsx`
+## Recommended First Inspection Task
+Inspect sessions lifecycle and badge orchestration in:
+- `apps/api/src/sessions/sessions.service.ts`
+- `apps/api/src/sessions/domain/*`
+- `apps/api/test/sessions/*`
 
 Reason:
-- small enough to review
-- low-risk if behavior-preserving
-- reduces cross-cutting instability before touching deeper domains
+- sessions remain central to product value and badge/progress correctness
+- the service is still a large backend hotspot
+- inspection-first avoids continuing routines or sessions refactors by momentum
 
 ## Recommended First Test Task
-Add unit tests for a first extracted pure backend rule module:
-- badge context key generation
-
-Reason:
-- very small surface area
-- deterministic
-- high leverage for later session/badge refactors
+Choose the first sessions test only after inspection.
+Likely candidates include:
+- session finish orchestration safety coverage
+- badge award edge case coverage
+- a minimal smoke/e2e flow if repository tooling supports it cleanly

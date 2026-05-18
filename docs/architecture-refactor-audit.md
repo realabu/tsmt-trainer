@@ -58,18 +58,22 @@ Interpretation:
   - one calculator/helper or one small orchestration boundary extraction per PR
 
 ### Routines
-- Current state: `Risky`
+- Current state: `Acceptable with caution`
 - Evidence from repo:
-  - hotspot service still exists: [apps/api/src/routines/routines.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/routines/routines.service.ts) (~874 lines)
+  - hotspot service still exists: [apps/api/src/routines/routines.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/routines/routines.service.ts) (~564 lines)
+  - `RoutineDeleteImpactService` owns delete-impact preview lookup/count orchestration
+  - `RoutinesService` remains the public facade for delete-impact preview methods and still owns actual delete methods
   - several pure helpers have already been extracted into `apps/api/src/routines/domain`
-  - tests exist for extracted progress, delete impact, repetition label, media kind, task song/display/input, and period input logic
+  - tests exist for extracted progress, delete impact, repetition label, media kind, task song/display/input, period input logic, task catalog search, and service-level delete-impact previews
+  - [docs/routines-refactor-plan.md](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/docs/routines-refactor-plan.md) is current through the controlled routines experiment and pauses routines refactoring by default
 - Main risks:
-  - routine CRUD, task CRUD, period CRUD, delete impact, progress, and catalog-related logic still converge into one large service
+  - routine CRUD, task CRUD, period CRUD, progress, catalog search, and catalog listing still converge into one large service
   - this domain is central to sessions, parent workflows, trainer flows, and future monetization boundaries
 - Recommended next action:
-  - focus next on routine creation/update domain shaping and orchestration, not broad routines rewrite
+  - do not continue routines refactoring by momentum
+  - inspect routines again only if product work directly touches the domain or a specific production risk appears
 - Suggested PR granularity:
-  - one create/update helper or one CRUD branch extraction per PR
+  - one safety test, one small helper, or one explicitly approved service-boundary extraction per PR
 
 ### Admin
 - Current state: `Good`
@@ -228,7 +232,8 @@ Interpretation:
   - routines and sessions still carry cross-cutting business weight inside hotspot services
   - subscriptions exist in schema but not as an application boundary
 - Recommended next action:
-  - continue extracting by real responsibility, especially in routines and sessions
+  - select the next domain by production-readiness inspection, not by continuing the last refactor thread
+  - sessions backend is the likely next backend inspection candidate; frontend destructive flows and quality gates are also strong candidates
 - Suggested PR granularity:
   - one domain boundary extraction at a time
 
@@ -236,7 +241,8 @@ Interpretation:
 - Current state: `Acceptable`
 - Evidence from repo:
   - `AdminService` has been reduced to a facade
-  - `SessionsService` and `RoutinesService` remain large hotspots
+  - `SessionsService` remains a large hotspot
+  - `RoutinesService` remains sizable, but delete-impact preview orchestration now lives in `RoutineDeleteImpactService`
   - `AuthService`, `ChildrenService`, and `TrainersService` are more cohesive but still mix orchestration with some business rules
 - Main risks:
   - hotspot services still attract new behavior unless guarded
@@ -286,7 +292,7 @@ Interpretation:
   - hotspot UI components still rely more on helper tests than behavior/integration tests
   - some domain areas (children, trainers, auth service internals) have lighter direct coverage
 - Recommended next action:
-  - add tests where new boundaries are introduced, especially service facades and create/update routines flows
+  - add tests where new boundaries are introduced, especially sessions lifecycle, destructive flows, and ownership-sensitive paths
 - Suggested PR granularity:
   - one service/helper test PR or one focused integration-like behavior PR
 
@@ -296,6 +302,7 @@ Interpretation:
   - CI workflow exists at `.github/workflows/ci.yml`
   - CI runs:
     - install with frozen lockfile
+    - `pnpm check:generated`
     - `pnpm db:generate`
     - `pnpm typecheck`
     - `pnpm test`
@@ -313,6 +320,7 @@ Interpretation:
 ### Generated / Build Artifact Hygiene
 - Current state: `Good`
 - Evidence from repo:
+  - `pnpm check:generated` guards against tracked generated output in CI
   - `.gitignore` excludes:
     - `.next`
     - `dist`
@@ -322,7 +330,7 @@ Interpretation:
     - `packages/db/generated`
   - previous test-discovery/build-output issues appear to have been cleaned up
 - Main risks:
-  - helper/test compile outputs can regress into version control if scripts or CI discovery change carelessly
+  - helper/test compile outputs can still regress if the guard is removed or narrowed carelessly
 - Recommended next action:
   - keep generated-output hygiene explicit in docs and scripts
 - Suggested PR granularity:
@@ -331,16 +339,16 @@ Interpretation:
 ## Candidate Next PRs
 These are candidate next PRs, not final strategy decisions.
 
-1. Extract routines create/update scalar and relation orchestration into smaller backend use-case helpers.
-2. Add service-level tests for critical routines create/update flows.
-3. Extract a small routines creation/update orchestration boundary from `apps/api/src/routines/routines.service.ts`.
-4. Split `apps/web/components/admin-catalog-manager.tsx` into task/song/equipment sub-sections without changing behavior.
-5. Extract ParentDashboard data-loading/selection orchestration into a focused hook or client helper.
-6. Extract TrainingRunner session-control/mutation orchestration into a focused helper or hook.
-7. Add focused tests around `ChildrenService` delete-impact and badge aggregation behavior.
-8. Add focused tests or small policy helpers around trainer assignment ownership/role checks.
-9. Introduce a first routines backend integration-style test harness for create/update + progress-adjacent behavior.
-10. Add a minimal repo note linking this audit from the engineering docs after architect review, if accepted.
+1. Inspect `SessionsService` session finish / badge orchestration before choosing the next backend PR.
+2. Add one focused sessions service safety test if the inspection identifies a production-critical uncovered path.
+3. Plan a minimal smoke/e2e quality gate for auth -> routine -> session runner happy path.
+4. Audit frontend destructive confirmation flows before changing `routines-manager` or dashboard behavior.
+5. Inspect `TrainingRunner` session lifecycle mutation flow before extracting a hook or helper.
+6. Split `apps/web/components/admin-catalog-manager.tsx` only if admin catalog product work resumes.
+7. Add focused tests or small policy helpers around trainer assignment ownership/role checks if trainer workflows resume.
+8. Inspect `ChildrenService` delete-impact and badge aggregation only if child deletion/badge work resumes.
+9. Keep docs freshness checks as a recurring AI-maintainability task after domain shifts.
+10. Return to routines only with a scoped inspection tied to product work or a concrete production risk.
 
 ## Uncertain / Not Fully Inspected
 - No dedicated subscription/billing application module was found, but schema/types support exists.
