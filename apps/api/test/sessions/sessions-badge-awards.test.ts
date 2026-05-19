@@ -1,13 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  BadgeTriggerType,
-  SessionStatus,
-  UserRole,
-} from "@prisma/client";
+import { BadgeTriggerType, SessionStatus } from "@prisma/client";
 import { buildBadgeAwardIdentifiers } from "../../src/sessions/domain/badge-award-identifiers";
 import { startOfWeek } from "../../src/sessions/domain/session-week-boundaries";
-import { SessionsService } from "../../src/sessions/sessions.service";
+import { SessionBadgeAwardService } from "../../src/sessions/session-badge-award.service";
 
 type BadgeDefinitionLike = {
   id: string;
@@ -49,47 +45,18 @@ function createSessionsServiceHarness(config: BadgeAwardTestConfig) {
     completedAtByRange.set("period", config.completedInPeriod);
   }
 
-  const inProgressSession = {
-    id: "session-1",
-    childId: "child-1",
-    routineId: "routine-1",
-    status: SessionStatus.IN_PROGRESS,
-    startedAt: new Date("2026-04-08T11:59:00.000Z"),
-    createdAt: new Date("2026-04-08T11:59:00.000Z"),
-    routine: {
-      tasks: [],
-    },
-    taskTimings: [],
-  };
-
   const prisma = {
     badgeDefinition: {
       findMany: async () => config.badgeDefinitions,
     },
     session: {
       findFirst: async (args: any) => {
-        if (args?.where?.status === SessionStatus.IN_PROGRESS) {
-          return inProgressSession;
-        }
-
         if (args?.select?.totalSeconds) {
           return config.previousBestRecord ?? null;
         }
 
-        if (args?.include?.routine?.include?.sessions) {
-          return {
-            id: "session-1",
-            routine: {
-              tasks: [],
-              sessions: [],
-            },
-            taskTimings: [],
-          };
-        }
-
         return null;
       },
-      update: async () => ({ id: "session-1" }),
       count: async (args: any) => {
         sessionCountCalls.push(args);
 
@@ -143,18 +110,16 @@ function createSessionsServiceHarness(config: BadgeAwardTestConfig) {
     },
   };
 
-  const service = new SessionsService(prisma as never);
-  const currentUser = {
-    sub: "parent-1",
-    email: "parent@example.com",
-    role: UserRole.PARENT,
+  return {
+    service: new SessionBadgeAwardService(prisma as never),
+    badgeAwardCreates,
+    badgeAwardFindFirstCalls,
+    sessionCountCalls,
   };
-
-  return { service, currentUser, badgeAwardCreates, badgeAwardFindFirstCalls, sessionCountCalls };
 }
 
-test("finish awards FIRST_SESSION badge with expected contextKey and reason", async () => {
-  const { service, currentUser, badgeAwardCreates } = createSessionsServiceHarness({
+test("badge evaluation awards FIRST_SESSION badge with expected contextKey and reason", async () => {
+  const { service, badgeAwardCreates } = createSessionsServiceHarness({
     badgeDefinitions: [
       {
         id: "badge-first",
@@ -164,9 +129,12 @@ test("finish awards FIRST_SESSION badge with expected contextKey and reason", as
     completedSessionsCount: 1,
   });
 
-  await service.finish(currentUser, "session-1", {
-    completedAt: "2026-04-08T12:00:00.000Z",
-  });
+  await service.evaluateBadges(
+    "child-1",
+    "routine-1",
+    60,
+    new Date("2026-04-08T12:00:00.000Z"),
+  );
 
   assert.equal(badgeAwardCreates.length, 1);
   assert.deepEqual(badgeAwardCreates[0], {
@@ -178,8 +146,8 @@ test("finish awards FIRST_SESSION badge with expected contextKey and reason", as
   });
 });
 
-test("finish awards TOTAL_SESSION_COUNT badge when threshold is met", async () => {
-  const { service, currentUser, badgeAwardCreates } = createSessionsServiceHarness({
+test("badge evaluation awards TOTAL_SESSION_COUNT badge when threshold is met", async () => {
+  const { service, badgeAwardCreates } = createSessionsServiceHarness({
     badgeDefinitions: [
       {
         id: "badge-total",
@@ -190,9 +158,12 @@ test("finish awards TOTAL_SESSION_COUNT badge when threshold is met", async () =
     completedSessionsCount: 5,
   });
 
-  await service.finish(currentUser, "session-1", {
-    completedAt: "2026-04-08T12:00:00.000Z",
-  });
+  await service.evaluateBadges(
+    "child-1",
+    "routine-1",
+    60,
+    new Date("2026-04-08T12:00:00.000Z"),
+  );
 
   assert.equal(badgeAwardCreates.length, 1);
   assert.deepEqual(badgeAwardCreates[0], {
@@ -204,8 +175,8 @@ test("finish awards TOTAL_SESSION_COUNT badge when threshold is met", async () =
   });
 });
 
-test("finish does not award TOTAL_SESSION_COUNT badge when threshold is not met", async () => {
-  const { service, currentUser, badgeAwardCreates } = createSessionsServiceHarness({
+test("badge evaluation does not award TOTAL_SESSION_COUNT badge when threshold is not met", async () => {
+  const { service, badgeAwardCreates } = createSessionsServiceHarness({
     badgeDefinitions: [
       {
         id: "badge-total",
@@ -216,15 +187,18 @@ test("finish does not award TOTAL_SESSION_COUNT badge when threshold is not met"
     completedSessionsCount: 4,
   });
 
-  await service.finish(currentUser, "session-1", {
-    completedAt: "2026-04-08T12:00:00.000Z",
-  });
+  await service.evaluateBadges(
+    "child-1",
+    "routine-1",
+    60,
+    new Date("2026-04-08T12:00:00.000Z"),
+  );
 
   assert.equal(badgeAwardCreates.length, 0);
 });
 
-test("finish awards ROUTINE_RECORD badge when previous best is missing", async () => {
-  const { service, currentUser, badgeAwardCreates } = createSessionsServiceHarness({
+test("badge evaluation awards ROUTINE_RECORD badge when previous best is missing", async () => {
+  const { service, badgeAwardCreates } = createSessionsServiceHarness({
     badgeDefinitions: [
       {
         id: "badge-record",
@@ -234,9 +208,12 @@ test("finish awards ROUTINE_RECORD badge when previous best is missing", async (
     previousBestRecord: null,
   });
 
-  await service.finish(currentUser, "session-1", {
-    completedAt: "2026-04-08T12:00:00.000Z",
-  });
+  await service.evaluateBadges(
+    "child-1",
+    "routine-1",
+    60,
+    new Date("2026-04-08T12:00:00.000Z"),
+  );
 
   assert.equal(badgeAwardCreates.length, 1);
   assert.deepEqual(badgeAwardCreates[0], {
@@ -248,8 +225,8 @@ test("finish awards ROUTINE_RECORD badge when previous best is missing", async (
   });
 });
 
-test("finish awards ROUTINE_RECORD badge when previous best totalSeconds is null", async () => {
-  const { service, currentUser, badgeAwardCreates } = createSessionsServiceHarness({
+test("badge evaluation awards ROUTINE_RECORD badge when previous best totalSeconds is null", async () => {
+  const { service, badgeAwardCreates } = createSessionsServiceHarness({
     badgeDefinitions: [
       {
         id: "badge-record",
@@ -259,15 +236,18 @@ test("finish awards ROUTINE_RECORD badge when previous best totalSeconds is null
     previousBestRecord: { totalSeconds: null },
   });
 
-  await service.finish(currentUser, "session-1", {
-    completedAt: "2026-04-08T12:00:00.000Z",
-  });
+  await service.evaluateBadges(
+    "child-1",
+    "routine-1",
+    60,
+    new Date("2026-04-08T12:00:00.000Z"),
+  );
 
   assert.equal(badgeAwardCreates.length, 1);
 });
 
-test("finish does not award ROUTINE_RECORD badge when current time is not faster", async () => {
-  const { service, currentUser, badgeAwardCreates } = createSessionsServiceHarness({
+test("badge evaluation does not award ROUTINE_RECORD badge when current time is not faster", async () => {
+  const { service, badgeAwardCreates } = createSessionsServiceHarness({
     badgeDefinitions: [
       {
         id: "badge-record",
@@ -277,15 +257,18 @@ test("finish does not award ROUTINE_RECORD badge when current time is not faster
     previousBestRecord: { totalSeconds: 60 },
   });
 
-  await service.finish(currentUser, "session-1", {
-    completedAt: "2026-04-08T12:00:00.000Z",
-  });
+  await service.evaluateBadges(
+    "child-1",
+    "routine-1",
+    60,
+    new Date("2026-04-08T12:00:00.000Z"),
+  );
 
   assert.equal(badgeAwardCreates.length, 0);
 });
 
-test("finish awards TASK_COMPLETION_COUNT badge when threshold is met", async () => {
-  const { service, currentUser, badgeAwardCreates } = createSessionsServiceHarness({
+test("badge evaluation awards TASK_COMPLETION_COUNT badge when threshold is met", async () => {
+  const { service, badgeAwardCreates } = createSessionsServiceHarness({
     badgeDefinitions: [
       {
         id: "badge-task-count",
@@ -296,9 +279,12 @@ test("finish awards TASK_COMPLETION_COUNT badge when threshold is met", async ()
     completedTaskCount: 10,
   });
 
-  await service.finish(currentUser, "session-1", {
-    completedAt: "2026-04-08T12:00:00.000Z",
-  });
+  await service.evaluateBadges(
+    "child-1",
+    "routine-1",
+    60,
+    new Date("2026-04-08T12:00:00.000Z"),
+  );
 
   assert.equal(badgeAwardCreates.length, 1);
   assert.deepEqual(badgeAwardCreates[0], {
@@ -310,9 +296,9 @@ test("finish awards TASK_COMPLETION_COUNT badge when threshold is met", async ()
   });
 });
 
-test("finish awards WEEKLY_GOAL_COMPLETED badge with periodId when matching period exists and goal is met", async () => {
+test("badge evaluation awards WEEKLY_GOAL_COMPLETED badge with periodId when matching period exists and goal is met", async () => {
   const completedAt = new Date("2026-04-08T12:00:00.000Z");
-  const { service, currentUser, badgeAwardCreates } = createSessionsServiceHarness({
+  const { service, badgeAwardCreates } = createSessionsServiceHarness({
     badgeDefinitions: [
       {
         id: "badge-weekly",
@@ -333,9 +319,7 @@ test("finish awards WEEKLY_GOAL_COMPLETED badge with periodId when matching peri
     completedInWeek: 3,
   });
 
-  await service.finish(currentUser, "session-1", {
-    completedAt: completedAt.toISOString(),
-  });
+  await service.evaluateBadges("child-1", "routine-1", 60, completedAt);
 
   const identifiers = buildBadgeAwardIdentifiers({
     type: "weekly-goal",
@@ -354,8 +338,8 @@ test("finish awards WEEKLY_GOAL_COMPLETED badge with periodId when matching peri
   });
 });
 
-test("finish does not create duplicate badge award when existing contextKey award is found", async () => {
-  const { service, currentUser, badgeAwardCreates, badgeAwardFindFirstCalls } =
+test("badge evaluation does not create duplicate badge award when existing contextKey award is found", async () => {
+  const { service, badgeAwardCreates, badgeAwardFindFirstCalls } =
     createSessionsServiceHarness({
       badgeDefinitions: [
         {
@@ -367,9 +351,12 @@ test("finish does not create duplicate badge award when existing contextKey awar
       existingBadgeAward: { id: "award-existing" },
     });
 
-  await service.finish(currentUser, "session-1", {
-    completedAt: "2026-04-08T12:00:00.000Z",
-  });
+  await service.evaluateBadges(
+    "child-1",
+    "routine-1",
+    60,
+    new Date("2026-04-08T12:00:00.000Z"),
+  );
 
   assert.deepEqual(badgeAwardFindFirstCalls[0], {
     where: {
@@ -384,7 +371,7 @@ test("finish does not create duplicate badge award when existing contextKey awar
   assert.equal(badgeAwardCreates.length, 0);
 });
 
-test("finish awards PERIOD_TARGET_COMPLETED badge with periodId when period target is met", async () => {
+test("badge evaluation awards PERIOD_TARGET_COMPLETED badge with periodId when period target is met", async () => {
   const completedAt = new Date("2026-04-08T12:00:00.000Z");
   const period = {
     id: "period-1",
@@ -392,7 +379,7 @@ test("finish awards PERIOD_TARGET_COMPLETED badge with periodId when period targ
     endsOn: new Date("2026-04-08T23:59:59.999Z"),
     weeklyTargetCount: 7,
   };
-  const { service, currentUser, badgeAwardCreates, sessionCountCalls } =
+  const { service, badgeAwardCreates, sessionCountCalls } =
     createSessionsServiceHarness({
       badgeDefinitions: [
         {
@@ -407,9 +394,7 @@ test("finish awards PERIOD_TARGET_COMPLETED badge with periodId when period targ
       completedInPeriod: 10,
     });
 
-  await service.finish(currentUser, "session-1", {
-    completedAt: completedAt.toISOString(),
-  });
+  await service.evaluateBadges("child-1", "routine-1", 60, completedAt);
 
   const identifiers = buildBadgeAwardIdentifiers({
     type: "period-target",

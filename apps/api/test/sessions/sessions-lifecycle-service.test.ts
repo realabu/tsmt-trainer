@@ -7,6 +7,12 @@ import { SessionsService } from "../../src/sessions/sessions.service";
 type SessionFindFirstArgs = Record<string, any>;
 type SessionUpdateArgs = Record<string, any>;
 type SessionTaskTimingCreateArgs = Record<string, any>;
+type BadgeEvaluationArgs = {
+  childId: string;
+  routineId: string;
+  totalSeconds: number;
+  completedAt: Date;
+};
 
 function createCurrentUser() {
   return {
@@ -22,7 +28,7 @@ function createFinishHarness(input: {
 }) {
   const sessionFindFirstCalls: SessionFindFirstArgs[] = [];
   const sessionUpdateCalls: SessionUpdateArgs[] = [];
-  const badgeDefinitionFindManyCalls: Array<Record<string, any>> = [];
+  const badgeEvaluationCalls: BadgeEvaluationArgs[] = [];
 
   const sessionDetail = input.sessionDetail ?? {
     id: "session-1",
@@ -34,12 +40,6 @@ function createFinishHarness(input: {
   };
 
   const prisma = {
-    badgeDefinition: {
-      findMany: async (args: Record<string, any>) => {
-        badgeDefinitionFindManyCalls.push(args);
-        return [];
-      },
-    },
     session: {
       findFirst: async (args: SessionFindFirstArgs) => {
         sessionFindFirstCalls.push(args);
@@ -62,27 +62,25 @@ function createFinishHarness(input: {
         sessionUpdateCalls.push(args);
         return { id: args.where.id };
       },
-      count: async () => 0,
-      findMany: async () => [],
     },
-    sessionTaskTiming: {
-      count: async () => 0,
-    },
-    routine: {
-      findUnique: async () => null,
-    },
-    badgeAward: {
-      findFirst: async () => null,
-      create: async ({ data }: { data: Record<string, any> }) => data,
+  };
+  const sessionBadgeAwardService = {
+    evaluateBadges: async (
+      childId: string,
+      routineId: string,
+      totalSeconds: number,
+      completedAt: Date,
+    ) => {
+      badgeEvaluationCalls.push({ childId, routineId, totalSeconds, completedAt });
     },
   };
 
   return {
-    service: new SessionsService(prisma as never),
+    service: new SessionsService(prisma as never, sessionBadgeAwardService as never),
     currentUser: createCurrentUser(),
     sessionFindFirstCalls,
     sessionUpdateCalls,
-    badgeDefinitionFindManyCalls,
+    badgeEvaluationCalls,
     sessionDetail,
   };
 }
@@ -133,7 +131,7 @@ function createCompleteTaskHarness(input: {
   };
 
   return {
-    service: new SessionsService(prisma as never),
+    service: new SessionsService(prisma as never, {} as never),
     currentUser: createCurrentUser(),
     sessionFindFirstCalls,
     sessionUpdateCalls,
@@ -156,7 +154,7 @@ test("finish validates active session ownership, completes session, evaluates ba
     },
     taskTimings: [],
   };
-  const { service, currentUser, sessionFindFirstCalls, sessionUpdateCalls, badgeDefinitionFindManyCalls, sessionDetail } =
+  const { service, currentUser, sessionFindFirstCalls, sessionUpdateCalls, badgeEvaluationCalls, sessionDetail } =
     createFinishHarness({ activeSession });
 
   const result = await service.finish(currentUser, "session-1", {
@@ -190,12 +188,13 @@ test("finish validates active session ownership, completes session, evaluates ba
       notes: "great work",
     },
   });
-  assert.deepEqual(badgeDefinitionFindManyCalls[0], {
-    where: {
-      isActive: true,
-    },
+  assert.deepEqual(badgeEvaluationCalls[0], {
+    childId: "child-1",
+    routineId: "routine-1",
+    totalSeconds: 90,
+    completedAt,
   });
-  assert.equal(sessionFindFirstCalls.length, 3);
+  assert.equal(sessionFindFirstCalls.length, 2);
   assert.equal(result, sessionDetail);
 });
 
@@ -224,7 +223,7 @@ test("finish falls back to createdAt when startedAt is null for totalSeconds", a
 });
 
 test("finish preserves not-found behavior for missing or not-owned active session", async () => {
-  const { service, currentUser, sessionFindFirstCalls, sessionUpdateCalls, badgeDefinitionFindManyCalls } =
+  const { service, currentUser, sessionFindFirstCalls, sessionUpdateCalls, badgeEvaluationCalls } =
     createFinishHarness({ activeSession: null });
 
   await assert.rejects(
@@ -257,7 +256,7 @@ test("finish preserves not-found behavior for missing or not-owned active sessio
     },
   });
   assert.equal(sessionUpdateCalls.length, 0);
-  assert.equal(badgeDefinitionFindManyCalls.length, 0);
+  assert.equal(badgeEvaluationCalls.length, 0);
 });
 
 test("completeTask validates active session ownership, writes timing, increments count, and returns getById response", async () => {
