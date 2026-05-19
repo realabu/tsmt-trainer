@@ -657,8 +657,9 @@ Recommended execution sequence:
 
 ### Baseline and Final State
 - Baseline commit SHA: `04706d907c1abb58f807dbea82017e6d640d54da`
-- Final experiment commit SHA: `c88a3c1fa6a10be42d685479d29854fc1f3890c2`
+- Final experiment commit SHA: `e61416477518702661ccfc2b81ae8ca6aff872b9`
 - Step 5 implementation commit SHA: `c88a3c1fa6a10be42d685479d29854fc1f3890c2`
+- `c88a3c1fa6a10be42d685479d29854fc1f3890c2` is the Step 5 implementation commit; `e61416477518702661ccfc2b81ae8ca6aff872b9` is the final review/docs commit and current experiment head.
 
 Changed files:
 - `apps/api/src/sessions/session-badge-award.service.ts`
