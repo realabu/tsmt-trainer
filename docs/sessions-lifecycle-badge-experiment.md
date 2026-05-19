@@ -652,3 +652,167 @@ Recommended execution sequence:
 6. Gate-review whether `SessionBadgeAwardService` extraction is justified.
 7. Extract `SessionBadgeAwardService` only if the gate approves.
 8. Write final outcome review and decide merge all / partial merge / continue / discard.
+
+## Final Outcome Review
+
+### Baseline and Final State
+- Baseline commit SHA: `04706d907c1abb58f807dbea82017e6d640d54da`
+- Final experiment commit SHA: `c88a3c1fa6a10be42d685479d29854fc1f3890c2`
+- Step 5 implementation commit SHA: `c88a3c1fa6a10be42d685479d29854fc1f3890c2`
+
+Changed files:
+- `apps/api/src/sessions/session-badge-award.service.ts`
+- `apps/api/src/sessions/sessions.module.ts`
+- `apps/api/src/sessions/sessions.service.ts`
+- `apps/api/test/sessions/sessions-badge-awards.test.ts`
+- `apps/api/test/sessions/sessions-lifecycle-service.test.ts`
+
+Executed steps:
+- Step 2: added finish lifecycle service safety tests.
+- Step 3: added task timing lifecycle service safety tests.
+- Step 4: added badge duplicate-prevention and `PERIOD_TARGET_COMPLETED` service safety tests.
+- Gate Review A: confirmed that `SessionBadgeAwardService` extraction was justified after safety coverage.
+- Step 5: extracted badge award orchestration into `SessionBadgeAwardService`.
+
+### Public API / Behavior Safety
+Confirmed:
+- No controller changes.
+- No DTO changes.
+- No intended API response shape changes.
+- No Prisma schema changes.
+- No session lifecycle semantics changes.
+- No badge semantics changes.
+- No transaction behavior changes.
+- No frontend changes.
+
+### Boundary Extraction Assessment
+The `SessionBadgeAwardService` extraction achieved the intended boundary.
+
+What stayed in `SessionsService`:
+- all public controller-facing methods
+- `start(...)`
+- `getById(...)`
+- `listByRoutine(...)`
+- `completeTask(...)`
+- `finish(...)`
+- `cancel(...)`
+- `finish(...)` active-session lookup
+- `finish(...)` completion update
+- `finish(...)` response flow through `getById(...)`
+- `completeTask(...)` timing lifecycle and validation
+- ownership checks for public lifecycle methods
+
+What moved:
+- badge award orchestration
+- duplicate-prevention lookup/write behavior
+- weekly streak orchestration used by badge evaluation
+- calls to existing pure badge/domain helpers
+
+The provider wiring stayed small:
+- `SessionBadgeAwardService` injects `PrismaService`
+- `SessionsModule` registers `SessionBadgeAwardService`
+- `SessionsService` injects and delegates to `SessionBadgeAwardService`
+
+Unrelated sessions logic did not move.
+
+### Query / Prisma Safety
+Prisma reads/writes moved into `SessionBadgeAwardService`:
+- `badgeDefinition.findMany(...)`
+- `session.count(...)` for completed child sessions
+- `session.count(...)` for completed routine sessions
+- `session.findMany(...)` for distinct completed routines
+- `sessionTaskTiming.count(...)` for completed task count
+- previous-best `session.findFirst(...)`
+- `routine.findUnique(...)` with periods
+- weekly goal `session.count(...)`
+- period target `session.count(...)`
+- weekly streak `session.findMany(...)`
+- `badgeAward.findFirst(...)`
+- `badgeAward.create(...)`
+
+The query/write/count shapes are intended to be unchanged. Safety coverage now pins representative service behavior for:
+- finish lifecycle update and badge evaluation delegation
+- task timing lifecycle behavior
+- first session badge
+- total session count badge
+- routine record badge
+- task completion count badge
+- weekly goal badge
+- period target badge
+- duplicate-prevention lookup and no-create path
+
+### Tests and Validation
+Tests added/changed:
+- `sessions-lifecycle-service.test.ts` was added to cover `finish(...)` and `completeTask(...)` lifecycle safety.
+- `sessions-badge-awards.test.ts` now tests badge orchestration through `SessionBadgeAwardService` directly.
+- Existing pure badge/domain helper tests remain unchanged.
+
+Validation passed after Step 5:
+- `pnpm --filter @tsmt/api test:unit`
+- `pnpm --filter @tsmt/api typecheck`
+- `pnpm --filter @tsmt/api build`
+- `git diff --check`
+
+Test quality assessment:
+- The test changes are reasonable and production-risk driven.
+- They avoid full implementation snapshots of every badge branch.
+- They do pin important query/write shapes where behavior is high-risk.
+- The badge service tests became cleaner after extraction because they no longer need to drive badge behavior through the full session lifecycle harness.
+
+### SessionsService Before / After
+Before:
+- `SessionsService` owned session lifecycle, task timing lifecycle, response reads, badge evaluation orchestration, duplicate-prevention writes, weekly streak orchestration, and all related Prisma operations.
+- Approximate size: ~685 lines.
+
+After:
+- `SessionsService` remains the controller-facing lifecycle facade.
+- Badge award orchestration is isolated behind `SessionBadgeAwardService`.
+- Approximate `SessionsService` size is materially reduced by moving ~400 lines of badge orchestration.
+
+Remaining large/risky areas:
+- `start(...)`, `getById(...)`, `listByRoutine(...)`, `completeTask(...)`, `finish(...)`, and `cancel(...)` still return or depend on raw Prisma shapes.
+- `completeTask(...)` remains non-transactional for timing create + completed-task increment.
+- `finish(...)` remains non-transactional for session completion + badge evaluation.
+- Transaction behavior was intentionally not changed in this experiment.
+
+### Production-Readiness Impact
+Finish lifecycle safety:
+- improved through focused service-level tests for active-session ownership lookup, completion update shape, totalSeconds behavior, badge evaluation delegation, and response flow.
+
+Task timing lifecycle safety:
+- improved through tests for not-found behavior, task membership validation, duplicate timing validation, original-order enforcement, timing create shape, completed-task increment, and response flow.
+
+Badge duplicate-prevention safety:
+- improved through explicit existing-award coverage that verifies the current `badgeAward.findFirst(...)` lookup and no-create behavior.
+
+Period target badge safety:
+- improved through service-level coverage for `PERIOD_TARGET_COMPLETED`, including period-scoped count query and `periodId` award data.
+
+AI maintainability:
+- improved. Future agents now have a named `SessionBadgeAwardService` boundary for badge orchestration and a smaller `SessionsService` lifecycle facade.
+- This is not merely code movement: the branch added safety coverage first, then moved a cohesive private workflow boundary.
+
+### Merge Recommendation
+Recommendation: merge all.
+
+Why:
+- The safety tests are meaningful and cover production-critical lifecycle and badge risks.
+- The extraction reduced real cognitive load in `SessionsService`.
+- Public API/controller/DTO/schema/frontend behavior did not change.
+- Session lifecycle, badge semantics, and transaction behavior were intentionally preserved.
+- Validation passed.
+
+Do not partial-merge unless review finds an unexpected maintainability issue in the new boundary.
+
+### Follow-Up Recommendations
+Immediately after merge:
+- Update `docs/refactor-roadmap.md` or architecture guidance with a short sessions checkpoint.
+- Mark `SessionBadgeAwardService` as the first sessions workflow service boundary.
+- Pause sessions backend refactoring by default after the checkpoint.
+
+Future sessions candidates should remain inspection-only until justified:
+- `completeTask(...)` transaction/data-integrity inspection
+- `finish(...)` transaction/idempotency inspection
+- `start(...)` and `getById(...)` raw response shape inspection
+- additional service-level badge coverage for `ROUTINE_SESSION_COUNT`, `DISTINCT_ROUTINE_COUNT`, or `CONSECUTIVE_WEEKS_COMPLETED`
+- frontend/session runner smoke or e2e quality gate planning
