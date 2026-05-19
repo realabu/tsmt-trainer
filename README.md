@@ -29,6 +29,6 @@ Monorepo alap egy API-first TSMT webalkalmazáshoz.
 ## Aktuális technikai fókusz
 
 - A routines backend refaktor checkpoint lezárult, további routines munka csak célzott inspection után induljon.
-- A következő backend inspection jelölt a sessions lifecycle / badge orchestration.
+- A sessions lifecycle / badge orchestration kísérlet lezárult; `SessionBadgeAwardService` kezeli a badge award orchestration részt, további sessions refaktor csak célzott inspection után induljon.
 - Fontos további jelöltek: frontend destruktív flow-k, training runner session flow, minimális e2e/smoke quality gate.
 - CI/higiénia: `pnpm check:generated`, `pnpm typecheck`, `pnpm test`, app buildok.

@@ -41,6 +41,7 @@ Current high-risk files include:
 
 Recent checkpoint:
 - routines backend refactoring is paused by default after `RoutineDeleteImpactService` was extracted
+- sessions backend refactoring is paused by default after `SessionBadgeAwardService` was extracted
 - admin backend has already been split into focused services; admin frontend remains the larger admin hotspot
 - generated output is guarded by `pnpm check:generated`
 
@@ -189,7 +190,8 @@ Domain boundary rule:
 
 Example:
 - `sessions` may trigger badge evaluation
-- but badge awarding logic should live in `badges/progress`, not remain permanently embedded in session orchestration code
+- badge award orchestration now lives behind `SessionBadgeAwardService`
+- `SessionsService` should remain the public lifecycle facade unless a scoped inspection justifies another boundary
 
 ## Rules for Business Logic Placement
 Business logic must not live in:
@@ -387,8 +389,9 @@ Minimum AI task close-out should say:
 ## Refactor Priorities in Recommended Order
 Do not refactor everything at once. Use this order as a guide, then choose the next workstream by current production-readiness inspection.
 
-1. Inspect and stabilize sessions lifecycle and badge orchestration before changing session behavior
+1. Keep sessions lifecycle and badge orchestration stable after the #84 checkpoint
    - target: `apps/api/src/sessions/sessions.service.ts`
+   - current checkpoint: `SessionBadgeAwardService` owns badge award orchestration; further sessions extraction should start with inspection only
 
 2. Keep routines backend paused by default
    - `RoutineDeleteImpactService` is now the first routines workflow service boundary
@@ -448,8 +451,8 @@ Bad examples:
 ## Immediate Next Refactor Candidates
 These are the best next candidates given the current code:
 - backend:
-  - inspect session finish / badge orchestration in `apps/api/src/sessions/sessions.service.ts`
-  - add focused safety coverage for sessions only after inspection identifies the first risk
+  - keep sessions backend paused by default after `SessionBadgeAwardService`
+  - if product work touches sessions, inspect `completeTask(...)`, `finish(...)`, `start(...)`, `getById(...)`, or uncovered badge trigger paths before code
   - inspect children or trainer ownership/destructive flows only if product work resumes there
 - frontend:
   - split selection/fetch logic out of `apps/web/components/parent-dashboard.tsx`
