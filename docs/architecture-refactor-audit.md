@@ -45,17 +45,25 @@ Interpretation:
 ### Sessions
 - Current state: `Acceptable`
 - Evidence from repo:
-  - hotspot service still exists: [apps/api/src/sessions/sessions.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/sessions/sessions.service.ts) (~685 lines)
+  - hotspot service still exists: [apps/api/src/sessions/sessions.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/sessions/sessions.service.ts), but it no longer owns badge award orchestration inline
+  - `SessionBadgeAwardService` is the first extracted sessions workflow service boundary
+  - badge award orchestration, duplicate-prevention lookup/write behavior, weekly streak orchestration, and badge-only Prisma reads/writes moved to `SessionBadgeAwardService`
+  - `SessionsService` remains the public lifecycle facade for `start(...)`, `getById(...)`, `listByRoutine(...)`, `completeTask(...)`, `finish(...)`, and `cancel(...)`
+  - finish active-session lookup, completion update, and `getById(...)` response flow remain in `SessionsService`
+  - task timing lifecycle behavior remains in `SessionsService`
   - multiple extracted pure helpers exist under `apps/api/src/sessions/domain`
-  - service-level badge award tests exist: `apps/api/test/sessions/sessions-badge-awards.test.ts`
+  - service-level tests cover finish lifecycle, task timing lifecycle, badge duplicate prevention, and `PERIOD_TARGET_COMPLETED` badge behavior
   - pure helper tests cover streaks, weekly targets, trigger decisions, identifier building, and threshold parsing
 - Main risks:
-  - main service still owns session lifecycle orchestration plus a lot of badge/progress coordination
-  - behavior is better isolated than before, but still concentrated in one service
+  - `SessionsService` still owns lifecycle orchestration, task timing writes, raw response flow, and transaction-sensitive sequencing
+  - future changes around `completeTask(...)`, `finish(...)`, `start(...)`, or `getById(...)` can still affect production behavior
+  - some badge trigger paths remain less directly covered than the paths stabilized in #84
 - Recommended next action:
-  - continue behavior-preserving extractions around session completion orchestration and badge/progress coordination boundaries
+  - pause sessions backend refactoring by default after #84
+  - inspect before any further sessions service-boundary extraction
+  - likely future sessions inspection candidates: `completeTask(...)` transaction/data integrity, `finish(...)` transaction/idempotency, `start(...)`/`getById(...)` raw response shape, uncovered badge trigger paths, or frontend session runner smoke/e2e coverage
 - Suggested PR granularity:
-  - one calculator/helper or one small orchestration boundary extraction per PR
+  - one inspection, one safety test, or one explicitly approved boundary extraction per PR
 
 ### Routines
 - Current state: `Acceptable with caution`
@@ -233,7 +241,8 @@ Interpretation:
   - subscriptions exist in schema but not as an application boundary
 - Recommended next action:
   - select the next domain by production-readiness inspection, not by continuing the last refactor thread
-  - sessions backend is the likely next backend inspection candidate; frontend destructive flows and quality gates are also strong candidates
+  - sessions and routines backend refactoring are both paused by default after their checkpoints
+  - frontend destructive flows and quality gates are strong next candidates; return to backend sessions only with a scoped inspection tied to product work or a concrete risk
 - Suggested PR granularity:
   - one domain boundary extraction at a time
 
@@ -241,7 +250,7 @@ Interpretation:
 - Current state: `Acceptable`
 - Evidence from repo:
   - `AdminService` has been reduced to a facade
-  - `SessionsService` remains a large hotspot
+  - `SessionsService` remains a lifecycle hotspot, but badge award orchestration now lives in `SessionBadgeAwardService`
   - `RoutinesService` remains sizable, but delete-impact preview orchestration now lives in `RoutineDeleteImpactService`
   - `AuthService`, `ChildrenService`, and `TrainersService` are more cohesive but still mix orchestration with some business rules
 - Main risks:
@@ -285,7 +294,7 @@ Interpretation:
 - Current state: `Acceptable`
 - Evidence from repo:
   - backend unit coverage is strongest around extracted sessions/routines/admin helpers
-  - service-level tests now exist for sessions badge awarding and admin facades/activity
+  - service-level tests now exist for sessions lifecycle/timing/badge awarding and admin facades/activity
   - frontend coverage is helper-heavy rather than component-integration-heavy
   - root `pnpm test` runs both API and web unit suites
 - Main risks:
@@ -339,11 +348,11 @@ Interpretation:
 ## Candidate Next PRs
 These are candidate next PRs, not final strategy decisions.
 
-1. Inspect `SessionsService` session finish / badge orchestration before choosing the next backend PR.
-2. Add one focused sessions service safety test if the inspection identifies a production-critical uncovered path.
-3. Plan a minimal smoke/e2e quality gate for auth -> routine -> session runner happy path.
-4. Audit frontend destructive confirmation flows before changing `routines-manager` or dashboard behavior.
-5. Inspect `TrainingRunner` session lifecycle mutation flow before extracting a hook or helper.
+1. Plan a minimal smoke/e2e quality gate for auth -> routine -> session runner happy path.
+2. Audit frontend destructive confirmation flows before changing `routines-manager` or dashboard behavior.
+3. Inspect `TrainingRunner` session lifecycle mutation flow before extracting a hook or helper.
+4. If product work touches sessions, inspect `completeTask(...)`, `finish(...)`, `start(...)`, `getById(...)`, or uncovered badge trigger paths before code.
+5. Keep sessions and routines backend refactoring paused by default unless inspection identifies a concrete production risk.
 6. Split `apps/web/components/admin-catalog-manager.tsx` only if admin catalog product work resumes.
 7. Add focused tests or small policy helpers around trainer assignment ownership/role checks if trainer workflows resume.
 8. Inspect `ChildrenService` delete-impact and badge aggregation only if child deletion/badge work resumes.

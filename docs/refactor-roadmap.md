@@ -30,7 +30,8 @@ This roadmap does **not** authorize broad rewrites. It exists to guide future wo
   - still sizable, but the routines backend has reached a checkpoint: task/period/progress/search/delete-impact preview paths have safety coverage and `RoutineDeleteImpactService` now owns delete-impact preview orchestration
   - pause further routines refactoring by default unless product work or inspection identifies a concrete risk
 - `apps/api/src/sessions/sessions.service.ts`
-  - session lifecycle + timing + completion + badge/progress behavior are too coupled
+  - still a central lifecycle hotspot, but #84 extracted `SessionBadgeAwardService` as the first sessions workflow service boundary
+  - pause further sessions service-boundary extraction by default unless inspection identifies a concrete production risk
 - `apps/api/src/auth/auth.service.ts`
   - still small enough to work, but auth/profile/token concerns should be treated as a stability-first domain
 
@@ -47,7 +48,7 @@ This roadmap does **not** authorize broad rewrites. It exists to guide future wo
 ### Cross-cutting pain points
 - limited integration/e2e coverage for critical user flows
 - CI quality gates exist, including generated-artifact hygiene, but no browser/API smoke gate yet
-- badge awarding and session lifecycle orchestration remain important backend risks
+- session lifecycle and badge orchestration now have stronger guardrails, but transaction/idempotency and raw response-shape risks remain inspection candidates
 - auth/session logic is partly centralized, but still needs clearer stability rules before deeper refactors
 
 ## Target End-State
@@ -211,12 +212,24 @@ Split runtime session execution from badge/progress calculation concerns.
 - `apps/api/src/sessions/sessions.controller.ts`
 - `apps/api/src/sessions/dto.ts`
 
-### Likely extraction targets
-- session completion orchestrator
-- badge context key builder
-- session award evaluation helpers
-- timing derivation helpers
-- streak / weekly badge calculations
+### Current checkpoint
+- #84 added finish lifecycle service safety tests
+- #84 added task timing lifecycle service safety tests
+- #84 added badge duplicate-prevention and `PERIOD_TARGET_COMPLETED` badge safety coverage
+- #84 extracted `SessionBadgeAwardService` as the first sessions workflow service boundary
+- badge award orchestration, duplicate-prevention lookup/write behavior, weekly streak orchestration, and badge-only Prisma reads/writes moved to `SessionBadgeAwardService`
+
+### What stays in `SessionsService`
+- public controller-facing lifecycle methods:
+  - `start(...)`
+  - `getById(...)`
+  - `listByRoutine(...)`
+  - `completeTask(...)`
+  - `finish(...)`
+  - `cancel(...)`
+- finish active-session lookup, completion update, and `getById(...)` response flow
+- task timing lifecycle behavior in `completeTask(...)`
+- session lifecycle semantics and transaction behavior
 
 ### Behavior-preserving refactor scope
 - keep current session behavior unchanged
@@ -227,18 +240,20 @@ Split runtime session execution from badge/progress calculation concerns.
 - auth/session platform behavior stabilized enough to trust session tests
 
 ### Exit criteria
-- `sessions.service.ts` no longer contains all calculation-heavy logic inline
-- badge rule evaluation is separable and unit-testable
+- `SessionBadgeAwardService` owns badge orchestration behind the `SessionsService` facade
+- badge rule evaluation and badge award orchestration are separable and tested at service/domain level
 - session completion path remains functionally unchanged
 
 ### Risks
-- badge regressions
-- session completion regressions
-- hidden coupling to routine/progress behavior
+- transaction/data-integrity questions in `completeTask(...)` and `finish(...)`
+- idempotency questions around repeated finish or timing calls
+- raw response-shape coupling in `start(...)` and `getById(...)`
+- uncovered badge trigger paths
 
 ### Mitigation
-- extract one calculator at a time
-- snapshot or targeted tests for badge awarding behavior
+- pause further sessions extraction by default
+- start future sessions work with inspection only
+- add targeted tests before moving lifecycle or transaction-sensitive code
 - manual verification of:
   - start session
   - complete task
@@ -246,10 +261,12 @@ Split runtime session execution from badge/progress calculation concerns.
   - cancel session
 
 ### Suggested tests in this phase
-- badge context key tests
-- weekly goal award tests
-- streak calculation tests
-- routine record award tests
+- future tests should be selected by inspection, not coverage momentum
+- likely candidates:
+  - `completeTask(...)` transaction/data-integrity behavior
+  - `finish(...)` transaction/idempotency behavior
+  - `start(...)` and `getById(...)` raw response shape
+  - uncovered badge trigger paths
 
 ## Phase 3: Routines Domain Decomposition
 
@@ -444,13 +461,27 @@ Routines backend stabilization has reached a meaningful checkpoint:
 
 Routines are paused by default. Future routines work should start with inspection and should be tied to product work or a concrete production-readiness risk.
 
+## Sessions Backend Checkpoint
+
+The controlled sessions lifecycle / badge orchestration experiment in #84 reached a meaningful checkpoint:
+- finish lifecycle, task timing lifecycle, badge duplicate prevention, and `PERIOD_TARGET_COMPLETED` badge behavior now have focused service safety coverage
+- `SessionBadgeAwardService` is the first extracted sessions workflow service boundary
+- badge award orchestration, duplicate-prevention lookup/write behavior, weekly streak orchestration, and badge-only Prisma reads/writes moved to `SessionBadgeAwardService`
+- `SessionsService` remains the public controller-facing lifecycle facade
+- `start(...)`, `getById(...)`, `listByRoutine(...)`, `completeTask(...)`, `finish(...)`, and `cancel(...)` stay on `SessionsService`
+- finish active-session lookup, completion update, and `getById(...)` response flow remain in `SessionsService`
+- task timing lifecycle behavior remains in `SessionsService`
+- no controller, DTO, API, schema, frontend, session lifecycle, badge, or transaction behavior changed
+
+Sessions backend refactoring is paused by default after #84. Future sessions work should start with inspection only and should not continue service-boundary extraction automatically.
+
 ## Next Recommended Work Selection
 
 Recommended posture:
 - do not continue routines by momentum
+- do not continue sessions service-boundary extraction by momentum
 - select the next workstream by production-readiness inspection
-- likely next backend inspection candidate: sessions lifecycle and badge orchestration in `apps/api/src/sessions/sessions.service.ts`
-- other strong candidates: frontend destructive flows, training runner/session UI behavior, and a minimal e2e/smoke quality gate
+- likely next candidates: frontend destructive flows, training runner/session UI behavior, a minimal e2e/smoke quality gate, or a scoped sessions inspection only if product work touches lifecycle/badges
 
 ## Files / Modules to Refactor First
 
@@ -547,26 +578,17 @@ Leave these mostly untouched until earlier phases reduce risk:
 - docs updated when architectural expectations change
 
 ## Top 5 Immediate Next Tasks
-1. Inspect `apps/api/src/sessions/sessions.service.ts` session finish / badge orchestration before choosing a backend PR.
-2. Plan the smallest reliable e2e/smoke quality gate for auth, routine selection, and session runner happy path.
-3. Audit frontend destructive confirmation flows before changing `routines-manager` or dashboard behavior.
-4. Inspect `apps/web/components/training-runner.tsx` mutation/session lifecycle flow before extracting more UI structure.
+1. Plan the smallest reliable e2e/smoke quality gate for auth, routine selection, and session runner happy path.
+2. Audit frontend destructive confirmation flows before changing `routines-manager` or dashboard behavior.
+3. Inspect frontend training runner/session UI mutation flow before extracting more UI structure.
+4. Inspect admin catalog UI only if admin catalog product work resumes.
 5. Keep docs and AI guidance current after each domain shift so stale plans do not drive future Codex work.
 
-## Recommended First Inspection Task
-Inspect sessions lifecycle and badge orchestration in:
-- `apps/api/src/sessions/sessions.service.ts`
-- `apps/api/src/sessions/domain/*`
-- `apps/api/test/sessions/*`
+## Future Sessions Inspection Candidates
 
-Reason:
-- sessions remain central to product value and badge/progress correctness
-- the service is still a large backend hotspot
-- inspection-first avoids continuing routines or sessions refactors by momentum
-
-## Recommended First Test Task
-Choose the first sessions test only after inspection.
-Likely candidates include:
-- session finish orchestration safety coverage
-- badge award edge case coverage
-- a minimal smoke/e2e flow if repository tooling supports it cleanly
+Do not start another sessions extraction automatically. If product work touches sessions, inspect the exact path first:
+- `completeTask(...)` transaction/data-integrity behavior
+- `finish(...)` transaction/idempotency behavior
+- `start(...)` and `getById(...)` raw response shape
+- uncovered badge trigger paths
+- frontend session runner smoke/e2e coverage
