@@ -12,6 +12,7 @@
     "test:smoke": "pnpm --filter @tsmt/api test:smoke",
     "db:generate": "pnpm --filter @tsmt/db db:generate",
     "db:migrate": "pnpm --filter @tsmt/db db:migrate",
+    "db:migrate:deploy": "pnpm --filter @tsmt/db db:migrate:deploy",
     "db:seed": "pnpm --filter @tsmt/db db:seed",
     "db:import:tsmt-catalog": "pnpm --filter @tsmt/db db:import:tsmt-catalog"
   },

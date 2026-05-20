@@ -9,8 +9,24 @@ on:
 jobs:
   quality-gate:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: tsmt_trainer_ci
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        options: >-
+          --health-cmd "pg_isready -U postgres -d tsmt_trainer_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tsmt_trainer_ci
+      JWT_ACCESS_SECRET: ci-access-secret
+      JWT_REFRESH_SECRET: ci-refresh-secret
 
     steps:
       - name: Checkout
@@ -36,11 +52,17 @@ jobs:
       - name: Generate Prisma client
         run: pnpm db:generate
 
+      - name: Apply database migrations
+        run: pnpm db:migrate:deploy
+
       - name: Typecheck
         run: pnpm typecheck
 
       - name: Test
         run: pnpm test
+
+      - name: Smoke Test API
+        run: pnpm --filter @tsmt/api test:smoke
 
       - name: Build API
         run: pnpm --filter @tsmt/api build

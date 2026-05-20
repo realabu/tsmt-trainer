@@ -9,6 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "prisma generate && prisma db seed",
     "db:import:tsmt-catalog": "prisma generate && node --import tsx prisma/import-tsmt-catalog.ts"
   },
