@@ -9,7 +9,8 @@ Current posture:
 - routines backend refactoring is paused by default after `RoutineDeleteImpactService`
 - sessions backend refactoring is paused by default after `SessionBadgeAwardService`
 - generated artifacts are guarded by `pnpm check:generated`
-- strategic docs now point to smoke/e2e/quality gates as a high-value production-readiness direction
+- DB-backed API smoke is established through auth, children ownership, and routine ownership paths
+- API smoke completion is being planned before browser smoke begins
 
 Hard rule: do not add a broad browser e2e suite just because e2e is fashionable. Start with the smallest gate that protects a real product journey without becoming brittle.
 
@@ -36,12 +37,14 @@ CI currently runs one `quality-gate` job:
 - Node 20 setup
 - dependency install with frozen lockfile
 - Prisma generate
+- database migration deploy against a Postgres service
 - typecheck
 - unit tests
+- API smoke tests
 - API build
 - web build
 
-CI sets a dummy `DATABASE_URL` so Prisma client generation and typechecking can run. It does not currently start a real database service.
+CI starts a Postgres service, runs `pnpm db:migrate:deploy`, then runs `pnpm --filter @tsmt/api test:smoke` as a separate API smoke step.
 
 ### Existing Test Shape
 - API tests use TypeScript compilation to `.test-dist` and Node's built-in test runner.
@@ -50,10 +53,9 @@ CI sets a dummy `DATABASE_URL` so Prisma client generation and typechecking can 
 - Web coverage is strongest around pure helper/view-model modules, not rendered component flows.
 
 ### Current Gaps
-- No API smoke test starts the real Nest app against a test database.
+- No API smoke covers session start, task completion, or finish yet.
 - No browser smoke/e2e test starts web + API together.
-- No CI database service is configured.
-- No contract/API-shape gate protects frontend assumptions around raw Prisma response shapes.
+- No contract/API-shape gate beyond the current focused smoke assertions protects frontend assumptions around raw Prisma response shapes.
 - No automated smoke covers login -> dashboard -> routine -> training runner -> finish.
 - No lint/format gate beyond `tsc`-based `lint` scripts.
 
@@ -267,6 +269,7 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 ## Phased Roadmap
 
 ### Phase 1: Strategy Document
+- Status: complete via `#86`.
 - Goal: create this quality-gate strategy.
 - Scope: docs only.
 - Likely files: `docs/quality-gate-strategy.md`.
@@ -279,8 +282,9 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 - Must not change: source code, tests, CI, dependencies.
 
 ### Phase 2: API Smoke Foundation
+- Status: complete via `#87`, with follow-up parent/routine smoke coverage in `#88` and `#89`.
 - Goal: establish the smallest DB-backed API smoke harness.
-- Scope: add a script and one minimal smoke path, likely health/auth/me or auth/children.
+- Scope: add a script and one minimal smoke path, then extend to parent-owned data paths.
 - Likely files:
   - root `package.json`
   - `apps/api/package.json`
@@ -299,6 +303,9 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
   - real Nest app can run against test DB
   - deterministic test user/data exists
   - one protected endpoint is verified through real auth
+  - auth/me smoke exists
+  - parent-owned children smoke exists
+  - routine list ownership smoke exists
 - Stop conditions:
   - requires broad app refactor
   - requires external paid services
@@ -307,8 +314,9 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 - Must not change: production API behavior, Prisma schema unless explicitly planned.
 
 ### Phase 3: Core API Journey Smoke
+- Status: planned in `docs/api-smoke-completion-experiment.md`.
 - Goal: cover the first high-value product journey through API.
-- Scope: login -> list children/routines -> start session -> complete first task -> finish session -> verify response/progress/badge shape.
+- Scope: login -> list children/routines -> start session -> complete first task -> finish session -> verify one minimal post-finish observable consequence.
 - Likely files:
   - API smoke tests
   - smoke fixture builder
@@ -330,6 +338,7 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 - Must not change: session lifecycle, badge semantics, API shape.
 
 ### Phase 4: First Browser Smoke
+- Status: not ready yet; wait for API smoke completion and browser-readiness review.
 - Goal: prove web + API can support one stable user journey.
 - Scope: choose tooling only after inspecting local compatibility; cover login and landing/dashboard visibility first.
 - Likely files:
@@ -369,66 +378,52 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 - Rollback plan: remove the specific flaky expansion without removing foundation.
 - Must not change: product behavior.
 
-## First Recommended Implementation PR
+## Current Recommended Next Work
 
-Title: `test(api): add smoke test foundation`
+Title: `docs: plan API smoke completion before browser smoke`
 
-Branch: `test/api-smoke-foundation`
+Branch: `docs/api-smoke-completion-experiment`
 
 Scope:
-- add the smallest DB-backed API smoke harness
-- prefer one auth/protected endpoint smoke over a full journey
+- add `docs/api-smoke-completion-experiment.md`
+- define the remaining API smoke target state before browser smoke
+- plan session lifecycle smoke, one post-finish observable consequence, a gate review, and final browser-readiness decision
 - do not add browser tooling yet
 - do not change production behavior
 
 Likely files:
-- `apps/api/package.json`
-- root `package.json`
-- `apps/api/test` or `apps/api/smoke` smoke test file
-- possibly a small smoke fixture helper
-- possibly `.github/workflows/ci.yml` if the same PR includes a Postgres service; otherwise leave CI wiring for the next PR
+- `docs/api-smoke-completion-experiment.md`
+- this strategy document only if status lines are stale
 
 Exact implementation tasks:
-1. Inspect Nest app bootstrap testability and Prisma service lifecycle.
-2. Decide whether to instantiate the real Nest module or start the compiled API process.
-3. Add deterministic DB fixture creation for one parent user and one child.
-4. Log in through `/api/auth/login`.
-5. Call one protected endpoint such as `/api/auth/me` or `/api/children`.
-6. Add a smoke script.
-7. Run locally against a dedicated test `DATABASE_URL`.
-8. Decide whether CI wiring is safe in the same PR or should be a second PR.
+1. Record current API smoke baseline through `#89`.
+2. Define browser-smoke readiness criteria.
+3. Evaluate session lifecycle, post-finish consequence, badge, destructive preview, ownership, admin/catalog, and contract-shape candidates.
+4. Propose a controlled branch/PR strategy for API smoke completion.
+5. Add stop conditions to prevent full e2e scope creep.
 
 Validation commands:
-- `pnpm db:generate`
-- `pnpm --filter @tsmt/api test:smoke`
-- `pnpm --filter @tsmt/api test:unit`
-- `pnpm typecheck`
+- `git diff --check`
+- confirm docs-only diff
 
 CI impact:
-- none if first PR is local-script only
-- if CI wiring is included, add a Postgres service and keep the smoke step separate from unit tests
+- none
 
 Acceptance criteria:
-- smoke test uses real auth and a real protected endpoint
-- test data is deterministic
-- no external services are required
-- no broad product journey is attempted yet
-- failure output is understandable
+- API smoke completion plan exists
+- browser smoke remains deferred until API smoke reaches a clear readiness checkpoint
+- next implementation is expected to be a narrow session lifecycle API smoke, not browser tooling
 
 Risks:
-- DB lifecycle setup may be more costly than expected
-- Nest app bootstrap may need careful teardown
-- running migrations in CI may add time
+- planning could become too broad; keep it executable and checkpointed
 
 Uncertainties:
-- whether the first smoke should run the Nest app in-process or as a child process
-- whether CI wiring should be immediate or follow after local stability
-- whether a dedicated smoke seed belongs under `packages/db` or `apps/api/test`
+- whether the API smoke phase should stop after session lifecycle plus session history, or include one optional destructive/progress smoke
 
 Why this is the best first step:
-- it protects real backend wiring without browser flake
-- it creates the data/auth foundation required by later browser smoke
-- it is smaller and more reversible than adopting Playwright/Cypress immediately
+- it prevents browser smoke from becoming the place where backend auth/data/session basics are debugged
+- it keeps the API smoke layer small and risk-driven
+- it creates a clear gate before adding browser tooling
 
 ## Maintenance Rules
 - Update this document after each quality-gate milestone.
