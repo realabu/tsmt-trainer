@@ -382,16 +382,19 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 
 ## Current Recommended Next Work
 
-Title: implement the browser smoke foundation
+Title: start the browser smoke quality gate experiment
 
-Branch: `test/web-browser-smoke-foundation`
+Branch: `experiment/browser-smoke-quality-gate`
 
 Scope:
 - follow `docs/browser-smoke-and-quality-gate-roadmap.md`
-- choose the smallest reliable browser runner during implementation-time inspection
-- add one app-load smoke for the unauthenticated landing/auth panel
+- open one draft PR and keep it draft until final outcome review
+- execute browser smoke as sequential checkpoints in that one draft PR
+- start with baseline plus runner/tooling inspection
+- add one app-load smoke for the unauthenticated landing/auth panel only after the first checkpoint is accepted
 - use the API smoke foundation as a prerequisite, not as a reason to add a broad e2e suite
-- do not add authenticated dashboard, training runner, or full e2e scope in the foundation PR
+- do not merge intermediate checkpoints separately
+- do not add authenticated dashboard, training runner, or full e2e scope until the prior checkpoint report is reviewed
 - do not change production behavior
 
 Likely files:
@@ -401,11 +404,11 @@ Likely files:
 - generated-artifact guard or docs only if the selected runner creates local artifacts
 
 Exact implementation tasks:
-1. Inspect compatible browser runner options and local app startup requirements.
-2. Add only the minimal script/config needed for a local app-load smoke.
-3. Verify the unauthenticated landing/auth panel renders.
-4. Keep authenticated dashboard and training-runner flows for later PRs.
-5. Add stop conditions to prevent full e2e scope creep.
+1. Record baseline `main` SHA and inspect compatible browser runner options.
+2. Report expected files, artifact behavior, validation plan, and proceed/stop recommendation.
+3. If approved, add only the minimal script/config needed for a local app-load smoke.
+4. Verify the unauthenticated landing/auth panel renders.
+5. Report validation/risk notes before continuing to authenticated dashboard smoke.
 
 Validation commands:
 - `git diff --check`
@@ -414,23 +417,25 @@ Validation commands:
 - `pnpm typecheck`
 
 CI impact:
-- none by default; promote to CI only after local and PR stability are proven
+- none by default in the early checkpoints; promote only after the final outcome review or explicit architect decision
 
 Acceptance criteria:
+- one draft experiment PR exists
 - one app-load browser smoke exists
 - landing/auth panel visibility is asserted through a real browser
 - browser runner choice is documented and kept to the smallest useful foundation
 - API smoke remains the backend foundation and is not expanded by default
-- no authenticated dashboard or training-runner flow is added yet
+- intermediate checkpoints are not merged separately
+- final outcome review chooses merge all, split/partial merge, continue, or discard
 
 Risks:
 - browser smoke could become too broad or flaky if started without a narrow route
 
 Uncertainties:
-- browser runner choice is still open until the foundation PR inspects implementation tradeoffs
+- browser runner choice is still open until Checkpoint 0 inspects implementation tradeoffs
 
 Why this is the best first step:
-- it separates browser tooling risk from authenticated product-flow risk
+- it separates browser tooling risk from authenticated product-flow risk while keeping all findings in one reviewable draft experiment
 - it keeps the next quality-gate move inspection-led
 - it avoids turning the API smoke layer into an exhaustive backend test suite
 

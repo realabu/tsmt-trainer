@@ -240,166 +240,260 @@ The 80% target for quality gates is:
 - No paid or external services are required.
 - Docs state which journeys are protected and which are intentionally deferred.
 
-## Ordered Implementation Roadmap
+## Experiment Execution Model
 
-### Step 1: Browser Smoke Roadmap
-- Type: docs-only.
-- Purpose: choose browser-smoke target state before installing tooling.
-- Intended files:
-  - `docs/browser-smoke-and-quality-gate-roadmap.md`
-  - `docs/quality-gate-strategy.md`
-- User story: as a maintainer, I want browser smoke to start with a narrow plan so it protects product risk without becoming a brittle e2e suite.
+Browser smoke should start as a controlled experiment, not as a chain of independently merged test PRs.
+
+Execution rules:
+- Create one draft PR from a dedicated experiment branch.
+- Keep the PR draft until the final outcome review is complete.
+- Implement the roadmap as sequential commits/checkpoints inside that same PR.
+- Do not merge intermediate commits or checkpoints separately.
+- After each checkpoint, Codex reports validation results, changed files, risk notes, and whether stop conditions were hit.
+- Continue to the next checkpoint only after the architect accepts the report.
+- If a checkpoint becomes too large, flaky, or risky, stop and ask for architect decision before continuing.
+- Final decision happens after the complete experiment:
+  - merge all
+  - split/partial merge
+  - continue experiment
+  - discard
+
+Suggested branch and PR strategy:
+- Record the current `main` commit SHA before starting.
+- Optionally create a reference branch or baseline note from current `main`, for example `checkpoint/browser-smoke-before-quality-gate-experiment`.
+- Create experiment branch `experiment/browser-smoke-quality-gate`.
+- Open one draft PR titled `test(web): browser smoke quality gate experiment`.
+- Use small commits for each checkpoint so the final diff can be reviewed or split cleanly.
+- Update this roadmap or `docs/quality-gate-strategy.md` only at the final outcome review unless implementation diverges materially.
+
+## Target State Before Final Merge Decision
+
+The experiment should be judged against this target before any merge decision:
+- browser runner selected and documented
+- one local command runs browser smoke
+- app-load/auth-panel smoke passes
+- authenticated parent dashboard smoke passes
+- child/routine visibility is browser-covered if stable
+- runner standby is browser-covered if stable
+- minimal runner interaction is included only if it stays stable and small
+- no broad full e2e suite
+- no brittle snapshots
+- generated browser artifacts are ignored or guarded
+- runtime/flakiness observations are recorded
+- final docs say whether to merge all, split/partial merge, continue, or discard
+
+## Experiment Checkpoints
+
+### Checkpoint 0: Baseline And Runner/Tooling Inspection
+- Purpose: establish the experiment baseline and select the smallest viable browser-smoke approach before installing anything.
+- Intended changes/files:
+  - ideally docs/PR notes only
+  - no source, dependency, or test changes unless recording a tiny experiment log is useful
+- User story: as a maintainer, I want the browser-smoke runner choice to be evidence-led before the PR starts adding tooling.
 - Developer tasks:
-  - inspect current gates, web routes, auth flow, dashboard, routines, training runner, scripts, and CI
-  - record target journeys and stop conditions
-  - update strategy docs to point here
+  - record baseline `main` SHA
+  - inspect web/API startup requirements
+  - inspect candidate browser runner compatibility, scripts, generated artifacts, and CI implications
+  - confirm whether the first runnable checkpoint should stay local-only or can safely enter CI later
 - Acceptance criteria:
-  - roadmap names first-wave and deferred browser-smoke journeys
-  - no tooling or tests are added
-- Validation:
-  - `git diff --check`
-  - `pnpm typecheck` if cheap
+  - runner/tooling approach is selected or a stop recommendation is made
+  - expected files for Checkpoint 1 are listed
+  - no browser tooling is installed yet unless architect explicitly moves to Checkpoint 1
+- Validation commands:
+  - `git diff --check` if docs changed
+  - no app validation required if inspection-only
 - Stop conditions:
-  - doc starts prescribing broad full e2e
-  - doc chooses a browser tool without implementation inspection
+  - no small reliable runner path is found
+  - tool choice requires broad app/CI restructuring
+  - dependency/artifact behavior is unclear
 - Must not change:
-  - source code, tests, CI, dependencies, production behavior
+  - production behavior, frontend behavior, backend behavior, Prisma schema, CI, dependencies
+- Expected report back to architect:
+  - baseline SHA
+  - selected runner recommendation
+  - expected files for Checkpoint 1
+  - CI/artifact risks
+  - proceed/stop recommendation
 
-### Step 2: Browser Tooling Foundation And App-Load Smoke
-- Type: test/tooling, no production behavior change.
-- Purpose: prove a browser runner can start the web app reliably before adding authenticated flows.
-- Intended files:
+### Checkpoint 1: Browser Tooling Foundation And App-Load/Auth-Panel Smoke
+- Purpose: prove a browser runner can start the web app reliably before authenticated product flows are added.
+- Intended changes/files:
   - root and/or web package scripts
   - browser smoke config
   - one tiny browser smoke test
-  - optional CI workflow only if stable and fast
+  - generated-artifact guard or ignore updates only if the runner creates local artifacts
+  - no CI wiring unless it is clearly stable and small
 - User story: as a developer, I want one command that proves the app renders in a browser so future browser smoke has a stable base.
 - Developer tasks:
-  - inspect compatible browser tooling options
-  - choose the smallest reliable runner
+  - add minimal runner config and script
   - add one unauthenticated landing/auth-panel smoke
-  - document local env/start commands
+  - document local command if not obvious from package scripts
+  - verify generated artifacts are not tracked
 - Acceptance criteria:
-  - app loads
-  - login panel or landing headline is visible
+  - app loads in a real browser
+  - landing headline or auth panel is visible
   - no API DB fixture is required yet
-  - no broad product journey is included
+  - no authenticated dashboard, training runner, or full e2e flow is added
 - Validation commands:
-  - `pnpm --filter @tsmt/web build`
   - new browser smoke command
+  - `pnpm --filter @tsmt/web build`
   - `pnpm typecheck`
   - `git diff --check`
 - Stop conditions:
   - tooling requires broad app or CI restructuring
   - generated browser artifacts become tracked
-  - test is flaky locally
+  - app-load smoke is flaky locally
+  - setup requires external services
 - Must not change:
-  - frontend behavior, API behavior, Prisma schema, backend refactors
+  - frontend behavior, API behavior, Prisma schema, backend refactors, production config semantics
+- Expected report back to architect:
+  - commit hash
+  - files changed
+  - selected runner and why
+  - validation results
+  - artifact/CI risk notes
+  - proceed/stop recommendation for Checkpoint 2
 
-### Step 3: Login To Parent Dashboard Browser Smoke
-- Type: browser smoke, with tiny deterministic fixture setup.
-- Purpose: protect the first real integrated user journey.
-- Intended files:
+### Checkpoint 2: Login To Parent Dashboard Visible
+- Purpose: protect the first real integrated user journey after the browser foundation is stable.
+- Intended changes/files:
   - browser smoke test file
-  - tiny smoke fixture helper if needed
-  - scripts/CI only if Step 2 is stable
-- User story: as a parent, I can log in and see my dashboard with my child data.
+  - tiny deterministic fixture helper if needed
+  - script/config updates only if required by authenticated flow
+- User story: as a parent, I can log in through the UI and see my dashboard with my child data.
 - Developer tasks:
-  - seed parent, subscription, child, routine, and unrelated child/routine as needed
-  - log in through UI
-  - assert authenticated dashboard appears
-  - assert owned child is visible and unrelated child is not visible if the UI exposes enough stable text
+  - seed parent, free subscription, child, routine, and unrelated records only if needed
+  - log in through the rendered UI
+  - assert authenticated parent dashboard appears
+  - assert owned child is visible and unrelated child is not visible if the UI exposes stable text
 - Acceptance criteria:
   - login uses the real UI
-  - dashboard visible state is asserted
-  - assertions are narrow and user-visible
+  - browser storage/reload/auth state works
+  - dashboard visible state is asserted narrowly
+  - assertions are user-visible and avoid snapshots
 - Validation commands:
-  - API smoke
   - browser smoke command
+  - `pnpm --filter @tsmt/api test:smoke` if fixture/API assumptions changed
+  - `pnpm --filter @tsmt/web build`
   - `pnpm typecheck`
   - `git diff --check`
 - Stop conditions:
   - requires production UI changes
   - dashboard async loading is too flaky
   - fixture setup becomes a broad framework
+  - failures are hard to diagnose
 - Must not change:
-  - auth behavior, API response shape, frontend behavior
+  - auth behavior, API response shape, frontend behavior, backend behavior
+- Expected report back to architect:
+  - commit hash
+  - files changed
+  - validation results
+  - dashboard/auth flakiness notes
+  - whether child/routine visibility should continue in Checkpoint 3
 
-### Step 4: Routine Visibility And Runner Standby Smoke
-- Type: browser smoke.
-- Purpose: prove the browser can navigate from parent context to a trainable routine.
-- Intended files:
+### Checkpoint 3: Child/Routine Visibility And Runner Standby
+- Purpose: prove the browser can move from parent context toward a trainable routine without mutating session state yet.
+- Intended changes/files:
   - browser smoke tests
-  - small fixture extension if needed
-- User story: as a parent, I can see a routine and open the training runner before starting a session.
+  - small fixture extension only if needed
+- User story: as a parent, I can see my child/routine and open the training runner before starting a session.
 - Developer tasks:
-  - reuse parent/child/routine fixture
-  - navigate to routine/training route
+  - reuse the Checkpoint 2 fixture where possible
+  - assert child and routine visibility with stable user-facing text
+  - navigate to the training route
   - assert runner standby state and seeded task title
 - Acceptance criteria:
-  - routine is visible
+  - owned child/routine is visible
+  - unrelated child/routine is not exposed if stable to assert
   - training runner route loads
-  - start button is visible
+  - start button and seeded task are visible
 - Validation commands:
   - browser smoke command
-  - API smoke if backend fixture changed
+  - API smoke if fixture assumptions changed
+  - `pnpm --filter @tsmt/web build`
   - `pnpm typecheck`
+  - `git diff --check`
 - Stop conditions:
   - navigation requires brittle selectors
   - route depends on broad routine editor setup
+  - runner standby is flaky
 - Must not change:
-  - routines UI behavior, API response shape
+  - routines UI behavior, API response shape, frontend behavior, backend behavior
+- Expected report back to architect:
+  - commit hash
+  - files changed
+  - validation results
+  - selector/navigation risk notes
+  - proceed/stop recommendation for Checkpoint 4
 
-### Step 5: Minimal Training Runner Interaction Smoke
-- Type: browser smoke.
-- Purpose: protect the product-critical runner path through UI interaction.
-- Intended files:
+### Checkpoint 4: Minimal Runner Interaction, Only If Stable
+- Purpose: add the product-critical runner interaction only if prior checkpoints are stable and the test remains small.
+- Intended changes/files:
   - browser smoke tests
   - fixture helper extension only if tiny
-- User story: as a parent, I can start a session, complete one task, and see the session finish.
+- User story: as a parent, I can start a session, complete one task, and see the session finish in the browser.
 - Developer tasks:
   - start session from runner UI
   - complete the seeded task
   - assert completed state and critical text
-  - avoid exact timer assertions
+  - avoid exact timer assertions and broad snapshots
 - Acceptance criteria:
   - start button works
-  - one task completion is recorded
+  - one task completion is recorded through UI
   - final completed state is visible
+  - test remains stable and diagnosis-friendly
 - Validation commands:
   - browser smoke command
   - API smoke
+  - `pnpm --filter @tsmt/web build`
   - `pnpm typecheck`
   - `git diff --check`
 - Stop conditions:
   - timer behavior makes test flaky
   - completing task requires artificial sleeps
   - assertions become broad snapshots
+  - test becomes too large for the experiment
 - Must not change:
-  - session lifecycle semantics, badge semantics, frontend behavior
+  - session lifecycle semantics, badge semantics, frontend behavior, backend behavior
+- Expected report back to architect:
+  - commit hash
+  - files changed
+  - validation results
+  - runtime/flakiness notes
+  - whether final outcome review should recommend merge all, split, continue, or discard
 
-### Step 6: Final Browser-Smoke Checkpoint
-- Type: docs-only, maybe CI status update.
-- Purpose: decide whether browser smoke should run on every PR, remain manual, or expand.
-- Intended files:
+### Checkpoint 5: Final Outcome Review Docs
+- Purpose: decide whether the experiment achieved enough value to merge and how browser smoke should be maintained.
+- Intended changes/files:
   - this roadmap
   - `docs/quality-gate-strategy.md`
+  - optional experiment review note if the final diff needs a separate section
 - User story: as a maintainer, I want the browser-smoke outcome recorded so future AI work does not expand tests by momentum.
 - Developer tasks:
-  - record covered browser paths
+  - record baseline and final experiment commit SHAs
+  - list changed files and covered browser paths
+  - record validation commands/results
   - record runtime/flakiness observations
-  - decide CI cadence
-  - list deferred flows
+  - state CI cadence recommendation
+  - choose final outcome: merge all, split/partial merge, continue experiment, or discard
 - Acceptance criteria:
-  - merge/continue/defer decision is explicit
-  - docs reflect current quality-gate state
+  - final decision is explicit
+  - docs say what is protected and what remains deferred
+  - no intermediate checkpoint is treated as already merged
 - Validation:
   - `git diff --check`
+  - final browser smoke/API smoke/typecheck/build commands as relevant to the experiment state
 - Stop conditions:
   - browser smoke is unstable
-  - CI runtime is too high
+  - CI/runtime cost is too high
+  - final diff is too large to review comfortably
 - Must not change:
-  - production behavior, tests beyond docs if this is review-only
+  - production behavior, tests beyond review docs if this checkpoint is docs-only
+- Expected report back to architect:
+  - final experiment commit SHA
+  - final merge recommendation
+  - validations
+  - known risks and deferred candidates
 
 ## Deferred Candidates
 
@@ -417,44 +511,47 @@ These are legitimate future tests, but starting with them would increase fixture
 
 ## First Implementation Recommendation
 
-Recommended first implementation PR after this docs PR:
+Recommended next work after this docs PR:
 
-Title: `test(web): add browser smoke foundation`
+Title: `test(web): browser smoke quality gate experiment`
 
-Suggested branch: `test/web-browser-smoke-foundation`
+Suggested branch: `experiment/browser-smoke-quality-gate`
 
 Scope:
-- choose the smallest reliable browser runner after implementation-time inspection
-- add one app-load smoke for the unauthenticated landing/auth panel
-- add the minimal script needed to run it locally
-- do not add authenticated dashboard or training-runner assertions yet
-- do not wire it into required CI until local and PR stability are proven
+- start one draft experiment PR
+- record the baseline `main` SHA
+- execute Checkpoint 0 first
+- execute Checkpoint 1 only after the runner/tooling inspection is accepted
+- do not merge after Checkpoint 1
+- continue to Checkpoint 2 only after the Checkpoint 1 report is reviewed
+- keep all browser-smoke work in the same draft PR until final outcome review
 
-Likely files:
+Initial likely files for Checkpoint 1:
 - root `package.json` and/or `apps/web/package.json`
 - browser smoke config
 - one smoke test under a small web smoke test location
-- generated-artifact guard update only if the tool creates new local artifacts that must be ignored/blocked
+- generated-artifact guard update only if the tool creates local artifacts that must be ignored/blocked
 - docs note only if the command or artifact policy needs clarification
 
-Validation:
-- new browser smoke command
+Initial validation:
+- new browser smoke command once Checkpoint 1 exists
 - `pnpm --filter @tsmt/web build`
 - `pnpm typecheck`
 - `git diff --check`
 
-Why this is the best first step:
+Why this is the best next step:
 - it separates browser tooling risk from product-flow risk
-- it keeps the first PR reviewable
-- it proves web startup/rendering before adding auth/data fixtures
+- it lets the team judge the whole browser-smoke target state before merging
+- it keeps intermediate commits reviewable without pretending each checkpoint is independently production-ready
 - it avoids using browser tests to debug backend basics already covered by API smoke
 
 Stop immediately if:
 - the runner requires broad app changes
-- the app-load smoke is flaky locally
+- app-load smoke is flaky locally
 - setup requires external services
 - generated browser artifacts become tracked
 - the PR starts adding full e2e scope
+- any checkpoint becomes too large to review comfortably
 
 ## Maintenance Rules
 
