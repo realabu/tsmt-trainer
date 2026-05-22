@@ -11,6 +11,7 @@ Current posture:
 - generated artifacts are guarded by `pnpm check:generated`
 - DB-backed API smoke is established through auth, children ownership, routine ownership, minimal session lifecycle, and post-finish session history paths
 - API smoke is sufficient as a backend foundation for browser-smoke planning, but browser smoke has not started
+- browser-smoke target state and first-wave sequencing are planned in `docs/browser-smoke-and-quality-gate-roadmap.md`
 
 Hard rule: do not add a broad browser e2e suite just because e2e is fashionable. Start with the smallest gate that protects a real product journey without becoming brittle.
 
@@ -258,7 +259,7 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 “Good enough / 80% production-ready quality gates” means:
 - local developers can run a short smoke gate before risky changes
 - CI catches generated artifacts, type errors, unit regressions, and one or two core journey regressions
-- the first smoke tests protect auth, parent data, routine/session lifecycle, and finish/badge/progress wiring
+- the first smoke tests protect auth, parent data, routine/session lifecycle, and post-finish session-read wiring
 - tests use deterministic fixture data and avoid external services
 - browser smoke is small and stable before it is required on every PR
 - API shape assumptions consumed by frontend are protected for critical raw responses
@@ -339,9 +340,9 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 - Must not change: session lifecycle, badge semantics, API shape.
 
 ### Phase 4: First Browser Smoke
-- Status: planning/inspection is now justified; browser tooling is not implemented.
+- Status: target state and sequencing are planned in `docs/browser-smoke-and-quality-gate-roadmap.md`; browser tooling is not implemented.
 - Goal: prove web + API can support one stable user journey.
-- Scope: choose tooling only after inspecting local compatibility; cover login and landing/dashboard visibility first.
+- Scope: choose tooling only after inspecting local compatibility; cover app-load/auth-panel visibility first, then login/dashboard visibility in a follow-up.
 - Likely files:
   - new browser smoke config
   - package scripts
@@ -354,7 +355,7 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
   - web build
   - browser smoke locally
 - Acceptance criteria:
-  - deterministic login works
+  - app-load/auth-panel visibility works first; deterministic login follows in the next browser-smoke step
   - stable selectors or user-facing text checks are used
   - no broad brittle e2e suite is introduced
 - Stop conditions:
@@ -381,47 +382,60 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 
 ## Current Recommended Next Work
 
-Title: inspect first browser smoke candidate
+Title: start the browser smoke quality gate experiment
 
-Branch: to be chosen after inspection
+Branch: `experiment/browser-smoke-quality-gate`
 
 Scope:
-- inspect the smallest reliable browser smoke candidate
+- follow `docs/browser-smoke-and-quality-gate-roadmap.md`
+- open one draft PR and keep it draft until final outcome review
+- execute browser smoke as sequential checkpoints in that one draft PR
+- start with baseline plus runner/tooling inspection
+- add one app-load smoke for the unauthenticated landing/auth panel only after the first checkpoint is accepted
 - use the API smoke foundation as a prerequisite, not as a reason to add a broad e2e suite
-- do not add browser tooling until the inspection chooses a specific first path
+- do not merge intermediate checkpoints separately
+- do not add authenticated dashboard, training runner, or full e2e scope until the prior checkpoint report is reviewed
 - do not change production behavior
 
 Likely files:
-- frontend/API route files only for inspection
-- docs only if creating a browser-smoke plan
+- root `package.json` and/or `apps/web/package.json`
+- browser smoke config
+- one small web smoke test
+- generated-artifact guard or docs only if the selected runner creates local artifacts
 
 Exact implementation tasks:
-1. Inspect current auth/dashboard/training-runner frontend paths and API dependencies.
-2. Identify the smallest stable browser-visible journey.
-3. Decide whether browser tooling is justified now or whether another non-browser gate should come first.
-4. If browser tooling is justified, plan one narrow smoke path before implementation.
-5. Add stop conditions to prevent full e2e scope creep.
+1. Record baseline `main` SHA and inspect compatible browser runner options.
+2. Report expected files, artifact behavior, validation plan, and proceed/stop recommendation.
+3. If approved, add only the minimal script/config needed for a local app-load smoke.
+4. Verify the unauthenticated landing/auth panel renders.
+5. Report validation/risk notes before continuing to authenticated dashboard smoke.
 
 Validation commands:
 - `git diff --check`
-- no implementation validation unless a later PR adds tooling/tests
+- new browser smoke command
+- `pnpm --filter @tsmt/web build`
+- `pnpm typecheck`
 
 CI impact:
-- none for inspection/planning
+- none by default in the early checkpoints; promote only after the final outcome review or explicit architect decision
 
 Acceptance criteria:
-- browser-smoke candidate is chosen by inspection, not momentum
-- no Playwright/Cypress or equivalent tooling is added before a plan exists
+- one draft experiment PR exists
+- one app-load browser smoke exists
+- landing/auth panel visibility is asserted through a real browser
+- browser runner choice is documented and kept to the smallest useful foundation
 - API smoke remains the backend foundation and is not expanded by default
+- intermediate checkpoints are not merged separately
+- final outcome review chooses merge all, split/partial merge, continue, or discard
 
 Risks:
 - browser smoke could become too broad or flaky if started without a narrow route
 
 Uncertainties:
-- first browser path and tooling are not selected yet
+- browser runner choice is still open until Checkpoint 0 inspects implementation tradeoffs
 
 Why this is the best first step:
-- it prevents browser smoke from becoming the place where backend auth/data/session basics are debugged
+- it separates browser tooling risk from authenticated product-flow risk while keeping all findings in one reviewable draft experiment
 - it keeps the next quality-gate move inspection-led
 - it avoids turning the API smoke layer into an exhaustive backend test suite
 
