@@ -9,8 +9,8 @@ Current posture:
 - routines backend refactoring is paused by default after `RoutineDeleteImpactService`
 - sessions backend refactoring is paused by default after `SessionBadgeAwardService`
 - generated artifacts are guarded by `pnpm check:generated`
-- DB-backed API smoke is established through auth, children ownership, and routine ownership paths
-- API smoke completion is being planned before browser smoke begins
+- DB-backed API smoke is established through auth, children ownership, routine ownership, minimal session lifecycle, and post-finish session history paths
+- API smoke is sufficient as a backend foundation for browser-smoke planning, but browser smoke has not started
 
 Hard rule: do not add a broad browser e2e suite just because e2e is fashionable. Start with the smallest gate that protects a real product journey without becoming brittle.
 
@@ -53,10 +53,9 @@ CI starts a Postgres service, runs `pnpm db:migrate:deploy`, then runs `pnpm --f
 - Web coverage is strongest around pure helper/view-model modules, not rendered component flows.
 
 ### Current Gaps
-- No API smoke covers session start, task completion, or finish yet.
 - No browser smoke/e2e test starts web + API together.
 - No contract/API-shape gate beyond the current focused smoke assertions protects frontend assumptions around raw Prisma response shapes.
-- No automated smoke covers login -> dashboard -> routine -> training runner -> finish.
+- No browser smoke covers login -> dashboard -> routine -> training runner -> finish.
 - No lint/format gate beyond `tsc`-based `lint` scripts.
 
 ## Critical Product Journeys
@@ -314,7 +313,7 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 - Must not change: production API behavior, Prisma schema unless explicitly planned.
 
 ### Phase 3: Core API Journey Smoke
-- Status: planned in `docs/api-smoke-completion-experiment.md`.
+- Status: complete through `#90`, `#91`, and `#92`.
 - Goal: cover the first high-value product journey through API.
 - Scope: login -> list children/routines -> start session -> complete first task -> finish session -> verify one minimal post-finish observable consequence.
 - Likely files:
@@ -331,6 +330,8 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 - Acceptance criteria:
   - catches broken auth/session/routine wiring
   - avoids checking every badge permutation
+  - session lifecycle smoke exists
+  - post-finish session history/read consequence smoke exists
 - Stop conditions:
   - time/date logic becomes flaky
   - test starts duplicating service unit tests instead of journey behavior
@@ -338,7 +339,7 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 - Must not change: session lifecycle, badge semantics, API shape.
 
 ### Phase 4: First Browser Smoke
-- Status: not ready yet; wait for API smoke completion and browser-readiness review.
+- Status: planning/inspection is now justified; browser tooling is not implemented.
 - Goal: prove web + API can support one stable user journey.
 - Scope: choose tooling only after inspecting local compatibility; cover login and landing/dashboard visibility first.
 - Likely files:
@@ -380,50 +381,49 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 
 ## Current Recommended Next Work
 
-Title: `docs: plan API smoke completion before browser smoke`
+Title: inspect first browser smoke candidate
 
-Branch: `docs/api-smoke-completion-experiment`
+Branch: to be chosen after inspection
 
 Scope:
-- add `docs/api-smoke-completion-experiment.md`
-- define the remaining API smoke target state before browser smoke
-- plan session lifecycle smoke, one post-finish observable consequence, a gate review, and final browser-readiness decision
-- do not add browser tooling yet
+- inspect the smallest reliable browser smoke candidate
+- use the API smoke foundation as a prerequisite, not as a reason to add a broad e2e suite
+- do not add browser tooling until the inspection chooses a specific first path
 - do not change production behavior
 
 Likely files:
-- `docs/api-smoke-completion-experiment.md`
-- this strategy document only if status lines are stale
+- frontend/API route files only for inspection
+- docs only if creating a browser-smoke plan
 
 Exact implementation tasks:
-1. Record current API smoke baseline through `#89`.
-2. Define browser-smoke readiness criteria.
-3. Evaluate session lifecycle, post-finish consequence, badge, destructive preview, ownership, admin/catalog, and contract-shape candidates.
-4. Propose a controlled branch/PR strategy for API smoke completion.
+1. Inspect current auth/dashboard/training-runner frontend paths and API dependencies.
+2. Identify the smallest stable browser-visible journey.
+3. Decide whether browser tooling is justified now or whether another non-browser gate should come first.
+4. If browser tooling is justified, plan one narrow smoke path before implementation.
 5. Add stop conditions to prevent full e2e scope creep.
 
 Validation commands:
 - `git diff --check`
-- confirm docs-only diff
+- no implementation validation unless a later PR adds tooling/tests
 
 CI impact:
-- none
+- none for inspection/planning
 
 Acceptance criteria:
-- API smoke completion plan exists
-- browser smoke remains deferred until API smoke reaches a clear readiness checkpoint
-- next implementation is expected to be a narrow session lifecycle API smoke, not browser tooling
+- browser-smoke candidate is chosen by inspection, not momentum
+- no Playwright/Cypress or equivalent tooling is added before a plan exists
+- API smoke remains the backend foundation and is not expanded by default
 
 Risks:
-- planning could become too broad; keep it executable and checkpointed
+- browser smoke could become too broad or flaky if started without a narrow route
 
 Uncertainties:
-- whether the API smoke phase should stop after session lifecycle plus session history, or include one optional destructive/progress smoke
+- first browser path and tooling are not selected yet
 
 Why this is the best first step:
 - it prevents browser smoke from becoming the place where backend auth/data/session basics are debugged
-- it keeps the API smoke layer small and risk-driven
-- it creates a clear gate before adding browser tooling
+- it keeps the next quality-gate move inspection-led
+- it avoids turning the API smoke layer into an exhaustive backend test suite
 
 ## Maintenance Rules
 - Update this document after each quality-gate milestone.
