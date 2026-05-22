@@ -11,6 +11,10 @@ Current baseline:
 - Web tests cover pure helpers and view-model logic, not rendered app flows.
 - Browser smoke has completed a controlled local-first experiment in PR `#95`.
 - Playwright is selected, installed, and used by `pnpm --filter @tsmt/web test:smoke`.
+- Browser smoke commands are split so app-load can run without a database and authenticated smoke is explicitly DB-backed:
+  - `pnpm --filter @tsmt/web test:smoke:app`
+  - `pnpm --filter @tsmt/web test:smoke:auth`
+  - `pnpm --filter @tsmt/web test:smoke`
 - Browser smoke is not wired into required CI yet.
 - Routines and sessions backend refactoring are paused by default.
 
@@ -602,7 +606,10 @@ Browser paths now covered:
 - completed runner state is visible
 
 Validation summary:
-- `pnpm --filter @tsmt/web test:smoke` passed through Checkpoints 1-4.
+- `pnpm --filter @tsmt/web test:smoke:app` is the DB-free app-load/auth-panel smoke command.
+- `pnpm --filter @tsmt/web test:smoke:auth` is the DB-backed authenticated browser smoke command. It requires `DATABASE_URL`, reachable Postgres, and applied migrations for that database.
+- `pnpm --filter @tsmt/web test:smoke` runs both app-load and authenticated smoke.
+- `pnpm --filter @tsmt/web test:smoke` passed through Checkpoints 1-4 when the authenticated smoke database prerequisite was satisfied locally.
 - `pnpm --filter @tsmt/web build` passed through Checkpoints 1-4.
 - `pnpm typecheck` passed through Checkpoints 1-4. One transient local run failed when `pnpm typecheck` overlapped with `next build` rewriting `.next/types`; rerunning serially passed.
 - `pnpm check:generated` passed where run.
@@ -613,6 +620,8 @@ Validation summary:
 Runtime and flakiness notes:
 - The local smoke command passed after each accepted checkpoint.
 - The browser smoke remains local-first and is not a required CI gate.
+- App-load smoke is DB-free; authenticated/full browser smoke is DB-backed.
+- Before running authenticated/full browser smoke, ensure `DATABASE_URL` points to a reachable Postgres database and run migrations against it, for example `pnpm db:migrate:deploy` with the same environment.
 - GitHub CI stayed green for the branch, but CI does not run browser smoke yet.
 - No artificial sleeps or broad snapshots were introduced.
 - Future CI promotion should be inspected and implemented separately.

@@ -9,7 +9,9 @@
     "lint": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:unit": "tsc -p tsconfig.test.json && node --test .test-dist/apps/web/lib/__tests__/*.test.js",
-    "test:smoke": "playwright test --config=playwright.smoke.config.ts && playwright test --config=playwright.auth-smoke.config.ts"
+    "test:smoke": "pnpm run test:smoke:app && pnpm run test:smoke:auth",
+    "test:smoke:app": "playwright test --config=playwright.smoke.config.ts",
+    "test:smoke:auth": "playwright test --config=playwright.auth-smoke.config.ts"
   },
   "dependencies": {
     "@tsmt/types": "workspace:*",

@@ -27,7 +27,13 @@ export function loadWorkspaceEnv() {
   }
 
   if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL is required for authenticated browser smoke.");
+    throw new Error(
+      [
+        "DATABASE_URL is required for authenticated browser smoke.",
+        "Run `pnpm --filter @tsmt/web test:smoke:app` for the DB-free app-load smoke.",
+        "Run authenticated/full browser smoke only after Postgres is reachable and migrations are applied, for example with `pnpm db:migrate:deploy` against the same DATABASE_URL.",
+      ].join(" "),
+    );
   }
 
   return {

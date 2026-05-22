@@ -13,6 +13,8 @@ Current posture:
 - API smoke is sufficient as a backend foundation for browser smoke
 - browser smoke has completed a controlled local-first experiment in PR `#95`
 - `pnpm --filter @tsmt/web test:smoke` now covers app-load/auth-panel, real UI login, parent dashboard, owned child/routine visibility, runner standby, and minimal one-task runner completion
+- `pnpm --filter @tsmt/web test:smoke:app` runs only the DB-free app-load/auth-panel smoke
+- `pnpm --filter @tsmt/web test:smoke:auth` runs the DB-backed authenticated browser smoke and requires `DATABASE_URL`, reachable Postgres, and applied migrations
 - browser smoke is not wired into required CI yet; CI promotion remains a separate inspection/implementation decision
 
 Hard rule: do not add a broad browser e2e suite just because e2e is fashionable. Start with the smallest gate that protects a real product journey without becoming brittle.
@@ -57,6 +59,7 @@ CI starts a Postgres service, runs `pnpm db:migrate:deploy`, then runs `pnpm --f
 
 ### Current Gaps
 - Browser smoke is local-first and not yet part of required CI.
+- Local authenticated/full browser smoke requires a developer-provided migrated Postgres database; this is intentional until CI promotion or local DB orchestration is planned separately.
 - No contract/API-shape gate beyond the current focused smoke assertions protects frontend assumptions around raw Prisma response shapes.
 - No browser smoke covers destructive previews, badges, admin/catalog flows, multi-child edge cases, or broader full e2e journeys.
 - No lint/format gate beyond `tsc`-based `lint` scripts.
@@ -351,6 +354,8 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
   - `apps/web/playwright.auth-smoke.config.ts`
   - `apps/web/test/smoke/*`
 - Expected scripts:
+  - `pnpm --filter @tsmt/web test:smoke:app`
+  - `pnpm --filter @tsmt/web test:smoke:auth`
   - `pnpm --filter @tsmt/web test:smoke`
 - CI placement: local-first for now; inspect CI promotion separately.
 - Validation:
@@ -412,6 +417,8 @@ Exact implementation tasks:
 
 Validation commands:
 - `git diff --check`
+- `pnpm --filter @tsmt/web test:smoke:app`
+- `pnpm --filter @tsmt/web test:smoke:auth` when a migrated local Postgres database is reachable
 - `pnpm --filter @tsmt/web test:smoke`
 - `pnpm --filter @tsmt/web build`
 - `pnpm typecheck`
