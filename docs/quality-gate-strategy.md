@@ -63,14 +63,15 @@ CI starts a Postgres service, runs `pnpm db:migrate:deploy`, then runs `pnpm --f
 - No contract/API-shape gate beyond the current focused smoke assertions protects frontend assumptions around raw Prisma response shapes.
 - No browser smoke covers destructive previews, badges, admin/catalog flows, multi-child edge cases, or broader full e2e journeys.
 - No lint/format gate beyond `tsc`-based `lint` scripts.
+- Docker/local dev orchestration is still deferred until serious feature, deployability, onboarding, or browser-smoke CI work needs it.
 
 ## Critical Product Journeys
 
 ### 1. Auth / Login / Session Persistence
 - User/product value: users must be able to enter the product and keep a valid session.
 - Risk if broken: complete product lockout or confusing auth refresh failures.
-- Current coverage: frontend `apiFetch` and auth storage helper tests; backend auth service has less direct end-to-end coverage.
-- Best gate type: API smoke first, browser smoke later.
+- Current coverage: frontend `apiFetch` and auth storage helper tests, DB-backed API smoke for login -> `/api/auth/me`, and local-first browser smoke for real UI login.
+- Best gate type: keep current API/browser smoke narrow; add more only if auth feature work creates a concrete risk.
 - Data setup needed: seeded parent/admin users or test-created users.
 - Flakiness risk: low for API smoke, medium for browser because redirects and storage are involved.
 - Recommended priority: high.
@@ -78,8 +79,8 @@ CI starts a Postgres service, runs `pnpm db:migrate:deploy`, then runs `pnpm --f
 ### 2. Parent Dashboard Loads Child/Routine Data
 - User/product value: parent home is the primary overview surface.
 - Risk if broken: user logs in but cannot see children, routines, progress, badges, or recent sessions.
-- Current coverage: pure parent dashboard helper/view-model tests; no rendered/data-flow smoke.
-- Best gate type: API smoke for `/children`, `/routines`, `/sessions`; browser smoke later.
+- Current coverage: pure parent dashboard helper/view-model tests, API smoke for children/routines/sessions, and local-first browser smoke for dashboard plus owned child/routine visibility.
+- Best gate type: feature-specific component/helper tests or scoped browser smoke only if dashboard behavior changes.
 - Data setup needed: parent, child, routine, completed session, badge definitions.
 - Flakiness risk: low for API smoke, medium for browser.
 - Recommended priority: high.
@@ -105,8 +106,8 @@ CI starts a Postgres service, runs `pnpm db:migrate:deploy`, then runs `pnpm --f
 ### 5. Training Runner Starts And Progresses A Session
 - User/product value: this is the core torna execution flow.
 - Risk if broken: users cannot start, complete tasks, finish, or record results.
-- Current coverage: sessions service lifecycle tests and frontend view-model/helper tests; no end-to-end flow.
-- Best gate type: API smoke first for start -> complete task -> finish, then browser smoke for runner UI.
+- Current coverage: sessions service lifecycle tests, frontend view-model/helper tests, DB-backed API smoke for start -> complete task -> finish, and local-first browser smoke for one-task runner completion.
+- Best gate type: keep the current smoke paths stable; inspect before expanding into multi-task/progress/badge flows.
 - Data setup needed: routine with ordered tasks and a valid parent/child.
 - Flakiness risk: low for API smoke, medium-high for browser because timers/UI state are involved.
 - Recommended priority: highest.
@@ -114,8 +115,8 @@ CI starts a Postgres service, runs `pnpm db:migrate:deploy`, then runs `pnpm --f
 ### 6. Finish Session And Badge/Progress Outcome
 - User/product value: completion should update stats and award achievements correctly.
 - Risk if broken: missed/duplicate badges, wrong progress, trust loss.
-- Current coverage: sessions service safety tests, badge helper tests, routines progress service tests.
-- Best gate type: API smoke validating finish response plus badge/progress endpoint shape; deeper badge permutations remain unit/service tests.
+- Current coverage: sessions service safety tests, badge helper tests, routines progress service tests, API smoke for finish and post-finish session listing, and browser smoke for completed runner state.
+- Best gate type: keep deeper badge/progress permutations in unit/service tests unless a product-visible badge/progress feature needs browser coverage.
 - Data setup needed: badge definitions, routine periods, completed session conditions.
 - Flakiness risk: medium if dates/timezones are not controlled.
 - Recommended priority: high.
@@ -153,12 +154,12 @@ CI starts a Postgres service, runs `pnpm db:migrate:deploy`, then runs `pnpm --f
 ### Browser Smoke Tests
 - Value: high for user confidence and frontend/API wiring.
 - Cost: medium-high. Requires web + API startup, auth/data setup, and browser tooling.
-- Flakiness risk: medium-high until selectors and test data stabilize.
+- Flakiness risk: medium; current local-first smoke passed the controlled experiment, but authenticated/full smoke still depends on a reachable migrated Postgres database.
 - Maintenance cost: medium-high.
 - Implementation complexity: high relative to current repo.
-- First useful PR size: should be separate from API smoke foundation.
-- CI cadence: every PR only after stable; otherwise manual/nightly first.
-- Recommendation: later, after API smoke and test data are reliable.
+- First useful PR size: complete via PR `#95`.
+- CI cadence: local-first for now; inspect CI promotion separately before making it required.
+- Recommendation: keep, but do not expand or promote by momentum.
 
 ### Full E2E Tests
 - Value: very high for release confidence.
@@ -222,24 +223,25 @@ The existing `packages/db/prisma/seed.ts` creates useful demo data:
 - badge definitions
 - catalog songs/tasks/equipment later in the seed
 
-This seed is useful for development, but an automated smoke gate should not depend on broad demo seed state forever. A dedicated smoke seed or fixture script is likely safer once API smoke begins.
+This seed is useful for development, but automated smoke gates should not depend on broad demo seed state. Current API and browser smoke paths use deterministic smoke fixtures instead.
 
 ### Database
-Current CI only provides a dummy `DATABASE_URL`; it does not run Postgres. Any DB-backed smoke gate needs:
-- a Postgres service in CI
-- a dedicated test database URL
-- Prisma generate
-- migration deploy or migrate reset strategy
-- deterministic fixture creation
-- cleanup or per-run isolated database
+Current CI runs a Postgres service for API smoke, applies migrations with `pnpm db:migrate:deploy`, then runs `pnpm --filter @tsmt/api test:smoke`.
+
+Authenticated browser smoke is still local-first. Running `pnpm --filter @tsmt/web test:smoke:auth` or the full `pnpm --filter @tsmt/web test:smoke` requires:
+- a reachable Postgres database through `DATABASE_URL`
+- applied migrations for that database
+- deterministic smoke fixture creation and cleanup through the browser-smoke helpers
+
+Browser-smoke CI promotion or local Docker orchestration remains a separate future inspection decision.
 
 ### Auth
-Auth should initially be exercised through API login, not browser UI, for API smoke. Browser smoke can later use UI login once the browser runner exists.
+Auth is now exercised in both API smoke and local-first browser smoke.
 
-Recommended first auth strategy:
-- create or seed a parent user with known credentials
-- login through `/api/auth/login`
-- use the returned access token for protected endpoints
+Current auth strategy:
+- API smoke creates deterministic parent users and logs in through `/api/auth/login`
+- browser smoke seeds deterministic data and logs in through the real UI
+- future auth expansion should stay narrow and should not replace service/unit tests
 
 ### External Services
 Smoke tests must not depend on paid or external services. Media/S3-like config should remain stubbed or use URL-only data where current app behavior permits.
@@ -394,54 +396,55 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 
 ## Current Recommended Next Work
 
-Title: review browser smoke experiment outcome and decide CI promotion separately
+Title: feature-readiness checkpoint before new product work
 
-Branch: `experiment/browser-smoke-quality-gate`
+Recommended posture:
+- the foundation is good enough to begin feature planning, but each feature should start with scoped inspection of the exact files and domains it will touch
+- routines and sessions backend refactoring remain paused by default
+- browser smoke remains local-first and should not be promoted to CI without a separate inspection of runtime, DB orchestration, artifact behavior, and flakiness
+- Docker/local dev setup remains deferred until deployability, onboarding, serious feature work, or browser-smoke CI promotion needs it
 
 Scope:
-- complete final architect review of PR `#95`
-- if accepted, merge the local-first browser smoke foundation as one experiment outcome
-- do not add more browser smoke immediately by default
-- inspect whether to promote browser smoke to CI as a separate PR
-- if CI promotion is deferred, add or confirm concise local usage guidance before relying on browser smoke as a release habit
-- do not change production behavior or broaden into full e2e scope
+- do not continue backend refactoring, smoke expansion, or infrastructure work by momentum
+- before feature implementation, inspect the touched frontend/backend areas for ownership, API shape, response assumptions, tests, and quality-gate coverage
+- add tests, docs, or small extractions only when inspection shows concrete production-readiness value
 
 Likely files:
-- docs only for final review/checkpoint updates, or CI workflow only in a later explicit CI-promotion PR
+- feature-specific files selected after inspection
+- strategic docs only when guidance becomes stale
+- CI workflow only in a later explicit CI-promotion PR
 
 Exact implementation tasks:
-1. Review PR `#95` final outcome docs and validation notes.
-2. Confirm whether the local-first browser smoke should merge as-is.
-3. Separately inspect CI promotion cost, runtime, flakiness risk, Postgres/API/web startup requirements, and artifact behavior.
-4. Implement CI promotion only if inspection finds a small reliable path.
+1. Define the intended product feature or production-readiness goal.
+2. Inspect the exact files/routes/services/components involved before coding.
+3. Decide whether existing unit, API smoke, and browser smoke coverage is enough for that feature.
+4. Add only the smallest missing guardrail or extraction needed to make the feature safe.
 
 Validation commands:
 - `git diff --check`
-- `pnpm --filter @tsmt/web test:smoke:app`
-- `pnpm --filter @tsmt/web test:smoke:auth` when a migrated local Postgres database is reachable
-- `pnpm --filter @tsmt/web test:smoke`
-- `pnpm --filter @tsmt/web build`
 - `pnpm typecheck`
 - `pnpm check:generated`
+- targeted unit/API/browser smoke commands based on the touched area
 
 CI impact:
-- none from the local-first experiment by default; promote only after explicit architect decision
+- none by default; browser-smoke CI promotion remains deferred
 
 Acceptance criteria:
-- PR `#95` records the final outcome and remains reviewable
-- browser smoke is clearly documented as local-first
-- API smoke remains the backend foundation and is not expanded by default
-- final outcome review chooses merge all, split/partial merge, continue, or discard before PR readiness
+- feature planning is evidence-based and scoped
+- no old roadmap item drives automatic refactor or smoke expansion
+- browser smoke remains an optional/local confidence gate unless explicitly promoted
 
 Risks:
-- promoting browser smoke to required CI too quickly could add runtime/flakiness before the local gate has enough history
+- starting feature work without scoped inspection could re-grow known hotspots
+- promoting browser smoke to required CI too quickly could add runtime/flakiness before DB orchestration and local/CI behavior are understood
 
 Uncertainties:
-- exact CI promotion shape is still open and should be inspected separately
+- exact next product feature is not selected in this document
+- exact CI promotion shape is still open and should be inspected separately if it becomes a goal
 
 Why this is the best first step:
-- it preserves the controlled experiment model and avoids turning local browser smoke into a required CI gate by momentum
-- it keeps the next quality-gate move inspection-led instead of adding more browser coverage automatically
+- the main foundation risks are now guarded enough for scoped feature planning
+- the remaining risks are feature-specific and should be evaluated against the actual product change rather than handled through generic refactor loops
 
 ## Maintenance Rules
 - Update this document after each quality-gate milestone.

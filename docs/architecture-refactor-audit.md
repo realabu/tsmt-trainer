@@ -313,16 +313,20 @@ Interpretation:
     - install with frozen lockfile
     - `pnpm check:generated`
     - `pnpm db:generate`
+    - `pnpm db:migrate:deploy` against a Postgres service
     - `pnpm typecheck`
     - `pnpm test`
+    - DB-backed API smoke through `pnpm --filter @tsmt/api test:smoke`
     - API build
     - web build
-  - dummy `DATABASE_URL` is set for CI quality gate usage
+  - local-first browser smoke exists but is not required in CI
 - Main risks:
-  - no database-backed integration job exists yet
-  - current quality gate is strong for unit/build hygiene, weaker for end-to-end behavior
+  - browser smoke CI promotion has not been inspected or implemented
+  - authenticated local browser smoke requires a reachable migrated Postgres database
+  - current browser coverage is intentionally smoke-level, not exhaustive e2e coverage
 - Recommended next action:
   - keep CI stable; only add heavier checks when they can pass reliably
+  - inspect browser-smoke CI promotion separately before wiring it into required CI
 - Suggested PR granularity:
   - one CI check addition per PR
 
@@ -348,18 +352,19 @@ Interpretation:
 ## Candidate Next PRs
 These are candidate next PRs, not final strategy decisions.
 
-1. Plan a minimal smoke/e2e quality gate for auth -> routine -> session runner happy path.
+1. Start feature planning with scoped inspection of the exact frontend/backend areas the feature will touch.
 2. Audit frontend destructive confirmation flows before changing `routines-manager` or dashboard behavior.
 3. Inspect `TrainingRunner` session lifecycle mutation flow before extracting a hook or helper.
-4. If product work touches sessions, inspect `completeTask(...)`, `finish(...)`, `start(...)`, `getById(...)`, or uncovered badge trigger paths before code.
-5. Keep sessions and routines backend refactoring paused by default unless inspection identifies a concrete production risk.
-6. Split `apps/web/components/admin-catalog-manager.tsx` only if admin catalog product work resumes.
-7. Add focused tests or small policy helpers around trainer assignment ownership/role checks if trainer workflows resume.
-8. Inspect `ChildrenService` delete-impact and badge aggregation only if child deletion/badge work resumes.
-9. Keep docs freshness checks as a recurring AI-maintainability task after domain shifts.
-10. Return to routines only with a scoped inspection tied to product work or a concrete production risk.
+4. Inspect browser-smoke CI promotion only if local-first browser smoke should become a required gate.
+5. If product work touches sessions, inspect `completeTask(...)`, `finish(...)`, `start(...)`, `getById(...)`, or uncovered badge trigger paths before code.
+6. Keep sessions and routines backend refactoring paused by default unless inspection identifies a concrete production risk.
+7. Split `apps/web/components/admin-catalog-manager.tsx` only if admin catalog product work resumes.
+8. Add focused tests or small policy helpers around trainer assignment ownership/role checks if trainer workflows resume.
+9. Inspect `ChildrenService` delete-impact and badge aggregation only if child deletion/badge work resumes.
+10. Keep docs freshness checks as a recurring AI-maintainability task after domain shifts.
 
 ## Uncertain / Not Fully Inspected
 - No dedicated subscription/billing application module was found, but schema/types support exists.
-- No end-to-end browser automation or API integration harness was inspected; this draft only reflects repository code and checked-in tests.
+- API smoke and local-first browser smoke now exist, but neither is exhaustive and browser smoke is not required in CI.
+- Docker/local dev orchestration is not present and remains deferred until deployability/onboarding or CI browser-smoke work needs it.
 - Trainer module was inspected at service level, but not exhaustively audited line-by-line beyond visible ownership/query patterns.
