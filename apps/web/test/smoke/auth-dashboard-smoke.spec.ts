@@ -180,3 +180,30 @@ test("parent can open the owned routine runner standby without starting a sessio
   await expect(page.getByText(ownedTaskTitle)).toBeVisible();
   await expect(page.getByRole("button", { name: "Torna inditasa" })).toBeVisible();
 });
+
+test("parent can start and finish the one-task routine from the runner", async ({ page }) => {
+  await page.goto("/");
+
+  const authPanel = page.locator("#auth");
+  await authPanel.getByPlaceholder("Email").fill(parentUser.email);
+  await authPanel.getByPlaceholder("Jelszo").fill(parentUser.password);
+  await authPanel.getByRole("button", { name: "Bejelentkezes" }).last().click();
+
+  await expect(page.getByRole("heading", { name: "Melyik gyermek tornazik most?" })).toBeVisible();
+  await page.getByRole("link", { name: "Kovetkezo torna inditasa" }).click();
+
+  await expect(page.getByRole("heading", { name: "Indulasra kesz a torna" })).toBeVisible();
+  await page.getByRole("button", { name: "Torna inditasa" }).click();
+
+  await expect(page.getByText("A torna elindult. Mehet az elso feladat.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: ownedTaskTitle })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Torna befejezese" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Torna befejezese" }).click();
+
+  await expect(page.getByText("Sikeres torna")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Torna befejezve" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ugyes voltal!" })).toBeVisible();
+  await expect(page.getByText("A torna sikeresen befejezodott.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Uj torna inditasa" })).toBeVisible();
+});
