@@ -9,8 +9,9 @@ Current baseline:
 - API smoke is DB-backed and runs in CI with real Postgres.
 - API smoke covers auth, parent-owned children, parent-owned routines, minimal session lifecycle, and post-finish session history.
 - Web tests cover pure helpers and view-model logic, not rendered app flows.
-- No browser tooling has been selected or installed.
-- No Playwright/Cypress/browser smoke has started.
+- Browser smoke has completed a controlled local-first experiment in PR `#95`.
+- Playwright is selected, installed, and used by `pnpm --filter @tsmt/web test:smoke`.
+- Browser smoke is not wired into required CI yet.
 - Routines and sessions backend refactoring are paused by default.
 
 Hard rule: do not turn this into a broad e2e suite. Each browser smoke must name the product risk it protects.
@@ -557,6 +558,84 @@ Artifact and CI risk notes:
 Proceed/stop recommendation:
 - Proceed to Checkpoint 1 with Playwright as a local-first browser smoke foundation.
 - Stop before Checkpoint 1 if installing Playwright requires broad app/CI restructuring, generated artifact behavior cannot be controlled, or the app-load smoke requires production app changes.
+
+## Final Outcome Review For PR #95
+
+Baseline and final state:
+- Baseline `main` commit SHA: `cd9de46b2ca477648d46941e7b847de83ad9a1b6`
+- Experiment PR: `#95` (`test(web): browser smoke quality gate experiment`)
+- Final browser-smoke implementation commit SHA before outcome docs: `6a9c9d0d8e4c8a33325951ca8027a129ef20b4ff`
+- Final outcome review commit SHA: this Checkpoint 5 docs commit on PR `#95`
+- PR status for review: draft until the architect accepts the final outcome
+
+Files changed by the experiment:
+- `apps/web/package.json`
+- `apps/web/playwright.smoke.config.ts`
+- `apps/web/playwright.auth-smoke.config.ts`
+- `apps/web/test/smoke/app-load-smoke.spec.ts`
+- `apps/web/test/smoke/auth-dashboard-smoke.spec.ts`
+- `apps/web/test/smoke/smoke-env.ts`
+- `pnpm-lock.yaml`
+- `docs/browser-smoke-and-quality-gate-roadmap.md`
+- `docs/quality-gate-strategy.md`
+
+Completed checkpoints:
+- Checkpoint 0: baseline and runner/tooling inspection; Playwright selected.
+- Checkpoint 1: local-first app-load/auth-panel smoke.
+- Checkpoint 2: real UI login -> parent dashboard -> owned child visible.
+- Checkpoint 3: child/routine visibility and runner standby.
+- Checkpoint 4: minimal one-task runner interaction.
+- Checkpoint 5: final outcome review docs.
+
+Browser paths now covered:
+- unauthenticated landing/auth panel renders
+- real UI login works for a deterministic parent fixture
+- parent dashboard becomes visible
+- owned child is visible and unrelated child is hidden
+- owned routine is visible and unrelated routine is hidden
+- training runner route opens
+- runner standby state is visible
+- seeded task title is visible
+- start button is visible
+- session starts through the UI
+- one seeded task is completed through the UI
+- completed runner state is visible
+
+Validation summary:
+- `pnpm --filter @tsmt/web test:smoke` passed through Checkpoints 1-4.
+- `pnpm --filter @tsmt/web build` passed through Checkpoints 1-4.
+- `pnpm typecheck` passed through Checkpoints 1-4. One transient local run failed when `pnpm typecheck` overlapped with `next build` rewriting `.next/types`; rerunning serially passed.
+- `pnpm check:generated` passed where run.
+- `git diff --check` passed through Checkpoints 1-4.
+- GitHub CI was green on the final Checkpoint 4 implementation commit.
+- API smoke was not run locally for Checkpoints 3-4 because local Postgres at `127.0.0.1:5432` was unavailable. Do not overclaim local API smoke validation from this experiment.
+
+Runtime and flakiness notes:
+- The local smoke command passed after each accepted checkpoint.
+- The browser smoke remains local-first and is not a required CI gate.
+- GitHub CI stayed green for the branch, but CI does not run browser smoke yet.
+- No artificial sleeps or broad snapshots were introduced.
+- Future CI promotion should be inspected and implemented separately.
+
+Artifact strategy:
+- Playwright outputs are kept under `apps/web/.test-dist/...`.
+- Generated browser artifacts are ignored and guarded by the generated-artifact check.
+- No generated browser artifacts should be tracked.
+
+Final outcome recommendation: merge all after architect review.
+
+Rationale:
+- The experiment reached the intended thin browser-smoke target state without production behavior changes.
+- The diff remains reviewable and is organized by checkpoint commits.
+- Browser smoke is local-first, so CI runtime/flakiness risk is not silently added to every PR.
+- The tests cover product-critical rendered flows that unit and API smoke cannot see: browser auth, dashboard hydration, routine navigation, runner standby, and one-task runner completion.
+- No hidden stop condition is currently known.
+
+Post-merge next work:
+- Do not add more browser smoke by default.
+- First inspect whether and how to promote `pnpm --filter @tsmt/web test:smoke` to CI.
+- If CI promotion is deferred, document local usage for developers before relying on it as a regular release gate.
+- Resume product/refactor priorities only with the existing quality gates in mind; do not expand browser smoke by momentum.
 
 ## Deferred Candidates
 
