@@ -143,6 +143,40 @@ test("API smoke: parent can start, complete, and finish a training session", asy
     assert.equal(typeof finishedSession.totalSeconds, "number");
     assert.equal((finishedSession.totalSeconds ?? 0) > 0, true);
     assert.equal(finishedSession.notes, finishNotes);
+
+    const sessionsResponse = await fetch(`${baseUrl}/api/sessions?routineId=${routineId}`, {
+      headers: {
+        Authorization: `Bearer ${loginBody.accessToken}`,
+      },
+    });
+
+    assert.equal(sessionsResponse.status, 200);
+    const sessions = (await sessionsResponse.json()) as Array<{
+      id?: string;
+      routineId?: string;
+      childId?: string;
+      status?: string;
+      completedTaskCount?: number;
+      totalSeconds?: number | null;
+      taskTimings?: Array<{ taskId?: string }>;
+      routine?: {
+        id?: string;
+        name?: string;
+      };
+    }>;
+    const listedSession = sessions.find((session) => session.id === finishedSession.id);
+    assert.equal(typeof listedSession, "object");
+    assert.equal(listedSession?.id, finishedSession.id);
+    assert.equal(listedSession?.routineId, routineId);
+    assert.equal(listedSession?.childId, childId);
+    assert.equal(listedSession?.status, "COMPLETED");
+    assert.equal(listedSession?.completedTaskCount, 1);
+    assert.equal(typeof listedSession?.totalSeconds, "number");
+    assert.equal((listedSession?.totalSeconds ?? 0) > 0, true);
+    assert.equal(listedSession?.taskTimings?.length, 1);
+    assert.equal(listedSession?.taskTimings?.[0]?.taskId, taskId);
+    assert.equal(listedSession?.routine?.id, routineId);
+    assert.equal(listedSession?.routine?.name, "Smoke Session Routine");
   } finally {
     await resetSmokeUsers(prisma, [parentUser.email]);
     await app.close();
