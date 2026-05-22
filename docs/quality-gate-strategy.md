@@ -10,8 +10,12 @@ Current posture:
 - sessions backend refactoring is paused by default after `SessionBadgeAwardService`
 - generated artifacts are guarded by `pnpm check:generated`
 - DB-backed API smoke is established through auth, children ownership, routine ownership, minimal session lifecycle, and post-finish session history paths
-- API smoke is sufficient as a backend foundation for browser-smoke planning, but browser smoke has not started
-- browser-smoke target state and first-wave sequencing are planned in `docs/browser-smoke-and-quality-gate-roadmap.md`
+- API smoke is sufficient as a backend foundation for browser smoke
+- browser smoke has completed a controlled local-first experiment in PR `#95`
+- `pnpm --filter @tsmt/web test:smoke` now covers app-load/auth-panel, real UI login, parent dashboard, owned child/routine visibility, runner standby, and minimal one-task runner completion
+- `pnpm --filter @tsmt/web test:smoke:app` runs only the DB-free app-load/auth-panel smoke
+- `pnpm --filter @tsmt/web test:smoke:auth` runs the DB-backed authenticated browser smoke and requires `DATABASE_URL`, reachable Postgres, and applied migrations
+- browser smoke is not wired into required CI yet; CI promotion remains a separate inspection/implementation decision
 
 Hard rule: do not add a broad browser e2e suite just because e2e is fashionable. Start with the smallest gate that protects a real product journey without becoming brittle.
 
@@ -54,9 +58,10 @@ CI starts a Postgres service, runs `pnpm db:migrate:deploy`, then runs `pnpm --f
 - Web coverage is strongest around pure helper/view-model modules, not rendered component flows.
 
 ### Current Gaps
-- No browser smoke/e2e test starts web + API together.
+- Browser smoke is local-first and not yet part of required CI.
+- Local authenticated/full browser smoke requires a developer-provided migrated Postgres database; this is intentional until CI promotion or local DB orchestration is planned separately.
 - No contract/API-shape gate beyond the current focused smoke assertions protects frontend assumptions around raw Prisma response shapes.
-- No browser smoke covers login -> dashboard -> routine -> training runner -> finish.
+- No browser smoke covers destructive previews, badges, admin/catalog flows, multi-child edge cases, or broader full e2e journeys.
 - No lint/format gate beyond `tsc`-based `lint` scripts.
 
 ## Critical Product Journeys
@@ -340,22 +345,29 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 - Must not change: session lifecycle, badge semantics, API shape.
 
 ### Phase 4: First Browser Smoke
-- Status: target state and sequencing are planned in `docs/browser-smoke-and-quality-gate-roadmap.md`; browser tooling is not implemented.
+- Status: controlled local-first experiment completed in PR `#95`; final docs recommend merge all after architect review.
 - Goal: prove web + API can support one stable user journey.
-- Scope: choose tooling only after inspecting local compatibility; cover app-load/auth-panel visibility first, then login/dashboard visibility in a follow-up.
+- Scope: Playwright local smoke now covers app-load/auth-panel, UI login, parent dashboard, owned child/routine visibility, runner standby, and one-task runner completion.
 - Likely files:
-  - new browser smoke config
-  - package scripts
-  - possibly CI workflow
+  - `apps/web/package.json`
+  - `apps/web/playwright.smoke.config.ts`
+  - `apps/web/playwright.auth-smoke.config.ts`
+  - `apps/web/test/smoke/*`
 - Expected scripts:
-  - `pnpm --filter @tsmt/web test:smoke` or root `pnpm test:smoke:web`
-- CI placement: manual/nightly first unless fast and stable.
+  - `pnpm --filter @tsmt/web test:smoke:app`
+  - `pnpm --filter @tsmt/web test:smoke:auth`
+  - `pnpm --filter @tsmt/web test:smoke`
+- CI placement: local-first for now; inspect CI promotion separately.
 - Validation:
-  - API smoke
   - web build
   - browser smoke locally
+  - typecheck
+  - generated artifact check
 - Acceptance criteria:
-  - app-load/auth-panel visibility works first; deterministic login follows in the next browser-smoke step
+  - app-load/auth-panel visibility works
+  - deterministic parent UI login works
+  - parent dashboard and owned child/routine visibility are covered
+  - runner standby and one-task completion are covered
   - stable selectors or user-facing text checks are used
   - no broad brittle e2e suite is introduced
 - Stop conditions:
@@ -382,62 +394,54 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 
 ## Current Recommended Next Work
 
-Title: start the browser smoke quality gate experiment
+Title: review browser smoke experiment outcome and decide CI promotion separately
 
 Branch: `experiment/browser-smoke-quality-gate`
 
 Scope:
-- follow `docs/browser-smoke-and-quality-gate-roadmap.md`
-- open one draft PR and keep it draft until final outcome review
-- execute browser smoke as sequential checkpoints in that one draft PR
-- start with baseline plus runner/tooling inspection
-- add one app-load smoke for the unauthenticated landing/auth panel only after the first checkpoint is accepted
-- use the API smoke foundation as a prerequisite, not as a reason to add a broad e2e suite
-- do not merge intermediate checkpoints separately
-- do not add authenticated dashboard, training runner, or full e2e scope until the prior checkpoint report is reviewed
-- do not change production behavior
+- complete final architect review of PR `#95`
+- if accepted, merge the local-first browser smoke foundation as one experiment outcome
+- do not add more browser smoke immediately by default
+- inspect whether to promote browser smoke to CI as a separate PR
+- if CI promotion is deferred, add or confirm concise local usage guidance before relying on browser smoke as a release habit
+- do not change production behavior or broaden into full e2e scope
 
 Likely files:
-- root `package.json` and/or `apps/web/package.json`
-- browser smoke config
-- one small web smoke test
-- generated-artifact guard or docs only if the selected runner creates local artifacts
+- docs only for final review/checkpoint updates, or CI workflow only in a later explicit CI-promotion PR
 
 Exact implementation tasks:
-1. Record baseline `main` SHA and inspect compatible browser runner options.
-2. Report expected files, artifact behavior, validation plan, and proceed/stop recommendation.
-3. If approved, add only the minimal script/config needed for a local app-load smoke.
-4. Verify the unauthenticated landing/auth panel renders.
-5. Report validation/risk notes before continuing to authenticated dashboard smoke.
+1. Review PR `#95` final outcome docs and validation notes.
+2. Confirm whether the local-first browser smoke should merge as-is.
+3. Separately inspect CI promotion cost, runtime, flakiness risk, Postgres/API/web startup requirements, and artifact behavior.
+4. Implement CI promotion only if inspection finds a small reliable path.
 
 Validation commands:
 - `git diff --check`
-- new browser smoke command
+- `pnpm --filter @tsmt/web test:smoke:app`
+- `pnpm --filter @tsmt/web test:smoke:auth` when a migrated local Postgres database is reachable
+- `pnpm --filter @tsmt/web test:smoke`
 - `pnpm --filter @tsmt/web build`
 - `pnpm typecheck`
+- `pnpm check:generated`
 
 CI impact:
-- none by default in the early checkpoints; promote only after the final outcome review or explicit architect decision
+- none from the local-first experiment by default; promote only after explicit architect decision
 
 Acceptance criteria:
-- one draft experiment PR exists
-- one app-load browser smoke exists
-- landing/auth panel visibility is asserted through a real browser
-- browser runner choice is documented and kept to the smallest useful foundation
+- PR `#95` records the final outcome and remains reviewable
+- browser smoke is clearly documented as local-first
 - API smoke remains the backend foundation and is not expanded by default
-- intermediate checkpoints are not merged separately
-- final outcome review chooses merge all, split/partial merge, continue, or discard
+- final outcome review chooses merge all, split/partial merge, continue, or discard before PR readiness
 
 Risks:
-- browser smoke could become too broad or flaky if started without a narrow route
+- promoting browser smoke to required CI too quickly could add runtime/flakiness before the local gate has enough history
 
 Uncertainties:
-- browser runner choice is still open until Checkpoint 0 inspects implementation tradeoffs
+- exact CI promotion shape is still open and should be inspected separately
 
 Why this is the best first step:
-- it separates browser tooling risk from authenticated product-flow risk while keeping all findings in one reviewable draft experiment
-- it keeps the next quality-gate move inspection-led
-- it avoids turning the API smoke layer into an exhaustive backend test suite
+- it preserves the controlled experiment model and avoids turning local browser smoke into a required CI gate by momentum
+- it keeps the next quality-gate move inspection-led instead of adding more browser coverage automatically
 
 ## Maintenance Rules
 - Update this document after each quality-gate milestone.
