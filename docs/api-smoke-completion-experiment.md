@@ -417,3 +417,80 @@ Recommended execution sequence:
 7. Add final outcome review and decide whether to move to browser smoke.
 
 The most likely first implementation PR inside the experiment should be `test(api): add session lifecycle smoke`. It should remain test-only, use the existing in-process Nest smoke setup, and avoid badge/progress/destructive preview expansion until the lifecycle path is stable.
+
+## Final Outcome Review
+
+### Baseline And Implemented Steps
+Planning baseline:
+- `#90` added this API smoke completion experiment plan.
+- Planning baseline commit recorded at the time: `9796ed88330b0ea6bb4fccd5a5b583c2058473f9`.
+
+Implemented PRs:
+- `#91` `test(api): add session lifecycle smoke`
+- `#92` `test(api): assert finished session is listed`
+
+Final merged state after `#92`:
+- API smoke now covers the minimal parent training-session lifecycle through real API endpoints.
+- API smoke now verifies one post-finish persisted read consequence through `GET /api/sessions?routineId=...`.
+- Browser smoke has not started.
+- No Playwright/Cypress tooling has been added.
+- No production behavior, Prisma schema, frontend, CI, controller, DTO, or service behavior changed as part of this experiment.
+
+Changed smoke test files:
+- `apps/api/test/smoke/session-lifecycle-smoke.test.ts`
+
+### API Smoke Paths Now Covered
+- `POST /api/auth/login` -> `GET /api/auth/me`
+- `GET /api/children` parent ownership visibility and unrelated-child non-leak
+- `GET /api/routines?childId=...` parent routine visibility and unrelated-routine non-leak
+- `POST /api/routines/:routineId/sessions/start`
+- `POST /api/sessions/:id/tasks/complete`
+- `POST /api/sessions/:id/finish`
+- `GET /api/sessions?routineId=...` verifies the finished session is visible afterward
+
+### Validation Status
+Validation reported for `#91`:
+- `pnpm db:generate`
+- `DATABASE_URL=postgresql://postgres@127.0.0.1:55435/tsmt_trainer_session_smoke pnpm db:migrate:deploy`
+- `DATABASE_URL=postgresql://postgres@127.0.0.1:55435/tsmt_trainer_session_smoke pnpm --filter @tsmt/api test:smoke`
+- `pnpm --filter @tsmt/api test:unit`
+- `pnpm --filter @tsmt/api typecheck`
+- `pnpm typecheck`
+- `git diff --check`
+
+Validation reported for `#92`:
+- `pnpm db:generate`
+- `DATABASE_URL=postgresql://postgres@127.0.0.1:55436/tsmt_trainer_session_history_smoke pnpm db:migrate:deploy`
+- `DATABASE_URL=postgresql://postgres@127.0.0.1:55436/tsmt_trainer_session_history_smoke pnpm --filter @tsmt/api test:smoke`
+- `pnpm --filter @tsmt/api test:unit`
+- `pnpm --filter @tsmt/api typecheck`
+- `pnpm typecheck`
+- `git diff --check`
+
+### Step 4 Gate Review Conclusion
+The Step 4 gate review concluded that no further optional API smoke is needed before first browser-smoke planning.
+
+Deferred unless a concrete browser-smoke or product risk later justifies them:
+- destructive delete-impact preview smoke
+- progress read smoke
+- minimal badge observable consequence smoke
+- additional negative session ownership smoke
+- admin/catalog smoke
+
+Rationale:
+- The current smoke layer already proves backend auth, parent-owned data access, routine visibility, session lifecycle, and post-finish session history visibility.
+- Additional API smoke candidates would currently add more coverage momentum than production-risk reduction.
+- Badge, progress, delete-impact, and ownership edge cases already have stronger service/domain-level coverage and should not be duplicated in smoke unless a specific browser or product flow needs it.
+
+### Outcome Decision
+Outcome: `merge all` for the API smoke completion experiment.
+
+The API smoke phase is sufficient as a backend foundation for browser-smoke planning and inspection. Browser-smoke planning is now justified, but browser tooling is intentionally not implemented here.
+
+This does not mean API smoke is exhaustive. It means the backend basics needed by a first browser smoke are stable enough that browser tests should not become the place where auth, ownership, session lifecycle, or post-finish persistence are first debugged.
+
+### Follow-Up Recommendations
+- Watch API smoke runtime and flakiness over future CI runs.
+- Start browser-smoke work with planning/inspection only.
+- Do not add Playwright, Cypress, or another browser tool until the browser-smoke plan chooses the smallest reliable first path.
+- If browser inspection identifies a concrete backend/API gap, add one targeted API smoke only after a gate review.
