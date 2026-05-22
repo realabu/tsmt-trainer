@@ -9,7 +9,7 @@
     "lint": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:unit": "tsc -p tsconfig.test.json && node --test .test-dist/apps/web/lib/__tests__/*.test.js",
-    "test:smoke": "playwright test --config=playwright.smoke.config.ts"
+    "test:smoke": "playwright test --config=playwright.smoke.config.ts && playwright test --config=playwright.auth-smoke.config.ts"
   },
   "dependencies": {
     "@tsmt/types": "workspace:*",
@@ -19,9 +19,11 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.51.1",
+    "@prisma/client": "^6.5.0",
     "@types/node": "^22.13.14",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
+    "bcryptjs": "^3.0.2",
     "typescript": "^5.8.2"
   }
 }

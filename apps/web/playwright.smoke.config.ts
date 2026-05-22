@@ -2,7 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./test/smoke",
-  outputDir: "./.test-dist/playwright/test-results",
+  testMatch: /app-load-smoke\.spec\.ts/,
+  outputDir: "./.test-dist/playwright/app-load-results",
   reporter: [["list"]],
   timeout: 30_000,
   use: {
