@@ -495,6 +495,69 @@ The experiment should be judged against this target before any merge decision:
   - validations
   - known risks and deferred candidates
 
+## Checkpoint 0 Experiment Log
+
+Baseline `main` commit SHA: `cd9de46b2ca477648d46941e7b847de83ad9a1b6`
+
+Checkpoint 0 scope:
+- inspection-only
+- no browser tooling installed
+- no browser tests added
+- no production code, frontend behavior, backend behavior, Prisma schema, or CI changes
+
+Inspection summary:
+- Existing root scripts cover `typecheck`, unit tests, API smoke, builds, DB generation/migration, and generated artifact checks.
+- CI already runs Postgres, `pnpm db:migrate:deploy`, API smoke, API build, and web build.
+- `apps/web` has no browser runner or rendered component test stack.
+- Web app startup is `pnpm --filter @tsmt/web dev`, binding to `0.0.0.0:3000`.
+- Browser-side API calls use same-origin `/api/*`, and `apps/web/next.config.mjs` rewrites those calls to `NEXT_PUBLIC_API_URL`.
+- Checkpoint 1 app-load/auth-panel smoke can avoid API and DB entirely.
+- Authenticated browser smoke in later checkpoints will need web startup with a test `NEXT_PUBLIC_API_URL` and a real API/test DB fixture.
+- `.gitignore` and `scripts/check-generated-artifacts.mjs` already guard `.next`, `dist`, and `apps/web/.test-dist`.
+
+Runner/tooling comparison:
+
+| Option | Fit | Cost / footprint | CI and artifacts | Debugging | Roadmap support | Assessment |
+| --- | --- | --- | --- | --- | --- | --- |
+| Playwright (`@playwright/test`) | Strong fit for Next app-load and later authenticated flows. | Adds a browser test runner and browser binary install/cache, but keeps tests scriptable and CI-friendly. | Default `test-results`/`playwright-report` should be redirected under `apps/web/.test-dist` or added to ignore/guard. CI can be added later after local stability. | Strong traces/screenshots/videos when enabled; good locator model. | Supports app-load, login/dashboard, runner standby, and runner interaction checkpoints. | Recommended. |
+| Cypress | Good browser UI tooling, but heavier for this repo's first smoke gate. | Larger runtime/tooling footprint and more opinionated project structure. | Produces `cypress/` artifacts/videos/screenshots unless configured; CI setup is usually heavier. | Strong interactive debugging. | Supports roadmap, but likely more than needed for the first thin smoke layer. | Defer/reject for now. |
+| Puppeteer or custom `node:test` browser harness | Smaller conceptual dependency, but would require custom server lifecycle, assertions, screenshots, retries, and reporting. | Lower runner abstraction, but higher local harness code. | Artifacts are whatever we build ourselves; guard behavior must be custom. | Weaker out of the box than Playwright/Cypress. | Can cover app-load, but later login/runner flows would need more custom glue. | Not recommended. |
+| Existing Node/API smoke only | Already works for backend, but cannot render the app or exercise browser storage/routing. | No new dependency. | No new artifacts. | Good for API failures only. | Does not satisfy browser-smoke target state. | Insufficient. |
+
+Selected recommendation:
+- Use Playwright in Checkpoint 1 unless implementation-time inspection reveals a blocker.
+- Keep Checkpoint 1 local-first and do not wire it into CI yet.
+- Configure generated Playwright outputs under `apps/web/.test-dist/...` if possible, so existing ignore/guard rules cover them.
+- Prefer one local command: `pnpm --filter @tsmt/web test:smoke`.
+- For Checkpoint 1, use a Playwright `webServer` command that starts the web app and checks the unauthenticated landing/auth panel only.
+
+Expected files for Checkpoint 1:
+- `apps/web/package.json`
+- `apps/web/playwright.smoke.config.ts` or similarly focused smoke config
+- `apps/web/test/smoke/app-load-smoke.spec.ts` or similarly focused smoke file
+- `pnpm-lock.yaml`
+- `.gitignore` and/or `scripts/check-generated-artifacts.mjs` only if Playwright artifacts cannot be kept under an already guarded generated-output path
+- optional tiny docs note only if the command or artifact policy needs clarification
+
+Expected Checkpoint 1 local command:
+- `pnpm --filter @tsmt/web test:smoke`
+
+Checkpoint 1 validation expectation:
+- `pnpm --filter @tsmt/web test:smoke`
+- `pnpm --filter @tsmt/web build`
+- `pnpm typecheck`
+- `git diff --check`
+
+Artifact and CI risk notes:
+- Playwright browser binaries should live in the package manager or Playwright cache, not in the repository.
+- Playwright reports, screenshots, traces, and test results must not become tracked files.
+- CI wiring should wait until the app-load smoke is stable locally and in the draft PR.
+- Later authenticated checkpoints will need a controlled `NEXT_PUBLIC_API_URL`, API process, Postgres, migration flow, and deterministic fixture setup.
+
+Proceed/stop recommendation:
+- Proceed to Checkpoint 1 with Playwright as a local-first browser smoke foundation.
+- Stop before Checkpoint 1 if installing Playwright requires broad app/CI restructuring, generated artifact behavior cannot be controlled, or the app-load smoke requires production app changes.
+
 ## Deferred Candidates
 
 Do not include these in the first browser wave unless product work directly touches them:
