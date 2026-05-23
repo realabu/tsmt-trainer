@@ -597,6 +597,28 @@ Behavior intentionally not moved yet:
 
 Checkpoint 1 supports proceeding to Checkpoint 2 only if the extraction remains limited to session-control orchestration and uses this helper naturally.
 
+## Checkpoint 2 Result
+Checkpoint 2 used the Checkpoint 1 helper inside `TrainingRunner` without moving React state, API calls, rendering, or cancellation behavior.
+
+Changed behavior intentionally:
+- none
+
+Inline decisions replaced:
+- complete-task payload construction now uses `buildCompleteTaskPayload(...)`
+- last-task auto-finish decision now uses `shouldFinishAfterTask(...)`
+- start, next-task, and finished success copy now use `getSessionControlSuccessMessage(...)`
+- start/complete error fallback copy now uses `getSessionControlErrorMessage(...)`
+
+Still intentionally inline in `TrainingRunner`:
+- API call sequencing
+- `session`, `routine`, `status`, timer, image, and celebration state
+- mutable `taskStartedAtRef`
+- routine snapshot refresh
+- finish endpoint call
+- cancel confirmation and cancel endpoint call
+
+This checkpoint reduces inline deterministic session-control decision logic while avoiding a hidden state machine or broad hook extraction.
+
 ## Must-Not-Change Constraints
 - Do not change API endpoints.
 - Do not change DTOs.
