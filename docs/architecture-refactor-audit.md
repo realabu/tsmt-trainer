@@ -214,6 +214,35 @@ Interpretation:
 - Suggested PR granularity:
   - one admin catalog sub-section extraction or one admin dashboard load-state extraction PR
 
+### Module Maturity Checkpoint
+Current repo-wide maturity after the API/browser smoke and backend workflow-boundary checkpoints:
+
+| Module / domain | Current maturity | Main risk |
+| --- | --- | --- |
+| Auth | Acceptable but feature-specific inspection required | Auth/profile/token behavior is production-critical; subscription creation still lives in auth registration. |
+| API client/auth storage | Good enough | Centralized and tested; keep stable unless auth UX changes. |
+| Children | Acceptable but feature-specific inspection required | CRUD, delete impact, and badge aggregation share one service. |
+| Routines backend | Acceptable but feature-specific inspection required | `RoutineDeleteImpactService` helped, but `RoutinesService` remains structurally broad. |
+| Sessions backend | Acceptable but feature-specific inspection required | `SessionBadgeAwardService` helped, but lifecycle/timing writes remain transaction-sensitive. |
+| Trainers | Needs targeted foundation before trainer feature work | Inline role/ownership checks and large include graphs have lighter direct coverage. |
+| Admin catalog backend | Acceptable but feature-specific inspection required | Backend boundaries are better; catalog query/write shapes remain complex. |
+| Catalog/admin UI | High-risk / not feature-ready | `admin-catalog-manager.tsx` combines multiple catalog domains. |
+| Parent dashboard | Acceptable but feature-specific inspection required | Loading, selection, progress, badges, and rendering converge in one component. |
+| Training runner | Needs targeted foundation before serious runner features | Timers, session API mutations, completion flow, media rendering, and UI state live in one component. |
+| Routines manager | High-risk / not feature-ready | Create/edit/delete impact/task/period orchestration live in one component. |
+| Task builder | Needs targeted foundation before task-builder features | Catalog search, song loading, task draft editing, media fields, and delete confirmation UI share one component. |
+| Database/schema | Acceptable but feature-specific inspection required | Cascades are powerful; subscription exists without an application boundary. |
+| Shared types | Acceptable but light | Useful, but not a strong API contract boundary yet. |
+| CI/quality gates | Good enough | API smoke runs in CI; browser smoke remains local-first. |
+| Local dev/env | Acceptable for now | Docker/local DB orchestration remains deferred. |
+
+Strategic conclusion:
+- the backend foundation and quality gates are much improved
+- the app is not broadly ready for serious feature work anywhere
+- the next foundation phase should target frontend hotspots, not backend refactor momentum
+- serious feature work should start only after scoped inspection and, where needed, stabilization of the relevant hotspot
+- this is not a broad frontend rewrite; it is a small, inspection-led foundation phase
+
 ### API Client / Data Access Patterns
 - Current state: `Acceptable`
 - Evidence from repo:
@@ -352,15 +381,15 @@ Interpretation:
 ## Candidate Next PRs
 These are candidate next PRs, not final strategy decisions.
 
-1. Start feature planning with scoped inspection of the exact frontend/backend areas the feature will touch.
-2. Audit frontend destructive confirmation flows before changing `routines-manager` or dashboard behavior.
-3. Inspect `TrainingRunner` session lifecycle mutation flow before extracting a hook or helper.
-4. Inspect browser-smoke CI promotion only if local-first browser smoke should become a required gate.
-5. If product work touches sessions, inspect `completeTask(...)`, `finish(...)`, `start(...)`, `getById(...)`, or uncovered badge trigger paths before code.
-6. Keep sessions and routines backend refactoring paused by default unless inspection identifies a concrete production risk.
-7. Split `apps/web/components/admin-catalog-manager.tsx` only if admin catalog product work resumes.
-8. Add focused tests or small policy helpers around trainer assignment ownership/role checks if trainer workflows resume.
-9. Inspect `ChildrenService` delete-impact and badge aggregation only if child deletion/badge work resumes.
+1. Inspect `TrainingRunner` session-control responsibilities and seams.
+2. If inspection confirms value, extract a small `TrainingRunner` session-control hook/helper with focused tests.
+3. Inspect `RoutinesManager` editor/delete-impact orchestration before changing routine editor behavior.
+4. If justified, extract one `RoutinesManager` slice.
+5. Inspect `TaskBuilder` catalog search/song-loading/draft editing boundaries before task-builder feature work.
+6. If justified, extract one `TaskBuilder` slice.
+7. Keep sessions and routines backend refactoring paused by default unless inspection identifies a concrete production risk.
+8. Inspect browser-smoke CI promotion only if local-first browser smoke should become a required gate.
+9. Split `apps/web/components/admin-catalog-manager.tsx` only if admin catalog product work resumes.
 10. Keep docs freshness checks as a recurring AI-maintainability task after domain shifts.
 
 ## Uncertain / Not Fully Inspected
