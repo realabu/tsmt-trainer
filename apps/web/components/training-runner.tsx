@@ -8,6 +8,12 @@ import {
   formatDuration,
   initialsFromTitle,
 } from "../lib/training-runner-helpers";
+import {
+  buildCompleteTaskPayload,
+  getSessionControlErrorMessage,
+  getSessionControlSuccessMessage,
+  shouldFinishAfterTask,
+} from "../lib/training-runner-session-control";
 import { buildTrainingRunnerViewModel } from "../lib/training-runner-view-model";
 import { useAuthUser } from "../lib/use-auth-user";
 
@@ -279,9 +285,9 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
       );
       setSession(started);
       taskStartedAtRef.current = Date.now();
-      setStatus("A torna elindult. Mehet az elso feladat.");
+      setStatus(getSessionControlSuccessMessage("started"));
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Nem sikerult elinditani a tornat.");
+      setStatus(getSessionControlErrorMessage(error, "Nem sikerult elinditani a tornat."));
     }
   }
 
@@ -291,27 +297,29 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
     }
 
     const completedAt = new Date().toISOString();
-    const startedAt = new Date(taskStartedAtRef.current).toISOString();
-    const secondsSpent = Math.max(1, Math.floor((Date.now() - taskStartedAtRef.current) / 1000));
+    const completeTaskPayload = buildCompleteTaskPayload({
+      taskId: currentTask.id,
+      taskStartedAtMs: taskStartedAtRef.current,
+      completedAtMs: Date.parse(completedAt),
+      elapsedNowMs: Date.now(),
+    });
 
     try {
       const updated = await apiFetch<SessionRecord>(
         `/api/sessions/${session.id}/tasks/complete`,
         {
           method: "POST",
-          body: JSON.stringify({
-            taskId: currentTask.id,
-            secondsSpent,
-            startedAt,
-            completedAt,
-          }),
+          body: JSON.stringify(completeTaskPayload),
         },
         accessToken,
       );
 
       setCelebrationBurst(Date.now());
 
-      const isLast = updated.taskTimings.length >= updated.routine.tasks.length;
+      const isLast = shouldFinishAfterTask({
+        completedTaskTimingCount: updated.taskTimings.length,
+        routineTaskCount: updated.routine.tasks.length,
+      });
       if (isLast) {
         const finished = await apiFetch<SessionRecord>(
           `/api/sessions/${session.id}/finish`,
@@ -326,16 +334,16 @@ export function TrainingRunner({ routineId }: { routineId: string }) {
         setSession(finished);
         taskStartedAtRef.current = null;
         await loadRoutineSnapshot(accessToken);
-        setStatus("Ugyes voltal! A torna sikeresen befejezodott.");
+        setStatus(getSessionControlSuccessMessage("session-finished"));
         return;
       }
 
       setSession(updated);
       taskStartedAtRef.current = Date.now();
       await loadRoutineSnapshot(accessToken);
-      setStatus("Szuper! Mehet a kovetkezo feladat.");
+      setStatus(getSessionControlSuccessMessage("task-completed"));
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Nem sikerult a feladat rogzitese.");
+      setStatus(getSessionControlErrorMessage(error, "Nem sikerult a feladat rogzitese."));
     }
   }
 
