@@ -15,6 +15,7 @@ This document is not a license to refactor by momentum. It is a routing document
 
 Current checkpoint:
 - Checkpoint 0: inventory and register skeleton
+- Checkpoint 1: backend/domain reconciliation
 - PR range considered: `#44` through `#99`
 - Current posture: routines backend, sessions backend, TrainingRunner, and RoutinesManager foundation work have reached checkpoints; further work should be selected by product/foundation priority, not by continuing the last thread.
 
@@ -70,14 +71,114 @@ This is a high-level inventory only. Later checkpoints should reconcile each row
 
 | Area / module | Related PRs | Detailed docs | Current inventory note | Current status |
 | --- | --- | --- | --- | --- |
-| Auth | To be completed in Checkpoint 1 | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md` | Auth/profile/token behavior is centralized enough for current work, but subscription creation and auth UX remain production-sensitive. | `acceptable but inspect first` |
-| Children | To be completed in Checkpoint 1 | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md` | CRUD is compact; delete impact and badge aggregation still share the service. | `acceptable but inspect first` |
-| Routines backend | `#44-#80`, `#79` | `docs/routines-refactor-plan.md`, `docs/routines-domain-completion-experiment.md` | Backend routines reached a checkpoint with task/period/progress/search/delete-impact guardrails and `RoutineDeleteImpactService`; actual delete semantics and large service responsibilities remain deferred. | `acceptable but inspect first` |
-| `RoutineDeleteImpactService` | `#75-#79` | `docs/routines-refactor-plan.md`, `docs/routines-domain-completion-experiment.md` | First routines workflow-service boundary; owns delete-impact preview lookup/count orchestration, while public facade and actual deletes remain in `RoutinesService`. | `good enough` |
-| Sessions backend | `#83-#85`, `#84` | `docs/sessions-lifecycle-badge-experiment.md`, `docs/refactor-roadmap.md` | Sessions lifecycle and badge orchestration are guarded; lifecycle/timing writes remain transaction-sensitive in `SessionsService`. | `acceptable but inspect first` |
-| `SessionBadgeAwardService` | `#84` | `docs/sessions-lifecycle-badge-experiment.md` | First sessions workflow-service boundary; badge-only reads/writes and duplicate-prevention moved out of `SessionsService`. | `good enough` |
-| Trainers | To be completed in Checkpoint 1 | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md` | Ownership/role checks and include-heavy overview queries need scoped inspection before trainer feature work. | `needs targeted foundation` |
-| Admin/catalog backend | To be completed in Checkpoint 1 | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md` | Admin backend is more split than the frontend, but catalog/activity query shapes remain complex. | `acceptable but inspect first` |
+| Auth | Older direct PR mapping uncertain; API/browser smoke coverage through `#87-#95` | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Auth/profile/token behavior is centralized enough for current work, but token refresh/revocation, profile changes, and default subscription creation remain production-sensitive. | `acceptable but inspect first` |
+| Children | Older direct PR mapping uncertain; child ownership smoke in `#88` | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | CRUD is compact; delete impact and badge aggregation still share the service and touch cascade-sensitive data. | `acceptable but inspect first` |
+| Routines backend | `#44-#80`, `#79` | `docs/routines-refactor-plan.md`, `docs/routines-domain-completion-experiment.md`, this register | Backend routines reached a checkpoint with task/period/progress/search/delete-impact guardrails and `RoutineDeleteImpactService`; actual delete semantics and broad service responsibilities remain deferred. | `acceptable but inspect first` |
+| `RoutineDeleteImpactService` | `#75-#79` | `docs/routines-refactor-plan.md`, `docs/routines-domain-completion-experiment.md`, this register | First routines workflow-service boundary; owns delete-impact preview lookup/count orchestration, while public facade and actual deletes remain in `RoutinesService`. | `good enough` |
+| Sessions backend | `#83-#85`, `#84`, API smoke `#91-#92` | `docs/sessions-lifecycle-badge-experiment.md`, `docs/refactor-roadmap.md`, this register | Sessions lifecycle and badge orchestration are guarded; lifecycle/timing writes and response flow remain transaction-sensitive in `SessionsService`. | `acceptable but inspect first` |
+| `SessionBadgeAwardService` | `#84` | `docs/sessions-lifecycle-badge-experiment.md`, this register | First sessions workflow-service boundary; badge-only reads/writes, duplicate-prevention, and weekly streak orchestration moved out of `SessionsService`. | `good enough` |
+| Trainers | Older direct PR mapping uncertain | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Ownership/role checks and include-heavy overview queries need scoped inspection before trainer feature work. | `needs targeted foundation` |
+| Admin/catalog backend | Older direct PR mapping uncertain; admin backend checkpoint documented | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Admin backend is more split than the frontend, but catalog/activity query shapes remain complex. Admin catalog UI risk is tracked separately in the frontend checkpoint. | `acceptable but inspect first` |
+
+## Checkpoint 1 Backend / Domain Reconciliation
+
+This checkpoint reconciles backend/domain rows from current docs and targeted code inspection. It does not restart backend refactoring and does not define open-ended implementation plans.
+
+### Area: Auth
+- Area / module: `apps/api/src/auth`
+- Related PRs: older direct PR mapping uncertain; quality coverage added through `#87-#95`.
+- Detailed docs: `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, `docs/quality-gate-strategy.md`, `docs/api-smoke-completion-experiment.md`.
+- Completed foundation work: `AuthService` centralizes register, login, refresh, current-user, profile update, logout, token issuing, and refresh-token hashing. API smoke exercises `/api/auth/login` and `/api/auth/me`; local browser smoke exercises real UI login.
+- Deferred risks: auth remains production-sensitive because registration creates the default free subscription, refresh-token rotation/revocation is security-sensitive, profile/email/password updates can affect identity, and auth UI/storage behavior spans frontend helpers.
+- Trigger conditions: changes to registration, login, refresh, logout, profile update, token expiry/claims, role behavior, subscription entitlement, auth UI, or auth storage.
+- Required reading before touching: this register, `docs/refactor-roadmap.md` auth rows, `docs/architecture-refactor-audit.md` auth sections, `docs/quality-gate-strategy.md`, and auth/API smoke files if the behavior is endpoint-facing.
+- Current safety coverage: DB-backed API smoke for login plus `/api/auth/me`; local-first browser smoke for UI login; frontend auth storage/API helper tests; typecheck/build/CI.
+- Current status: `acceptable but inspect first`.
+- Next recommended action: leave stable unless auth or subscription work is selected; start with scoped inspection and targeted safety tests before changing token, profile, role, or subscription behavior.
+
+### Area: Children
+- Area / module: `apps/api/src/children`
+- Related PRs: older direct PR mapping uncertain; parent-owned children API smoke added in `#88`.
+- Detailed docs: `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, `docs/quality-gate-strategy.md`.
+- Completed foundation work: `ChildrenService` has a compact ownership-filtered CRUD surface, delete-impact preview, and child badge listing. API smoke verifies a parent sees an owned child and does not see unrelated child data.
+- Deferred risks: child delete is cascade-sensitive; delete-impact counts and badge aggregation live in the same service as CRUD; badge listing returns aggregated award details; direct service-level safety coverage appears lighter than routines/sessions.
+- Trigger conditions: child delete UX/API changes, child badge/progress feature work, parent/child ownership changes, cascade/schema changes, or frontend dashboard changes that depend on child response shape.
+- Required reading before touching: this register, `docs/refactor-roadmap.md` children rows, `docs/architecture-refactor-audit.md` children/family notes, `docs/quality-gate-strategy.md`, and `packages/db/prisma/schema.prisma` for delete/cascade changes.
+- Current safety coverage: API smoke for child ownership visibility/non-leak; typecheck/build/CI. Direct child service tests are not currently as prominent as routines/sessions tests.
+- Current status: `acceptable but inspect first`.
+- Next recommended action: do not refactor by momentum; add targeted safety coverage before changing delete impact, badge aggregation, ownership, or cascade-sensitive behavior.
+
+### Area: Routines backend
+- Area / module: `apps/api/src/routines`
+- Related PRs: `#44-#80`, especially `#79`; routine API/browser smoke through `#89` and `#95`.
+- Detailed docs: `docs/routines-refactor-plan.md`, `docs/routines-domain-completion-experiment.md`, `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`.
+- Completed foundation work: task/period/progress/search/delete-impact paths gained focused safety coverage; multiple pure domain helpers exist; `RoutineDeleteImpactService` owns delete-impact preview lookup/count orchestration; API smoke verifies parent-owned routine list visibility; browser smoke verifies owned routine visibility.
+- Deferred risks: `RoutinesService` remains broad and still owns routine/task/period CRUD, resolver orchestration, progress, catalog listing/search, and actual delete methods. Actual delete semantics and cascade behavior intentionally did not change.
+- Trigger conditions: routine/task/period CRUD changes, task catalog search or song catalog changes, progress changes, delete semantics changes, Prisma include/select/order changes, routine editor feature work, trainer/routine sharing, or schema/cascade changes.
+- Required reading before touching: this register, `docs/routines-refactor-plan.md`, `docs/routines-domain-completion-experiment.md`, `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, and `docs/routines-manager-foundation-plan.md` if frontend routine editor/delete UX is involved.
+- Current safety coverage: broad routines unit/service tests for CRUD, task catalog, progress, delete impact, input/payload helpers, media/repetition helpers, and `RoutineDeleteImpactService`; DB-backed routine API smoke; local browser routine visibility smoke.
+- Current status: `acceptable but inspect first`.
+- Next recommended action: keep backend routines paused by default. For future routines work, inspect the exact touched method and add focused tests before moving Prisma reads/writes or changing delete/catalog/progress behavior.
+
+### Area: `RoutineDeleteImpactService`
+- Area / module: `apps/api/src/routines/routine-delete-impact.service.ts`
+- Related PRs: `#79`.
+- Detailed docs: `docs/routines-domain-completion-experiment.md`, `docs/routines-refactor-plan.md`, `docs/routines-manager-foundation-plan.md` for frontend destructive-flow context.
+- Completed foundation work: delete-impact preview lookup/count orchestration moved behind a named workflow service; existing pure builders remain in use; `RoutinesService` remains the public facade; actual delete methods stayed in `RoutinesService`.
+- Deferred risks: the service protects preview orchestration, not actual delete semantics; frontend delete-impact state and stale confirmation risks remain frontend concerns; schema/cascade behavior remains unchanged.
+- Trigger conditions: delete-impact query/count/shape changes, destructive routine/task/period UX changes, actual delete behavior changes, cascade/schema changes, or frontend delete preview/confirmation work.
+- Required reading before touching: this register, `docs/routines-domain-completion-experiment.md`, `docs/routines-refactor-plan.md`, and `docs/routines-manager-foundation-plan.md` for UI destructive-flow triggers.
+- Current safety coverage: `apps/api/test/routines/routines-delete-impact-service.test.ts`, `apps/api/test/routines/routine-delete-impact.test.ts`, and routines service/facade coverage.
+- Current status: `good enough`.
+- Next recommended action: leave stable; revisit only when a concrete destructive-preview/delete risk or product change touches the boundary.
+
+### Area: Sessions backend
+- Area / module: `apps/api/src/sessions`
+- Related PRs: `#83-#85`, especially `#84`; API smoke `#91-#92`; browser runner smoke `#95`.
+- Detailed docs: `docs/sessions-lifecycle-badge-experiment.md`, `docs/api-smoke-completion-experiment.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, `docs/refactor-roadmap.md`.
+- Completed foundation work: service-level safety tests cover finish lifecycle and task timing behavior; badge duplicate-prevention and `PERIOD_TARGET_COMPLETED` paths are covered; `SessionBadgeAwardService` owns badge orchestration; API smoke covers start, complete task, finish, and post-finish session listing; browser smoke covers one-task runner completion.
+- Deferred risks: `SessionsService` still owns lifecycle writes, active-session lookup, task timing writes, `getById`/list response flow, and transaction-sensitive sequencing. Transaction behavior, idempotency, and several badge trigger paths were not broadened by the experiment.
+- Trigger conditions: changes to `start(...)`, `completeTask(...)`, `finish(...)`, `cancel(...)`, `getById(...)`, session list response shape, task timing writes, status transitions, idempotency, transaction behavior, runner/session UX, badge/progress behavior, or Prisma schema/status fields.
+- Required reading before touching: this register, `docs/sessions-lifecycle-badge-experiment.md`, `docs/api-smoke-completion-experiment.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, and `docs/training-runner-foundation-plan.md` for frontend runner interactions.
+- Current safety coverage: `apps/api/test/sessions/sessions-lifecycle-service.test.ts`, `apps/api/test/sessions/sessions-badge-awards.test.ts`, pure badge/session helper tests, DB-backed session lifecycle API smoke, and local browser one-task runner smoke.
+- Current status: `acceptable but inspect first`.
+- Next recommended action: keep sessions backend refactoring paused by default. Use scoped inspection and targeted tests before changing lifecycle/timing/transaction-sensitive behavior.
+
+### Area: `SessionBadgeAwardService`
+- Area / module: `apps/api/src/sessions/session-badge-award.service.ts`
+- Related PRs: `#84`.
+- Detailed docs: `docs/sessions-lifecycle-badge-experiment.md`, `docs/refactor-roadmap.md`.
+- Completed foundation work: badge evaluation, duplicate-prevention lookup/write behavior, weekly streak orchestration, and badge-only Prisma reads/writes moved out of `SessionsService` into a named workflow service.
+- Deferred risks: badge semantics remain sensitive; duplicate prevention is still behaviorally guarded rather than treated as a broad schema redesign; not every badge trigger path has service-level smoke-style coverage; `finish(...)` still calls badge evaluation from the lifecycle flow.
+- Trigger conditions: badge trigger additions/changes, award duplicate semantics, badge visibility features, period/weekly streak logic changes, session finish badge behavior, or database uniqueness/constraint work.
+- Required reading before touching: this register, `docs/sessions-lifecycle-badge-experiment.md`, badge domain helper tests, and `packages/db/prisma/schema.prisma` if uniqueness/constraint behavior is discussed.
+- Current safety coverage: `apps/api/test/sessions/sessions-badge-awards.test.ts`, badge trigger/fact/decision/domain tests, and finish lifecycle service tests that preserve the badge evaluation entry path.
+- Current status: `good enough`.
+- Next recommended action: leave stable; add targeted safety coverage for any newly touched trigger before changing badge semantics or award write behavior.
+
+### Area: Trainers
+- Area / module: `apps/api/src/trainers`
+- Related PRs: older direct PR mapping uncertain.
+- Detailed docs: `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`.
+- Completed foundation work: trainer assignment endpoints live in a dedicated module/service; role checks distinguish parent, trainer, and admin paths; ownership checks use routine/child relationships; overview/list methods assemble trainer-facing data.
+- Deferred risks: `TrainersService` is still broad, role/ownership checks are inline, overview/list queries are include-heavy, direct tests appear lighter than routines/sessions, and assignment revocation/visibility semantics are production-sensitive.
+- Trigger conditions: trainer assignment creation/revoke changes, trainer dashboard/overview features, sharing permissions, parent/trainer/admin role behavior, include/response shape changes, or subscription/entitlement coupling.
+- Required reading before touching: this register, `docs/refactor-roadmap.md` trainer rows, `docs/architecture-refactor-audit.md` trainer assignment notes, and `packages/db/prisma/schema.prisma` for routine assignment relationships.
+- Current safety coverage: typecheck/build/CI and any indirect API protections from auth/ownership patterns. No dedicated trainer smoke path or prominent trainer service tests were identified in this checkpoint.
+- Current status: `needs targeted foundation`.
+- Next recommended action: before serious trainer feature work, run an inspection-first foundation PR and likely add focused role/ownership/query-shape safety tests. Do not refactor trainer code without a concrete trainer feature or production risk.
+
+### Area: Admin/catalog backend
+- Area / module: `apps/api/src/admin`, especially `AdminService`, `AdminCatalogService`, `AdminActivityService`, and `AdminUserService`.
+- Related PRs: older direct PR mapping uncertain; admin backend checkpoint is documented in the roadmap.
+- Detailed docs: `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, `docs/quality-gate-strategy.md`.
+- Completed foundation work: `AdminService` is a thin admin authorization facade; catalog, user/family admin, and activity logic are separated into dedicated services; admin activity helpers and admin facade tests exist; catalog media/domain tests exist.
+- Deferred risks: catalog CRUD still has complex write/query shapes and transactions; activity list/detail includes remain shape-sensitive; admin user delete/update is destructive; admin catalog UI remains a separate high-risk frontend hotspot and is not solved by backend splits.
+- Trigger conditions: admin catalog CRUD changes, task/song/equipment/media catalog import or linking changes, admin activity list/detail changes, admin user/family destructive changes, or admin UI work that depends on backend response shape.
+- Required reading before touching: this register, `docs/refactor-roadmap.md` admin backend checkpoint, `docs/architecture-refactor-audit.md` admin notes, existing admin service tests, and frontend admin catalog plans when UI is involved.
+- Current safety coverage: `apps/api/src/admin/admin.service.spec.ts`, `apps/api/src/admin/admin-activity.service.spec.ts`, `apps/api/test/admin/admin-catalog-media.test.ts`, `apps/api/test/admin/admin-media-kind.test.ts`, typecheck/build/CI.
+- Current status: `acceptable but inspect first`.
+- Next recommended action: keep backend stable unless admin product work resumes; inspect the exact service and add focused safety coverage before changing catalog query/write shapes or destructive admin behavior. Track admin catalog UI risk in the frontend checkpoint, not here.
 
 ### Frontend Areas To Reconcile
 
