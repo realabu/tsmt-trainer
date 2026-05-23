@@ -687,3 +687,86 @@ Codex must stop and ask for architect review if:
 - Intermediate commits should be independently understandable.
 - If Checkpoint 2 is valuable but later presentational splits are too noisy, split/merge only Checkpoints 0-2.
 - If session-control extraction adds complexity without reducing risk, discard implementation commits and keep only the plan as historical reference if useful.
+
+## Final Outcome Review
+Final recommendation: merge all Checkpoints 0-2.5 after final architect review and validation.
+
+Baseline main SHA:
+- `164ffeea0b4ebf1e58c476349adef9fafcfcd5d0`
+
+Final experiment commit SHA:
+- to be set to the PR head after this final review commit
+
+Checkpoint implementation commits:
+- `2b5abc33c91d5d66c8f956ecdec82f5199375cfd` - Checkpoint 0 plan
+- `666f392b5b706b1a1291010069594986ff14863c` - Checkpoint 1 characterization helper/tests
+- `aacbb50ed2d24a92689194bc4b8446b90ea3fb16` - Checkpoint 2 helper usage in `TrainingRunner`
+- `cd70a7f535b3dfd7af358803d31046f0d788f10e` - Checkpoint 2.5 gate review
+
+Files changed by the experiment:
+- `docs/training-runner-foundation-plan.md`
+- `apps/web/lib/training-runner-session-control.ts`
+- `apps/web/lib/__tests__/training-runner-session-control.test.ts`
+- `apps/web/components/training-runner.tsx`
+
+Completed checkpoints:
+- Checkpoint 0: documented current `TrainingRunner` responsibilities, risks, target structure, checkpoints, stop conditions, and rollback strategy.
+- Checkpoint 1: added a tiny pure session-control helper plus focused characterization tests.
+- Checkpoint 2: used the helper inside `TrainingRunner` for deterministic session-control decisions.
+- Checkpoint 2.5: reviewed remaining extraction value and recommended stopping implementation.
+
+Behavior protected:
+- complete-task payload shape: `taskId`, `secondsSpent`, `startedAt`, and `completedAt`
+- minimum one-second `secondsSpent` behavior
+- last-task auto-finish decision
+- current session-control success status copy
+- current error-message fallback behavior
+
+What changed:
+- `apps/web/lib/training-runner-session-control.ts` now owns deterministic session-control helper decisions.
+- `apps/web/lib/__tests__/training-runner-session-control.test.ts` pins those decisions.
+- `TrainingRunner` uses the helper for complete-task payload construction, last-task finish decision, success copy, and error fallback copy.
+
+What intentionally stayed in `TrainingRunner`:
+- rendering
+- API call sequencing
+- React state
+- mutable refs
+- routine snapshot refresh
+- finish endpoint call
+- cancel confirmation and cancel endpoint call
+- timer/progress state
+- image/media UI state
+
+Public behavior safety:
+- no API, backend, DTO, Prisma schema, or route behavior changed
+- no browser smoke scope changed
+- no CI or Docker changes were made
+- no React/component test tooling was added
+- no intended UI behavior changed
+
+Why implementation stops now:
+- the highest-risk deterministic session-control decisions are now named and tested
+- API calls and sequencing remain visible instead of hidden inside a broad helper or state machine
+- timer/best-time/view-model/presentational extraction would mostly improve readability right now
+- a future major TSMT Runner design and functional redesign is expected after broader app foundation work
+- broad extraction of the current visual/rendering structure would spend effort stabilizing UI architecture that may be replaced
+- continuing to Checkpoint 3 now would risk refactor momentum rather than production-risk reduction
+
+Deferred risks:
+- cancel flow remains uncharacterized
+- multi-task browser behavior remains lighter than the one-task happy path
+- double-click / in-flight mutation behavior remains untouched
+- timer and best-time logic remains inline
+- visual rendering remains large
+
+Future triggers:
+- revisit cancel, double-click, and multi-task behavior if the current runner remains production-critical before redesign
+- revisit timer/view-model/media splits only when a concrete Runner feature or redesign task touches those areas
+- use the new helper/tests as behavioral guardrails during the future Runner redesign
+
+Outcome decision:
+- merge all current experiment commits after final architect review
+- do not continue to Checkpoint 3 now
+- do not split unless final validation or review finds a problem
+- keep future Runner redesign as separate planning/execution work
