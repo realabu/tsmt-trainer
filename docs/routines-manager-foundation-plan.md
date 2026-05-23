@@ -596,12 +596,9 @@ Optional, environment-dependent:
 - Any checkpoint that requires production behavior changes should stop for architect review.
 
 ## Recommended Next Checkpoint
-Proceed to Checkpoint 1 only after architect review:
-- add a pure `routines-manager-save-plan` helper
-- add focused unit tests for current save operation planning
-- do not use it in `RoutinesManager` until Checkpoint 2 unless the implementation remains tiny and explicitly approved
+Final outcome review is the recommended next checkpoint.
 
-This is the best next step because it protects the most production-relevant frontend risk: multi-step routine editor persistence. It avoids a cosmetic UI split, avoids backend refactor momentum, and keeps the experiment small enough to review.
+Do not start Checkpoint 3 by momentum. Delete-impact preview extraction should only restart after scoped inspection tied to a concrete destructive-flow feature, bug, or architect decision.
 
 ## Open Risks And Uncertainties
 - Partial save failure behavior is unchanged and remains a product/architecture decision.
@@ -609,3 +606,82 @@ This is the best next step because it protects the most production-relevant fron
 - Double-click and in-flight mutation behavior is not currently guarded.
 - `TaskBuilder` remains a separate frontend hotspot.
 - Delete-impact preview state may deserve a later seam, but only after save-plan risk is addressed or if product work touches destructive flows.
+
+## Final Outcome Review
+
+PR: `#99 refactor(web): routines manager foundation experiment`
+
+Final state:
+- Checkpoint 0 created this RoutinesManager foundation plan.
+- Checkpoint 1 added a pure routine editor save-plan helper and focused unit tests.
+- Checkpoint 2 wired the helper into `RoutinesManager`.
+- Checkpoint 2.5 recorded the gate decision to stop implementation and not continue into delete-impact extraction now.
+
+Files changed:
+- `docs/routines-manager-foundation-plan.md`
+- `apps/web/lib/routines-manager-save-plan.ts`
+- `apps/web/lib/__tests__/routines-manager-save-plan.test.ts`
+- `apps/web/components/routines-manager.tsx`
+
+Validation results:
+- `pnpm --filter @tsmt/web test:unit` passed.
+- `pnpm --filter @tsmt/web build` passed.
+- `pnpm typecheck` passed.
+- `pnpm check:generated` passed.
+- `git diff --check` passed.
+- GitHub CI was green during Checkpoint 2 review.
+- Optional `pnpm --filter @tsmt/web test:smoke:app` was attempted during Checkpoint 2 but did not start because local port `3000` was already in use.
+
+Behavior preserved:
+- endpoint paths unchanged
+- HTTP methods unchanged
+- payload shapes unchanged
+- status copy unchanged
+- reload timing unchanged
+- partial-failure behavior unchanged
+- UI behavior unchanged
+- delete-impact state unchanged
+- `TaskBuilder` internals unchanged
+- backend routines code unchanged
+
+Risk reduced:
+- routine editor save operation planning is now named and unit-tested
+- removed task and period id detection is pinned
+- task and period update/create ordering is pinned
+- task `sortOrder` semantics are pinned
+- current payload helper behavior is reused instead of duplicated
+- future AI-assisted changes can inspect routine save behavior without reading the entire component
+
+Deferred risks not solved:
+- frontend delete-impact preview state
+- stale or competing delete preview risk
+- partial save failure behavior
+- duplicate save and in-flight mutation behavior
+- rendered routine editor save/delete coverage
+- `TaskBuilder` remains a separate hotspot
+
+## Future UX / Destructive-Flow Guard
+
+The deferred delete-impact seam is not forgotten.
+
+Any future UX, refactor, or feature work touching routine/task/period deletion, destructive confirmation, routine editor save/delete UX, `TaskBuilder` delete callbacks, or routine editor flow must inspect this plan first.
+
+Such work must explicitly decide whether to implement the delete-impact preview seam before changing UX.
+
+If a Codex prompt touches `apps/web/components/routines-manager.tsx`, `apps/web/components/task-builder.tsx`, delete-impact UI, or destructive actions, it must list this plan doc as required reading.
+
+Do not proceed directly to UX changes in those areas without a scoped inspection.
+
+Trigger conditions for revisiting delete-impact extraction:
+- product work touches routine/task/period delete UX
+- product work touches `TaskBuilder` delete callbacks
+- destructive confirmation behavior changes
+- routine editor UX redesign touches delete/save flows
+- bug/risk appears around stale preview, wrong confirm target, or accidental delete
+- feature work adds bulk operations, reorder, duplicate, archive, or richer editor states
+
+Final recommendation:
+- merge all after final architect review and validation
+- do not continue implementation now
+- do not start Checkpoint 3 by momentum
+- select the next hotspot by product/foundation priority

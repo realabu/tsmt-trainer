@@ -388,6 +388,10 @@ These are candidate next PRs, not final strategy decisions.
 5. Inspect `TaskBuilder` catalog search/song-loading/draft editing boundaries before task-builder feature work.
 6. If justified, extract one `TaskBuilder` slice.
 7. Keep sessions and routines backend refactoring paused by default unless inspection identifies a concrete production risk.
+
+RoutinesManager destructive-flow guard:
+- `docs/routines-manager-foundation-plan.md` must be required reading before work touches `routines-manager.tsx`, `task-builder.tsx`, routine/task/period deletion UX, destructive confirmations, or routine editor save/delete flow.
+- The deferred frontend delete-impact seam should be revisited only when destructive-flow product work, a bug, or an architect decision makes it concrete.
 8. Inspect browser-smoke CI promotion only if local-first browser smoke should become a required gate.
 9. Split `apps/web/components/admin-catalog-manager.tsx` only if admin catalog product work resumes.
 10. Keep docs freshness checks as a recurring AI-maintainability task after domain shifts.
