@@ -619,6 +619,43 @@ Still intentionally inline in `TrainingRunner`:
 
 This checkpoint reduces inline deterministic session-control decision logic while avoiding a hidden state machine or broad hook extraction.
 
+## Checkpoint 2.5 Gate Review
+Decision: stop implementation and move to final outcome review.
+
+Findings after Checkpoint 2:
+- `TrainingRunner` still owns routine loading, API call sequencing, React state, timer state, image state, rendering, routine refresh, and cancel behavior.
+- The highest-risk deterministic session-control decisions are now named and tested:
+  - complete-task payload construction
+  - last-task auto-finish decision
+  - success status copy
+  - error fallback copy
+- API calls and sequencing remain intentionally visible in the component, which is safer than hiding side effects inside a broad helper or state machine.
+
+Timer/best-time extraction assessment:
+- Remaining timer and best-time logic is user-visible, but not currently the highest production risk.
+- `formatDuration(...)` and ring style behavior already have focused helper tests.
+- Browser smoke deliberately avoids exact timer assertions, reducing flake risk.
+- A pure timer/best-time helper could reduce lines, but after Checkpoint 2 the immediate benefit is mostly readability rather than concrete regression-risk reduction.
+
+View-model expansion assessment:
+- Current task, next task, image selection, effective song, equipment, repetitions, progress percent, and finish action label are already extracted into `buildTrainingRunnerViewModel(...)` and tested.
+- Moving best-time calculations into the view model may be reasonable later, but it is not required before final review.
+
+Presentational split assessment:
+- The component remains large, but a visual split now would mostly create markup churn.
+- Standby/stage/sidebar splits should be deferred until a product change touches those sections or final review identifies reviewability as the merge blocker.
+
+Recommendation:
+- Do not continue to Checkpoint 3 by momentum.
+- Proceed to Checkpoint 5 final outcome review.
+- Leave timer/best-time, view-model expansion, and presentational splits as deferred candidates that require a concrete runner feature or production-risk trigger.
+
+Residual risks:
+- Cancel flow remains uncharacterized.
+- Multi-task browser behavior remains lighter than the one-task smoke path.
+- In-flight/double-click race behavior is still not addressed.
+- The component is still large, so serious runner feature work should still start with scoped inspection of the touched section.
+
 ## Must-Not-Change Constraints
 - Do not change API endpoints.
 - Do not change DTOs.
