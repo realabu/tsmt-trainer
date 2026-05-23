@@ -46,8 +46,10 @@ This roadmap does **not** authorize broad rewrites. It exists to guide future wo
   - multiple catalog domains are managed in a single component
 
 ### Cross-cutting pain points
-- limited integration/e2e coverage for critical user flows
-- CI quality gates exist, including generated-artifact hygiene, but no browser/API smoke gate yet
+- critical smoke coverage now exists, but it is intentionally thin:
+  - DB-backed API smoke runs in CI with Postgres and covers auth, parent-owned children, parent-owned routines, minimal session lifecycle, and post-finish session listing
+  - local-first browser smoke covers app-load/auth-panel, real UI login, parent dashboard, owned child/routine visibility, runner standby, and one-task runner completion
+- browser smoke is not required in CI yet; CI promotion remains a separate inspection decision
 - session lifecycle and badge orchestration now have stronger guardrails, but transaction/idempotency and raw response-shape risks remain inspection candidates
 - auth/session logic is partly centralized, but still needs clearer stability rules before deeper refactors
 
@@ -480,8 +482,10 @@ Sessions backend refactoring is paused by default after #84. Future sessions wor
 Recommended posture:
 - do not continue routines by momentum
 - do not continue sessions service-boundary extraction by momentum
-- select the next workstream by production-readiness inspection
-- likely next candidates: frontend destructive flows, training runner/session UI behavior, a minimal e2e/smoke quality gate, or a scoped sessions inspection only if product work touches lifecycle/badges
+- feature planning may begin, but only after scoped inspection of the areas the feature will touch
+- do not expand API or browser smoke by momentum; add more smoke only when it protects a named production or release risk
+- select any next foundation work by production-readiness inspection
+- likely future candidates: frontend destructive flows, training runner/session UI behavior, browser-smoke CI promotion, Docker/local dev setup for deployability/onboarding, or scoped backend inspection only when product work touches that domain
 
 ## Files / Modules to Refactor First
 
@@ -536,31 +540,24 @@ Leave these mostly untouched until earlier phases reduce risk:
   - session finish -> progress update -> badge award
   - destructive delete preview
 
-## Suggested CI / Quality Gates to Introduce Gradually
+## Current And Future CI / Quality Gates
 
-### Stage 1
+### Already in CI
 - `pnpm typecheck`
 - `pnpm check:generated`
-
-### Stage 2
+- unit tests through `pnpm test`
+- `pnpm db:generate`
+- `pnpm db:migrate:deploy` against CI Postgres
+- DB-backed API smoke through `pnpm --filter @tsmt/api test:smoke`
 - app build checks:
   - `pnpm --filter @tsmt/api build`
   - `pnpm --filter @tsmt/web build`
 
-### Stage 3
-- targeted test jobs for extracted critical rule modules
-
-### Stage 4
-- schema change gate:
-  - prisma generate
-  - migration sanity
-
-### Stage 5
-- required checks for critical domains:
-  - auth
-  - sessions
-  - routines
-  - badges/progress
+### Deferred / Inspect Before Adding
+- browser smoke CI promotion
+- Docker/local dev orchestration for deployability or onboarding
+- additional contract/API-shape gates for raw response shapes
+- broader e2e or release-gate automation
 
 ## Risks Across the Roadmap
 - hidden behavior drift during “structural” refactors
@@ -578,10 +575,10 @@ Leave these mostly untouched until earlier phases reduce risk:
 - docs updated when architectural expectations change
 
 ## Top 5 Immediate Next Tasks
-1. Plan the smallest reliable e2e/smoke quality gate for auth, routine selection, and session runner happy path.
+1. Start feature planning with a scoped inspection of the exact frontend/backend areas the feature will touch.
 2. Audit frontend destructive confirmation flows before changing `routines-manager` or dashboard behavior.
 3. Inspect frontend training runner/session UI mutation flow before extracting more UI structure.
-4. Inspect admin catalog UI only if admin catalog product work resumes.
+4. Inspect browser-smoke CI promotion only if the team wants browser smoke to become a required gate.
 5. Keep docs and AI guidance current after each domain shift so stale plans do not drive future Codex work.
 
 ## Future Sessions Inspection Candidates
@@ -591,4 +588,4 @@ Do not start another sessions extraction automatically. If product work touches 
 - `finish(...)` transaction/idempotency behavior
 - `start(...)` and `getById(...)` raw response shape
 - uncovered badge trigger paths
-- frontend session runner smoke/e2e coverage
+- additional frontend session runner coverage only if a future feature needs more than the current local-first one-task runner smoke
