@@ -9,11 +9,8 @@ import {
   routinePeriodToDraft,
   routineTaskToDraft,
 } from "../lib/routines-manager-helpers";
-import {
-  buildCreateRoutinePayload,
-  buildRoutinePeriodPayload,
-  buildRoutineTaskPayload,
-} from "../lib/routines-manager-payloads";
+import { buildCreateRoutinePayload } from "../lib/routines-manager-payloads";
+import { buildRoutineEditorSavePlan } from "../lib/routines-manager-save-plan";
 import { TaskBuilder, type TaskDraft } from "./task-builder";
 import { useAuthUser } from "../lib/use-auth-user";
 
@@ -378,79 +375,36 @@ export function RoutinesManager() {
     }
 
     try {
-      await apiFetch(
-        `/api/routines/${selectedRoutine.id}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({
-            name: editingName,
-            description: editingDescription,
-          }),
-        },
-        accessToken,
-      );
+      const savePlan = buildRoutineEditorSavePlan({
+        routineId: selectedRoutine.id,
+        name: editingName,
+        description: editingDescription,
+        tasks: editingTasks,
+        periods: editingPeriods,
+        originalTaskIds,
+        originalPeriodIds,
+      });
 
-      const currentTaskIds = editingTasks.map((task) => task.id).filter((value): value is string => Boolean(value));
-      const removedTaskIds = originalTaskIds.filter((id) => !currentTaskIds.includes(id));
-
-      for (const removedTaskId of removedTaskIds) {
-        await apiFetch(`/api/routines/tasks/${removedTaskId}`, { method: "DELETE" }, accessToken);
-      }
-
-      for (const [index, task] of editingTasks.entries()) {
-        const payload = buildRoutineTaskPayload(task, index + 1);
-
-        if (task.id) {
-          await apiFetch(
-            `/api/routines/tasks/${task.id}`,
-            {
-              method: "PATCH",
-              body: JSON.stringify(payload),
-            },
-            accessToken,
-          );
-        } else {
-          await apiFetch(
-            `/api/routines/${selectedRoutine.id}/tasks`,
-            {
-              method: "POST",
-              body: JSON.stringify(payload),
-            },
-            accessToken,
-          );
-        }
-      }
-
-      const currentPeriodIds = editingPeriods
-        .map((period) => period.id)
-        .filter((value): value is string => Boolean(value));
-      const removedPeriodIds = originalPeriodIds.filter((id) => !currentPeriodIds.includes(id));
-
-      for (const removedPeriodId of removedPeriodIds) {
-        await apiFetch(`/api/routines/periods/${removedPeriodId}`, { method: "DELETE" }, accessToken);
-      }
-
-      for (const period of editingPeriods) {
-        const payload = buildRoutinePeriodPayload(period);
-
-        if (period.id) {
-          await apiFetch(
-            `/api/routines/periods/${period.id}`,
-            {
-              method: "PATCH",
-              body: JSON.stringify(payload),
-            },
-            accessToken,
-          );
-        } else {
-          await apiFetch(
-            `/api/routines/${selectedRoutine.id}/periods`,
-            {
-              method: "POST",
-              body: JSON.stringify(payload),
-            },
-            accessToken,
-          );
+      for (const operation of savePlan.operations) {
+        switch (operation.type) {
+          case "deleteTask":
+          case "deletePeriod":
+            await apiFetch(operation.endpoint, { method: operation.method }, accessToken);
+            break;
+          case "updateRoutine":
+          case "updateTask":
+          case "createTask":
+          case "updatePeriod":
+          case "createPeriod":
+            await apiFetch(
+              operation.endpoint,
+              {
+                method: operation.method,
+                body: JSON.stringify(operation.payload),
+              },
+              accessToken,
+            );
+            break;
         }
       }
 

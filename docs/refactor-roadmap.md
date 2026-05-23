@@ -535,6 +535,11 @@ Recommended focused frontend foundation sequence:
 5. Inspect `TaskBuilder` catalog search/song-loading/draft editing boundaries.
 6. If justified, extract one `TaskBuilder` slice.
 
+RoutinesManager guard:
+- `docs/routines-manager-foundation-plan.md` records the routine editor save-plan seam and the deferred delete-impact seam.
+- Future work touching routine/task/period deletion, destructive confirmation, routine editor save/delete UX, `TaskBuilder` delete callbacks, or routine editor flow must inspect that plan before changing UX.
+- Do not continue RoutinesManager extraction by momentum; revisit delete-impact extraction only for a concrete destructive-flow feature, bug, or architect decision.
+
 ## Files / Modules to Refactor First
 
 ### Focused frontend foundation phase
@@ -626,6 +631,8 @@ Leave these mostly untouched until earlier phases reduce risk:
 3. Inspect `RoutinesManager` editor/delete-impact orchestration before changing routine editor behavior.
 4. Inspect `TaskBuilder` catalog search/song-loading/draft editing boundaries before task-builder feature work.
 5. Keep docs and AI guidance current after each domain shift so stale plans do not drive future Codex work.
+
+If routine editor or destructive-flow work is selected next, read `docs/routines-manager-foundation-plan.md` first and explicitly decide whether the deferred delete-impact seam is required before UX changes.
 
 ## Future Sessions Inspection Candidates
 
