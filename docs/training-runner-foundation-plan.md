@@ -695,7 +695,7 @@ Baseline main SHA:
 - `164ffeea0b4ebf1e58c476349adef9fafcfcd5d0`
 
 Final experiment commit SHA:
-- to be set to the PR head after this final review commit
+- `faa55888edb066ad50db6695cc4c4231d0308d60`
 
 Checkpoint implementation commits:
 - `2b5abc33c91d5d66c8f956ecdec82f5199375cfd` - Checkpoint 0 plan
