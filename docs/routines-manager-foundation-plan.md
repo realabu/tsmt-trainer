@@ -498,6 +498,15 @@ Scope:
 - Decide whether the experiment should continue into delete-impact state extraction or stop for final review.
 - Prefer stopping if save-plan extraction already addresses the highest concrete risk.
 
+Gate result after Checkpoints 1-2:
+- Checkpoints 1-2 addressed the highest production-risk frontend concern identified in Checkpoint 0: routine editor save operation planning.
+- The save path now has a named pure plan helper with focused tests for removed task/period ids, task/period operation order, endpoint/method descriptors, and payload helper reuse.
+- `RoutinesManager` still owns API side effects, status copy, reload behavior, and partial-failure behavior.
+- Backend delete-impact previews already have service-level and pure helper coverage for routine, task, and period previews.
+- Frontend delete-impact preview state remains a real risk, but it is not a must-have foundation item before general routine editor work unless the next product task touches destructive flows.
+- Continuing immediately into delete-impact extraction would reduce some AI-maintainability risk, but it would also broaden the experiment toward destructive UI state and `TaskBuilder` coupling.
+- Recommendation: stop implementation now and proceed to final outcome review. Do not start Checkpoint 3 unless a concrete destructive-flow feature or architect decision makes it necessary.
+
 Validation:
 - `git diff --check`
 - `pnpm typecheck`
