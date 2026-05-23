@@ -573,6 +573,30 @@ Reason:
 - It protects the highest production-risk behavior without immediately moving React state, API calls, or rendering.
 - It gives us evidence before deciding whether a hook extraction is genuinely useful or merely rearranges complexity.
 
+## Checkpoint 1 Result
+Checkpoint 1 added a tiny pure session-control characterization helper and focused unit tests.
+
+Files added:
+- `apps/web/lib/training-runner-session-control.ts`
+- `apps/web/lib/__tests__/training-runner-session-control.test.ts`
+
+Characterized decisions:
+- complete-task payload shape: `taskId`, `secondsSpent`, `startedAt`, and `completedAt`
+- minimum one-second `secondsSpent` behavior
+- last-task auto-finish decision based on completed timing count and routine task count
+- current success status copy for started, next-task, and finished states
+- current error-message fallback behavior
+
+Behavior intentionally not moved yet:
+- API calls
+- React state
+- mutable refs
+- routine refresh sequencing
+- cancel confirmation flow
+- rendered UI
+
+Checkpoint 1 supports proceeding to Checkpoint 2 only if the extraction remains limited to session-control orchestration and uses this helper naturally.
+
 ## Must-Not-Change Constraints
 - Do not change API endpoints.
 - Do not change DTOs.
