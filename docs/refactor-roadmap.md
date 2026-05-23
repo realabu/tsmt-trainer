@@ -463,6 +463,12 @@ Routines backend stabilization has reached a meaningful checkpoint:
 
 Routines are paused by default. Future routines work should start with inspection and should be tied to product work or a concrete production-readiness risk.
 
+Important correction after the repo-wide module maturity audit:
+- extracting `RoutineDeleteImpactService` was useful and production-risk reducing
+- it does not make routines structurally complete
+- `RoutinesService` still owns routine/task/period CRUD, resolver orchestration, progress, catalog listing/search, and actual delete methods
+- touched routines paths still require scoped inspection before feature work
+
 ## Sessions Backend Checkpoint
 
 The controlled sessions lifecycle / badge orchestration experiment in #84 reached a meaningful checkpoint:
@@ -477,32 +483,72 @@ The controlled sessions lifecycle / badge orchestration experiment in #84 reache
 
 Sessions backend refactoring is paused by default after #84. Future sessions work should start with inspection only and should not continue service-boundary extraction automatically.
 
+Important correction after the repo-wide module maturity audit:
+- extracting `SessionBadgeAwardService` was useful and production-risk reducing
+- it does not make sessions structurally complete
+- `SessionsService` still owns lifecycle writes, task timing orchestration, raw response flow, and transaction-sensitive sequencing
+- touched sessions paths still require scoped inspection before feature work
+
+## Repo-Wide Module Maturity Checkpoint
+
+The backend foundation and quality gates are much improved, but the whole app is not broadly feature-ready for serious feature work anywhere. The largest AI-maintainability risk is now concentrated in large stateful frontend components that mix data fetching, mutation orchestration, derived state, and rendering.
+
+Serious feature work should not begin until the relevant frontend hotspot has been inspected and, where needed, stabilized. This is a focused foundation phase, not a broad rewrite and not endless architecture work.
+
+| Module / domain | Current maturity | Notes |
+| --- | --- | --- |
+| Auth | Acceptable but feature-specific inspection required | Auth/profile/token behavior is centralized but production-critical; subscription creation still lives in auth registration. |
+| API client/auth storage | Good enough | Shared storage, refresh retry, and helper tests exist. |
+| Children | Acceptable but feature-specific inspection required | CRUD is compact, but delete impact and badge aggregation share the same service. |
+| Routines backend | Acceptable but feature-specific inspection required | `RoutineDeleteImpactService` helped, but `RoutinesService` remains broad and actual delete semantics are unchanged. |
+| Sessions backend | Acceptable but feature-specific inspection required | `SessionBadgeAwardService` helped, but lifecycle/timing writes remain transaction-sensitive in `SessionsService`. |
+| Trainers | Needs targeted foundation before trainer feature work | Ownership/role checks and large include graphs are inline with lighter direct coverage. |
+| Admin catalog backend | Acceptable but feature-specific inspection required | Backend split exists; catalog query/write shapes remain complex but stable enough unless admin work resumes. |
+| Catalog/admin UI | High-risk / not feature-ready | `admin-catalog-manager.tsx` manages multiple catalog domains in one large component. |
+| Parent dashboard | Acceptable but feature-specific inspection required | Helpers exist, but data loading, child/routine selection, progress, badges, and rendering still converge in one component. |
+| Training runner | Needs targeted foundation before serious runner features | Timers, session API mutations, completion flow, media rendering, and UI state live in one component. |
+| Routines manager | High-risk / not feature-ready | Create/edit/delete impact/task/period orchestration live in one large component. |
+| Task builder | Needs targeted foundation before task-builder features | Catalog search, song loading, draft editing, media fields, and delete confirmation UI share one component. |
+| Database/schema | Acceptable but feature-specific inspection required | Cascades are powerful and subscription concepts exist without an app boundary. |
+| Shared types | Acceptable but light | Useful, but not yet a strong API contract boundary. |
+| CI/quality gates | Good enough | Unit tests, DB-backed API smoke, builds, and generated-artifact guard run in CI. Browser smoke is local-first. |
+| Local dev/env | Acceptable for now | Docker/local DB orchestration remains deferred until deployability, onboarding, or browser-smoke CI promotion needs it. |
+
 ## Next Recommended Work Selection
 
 Recommended posture:
 - do not continue routines by momentum
 - do not continue sessions service-boundary extraction by momentum
-- feature planning may begin, but only after scoped inspection of the areas the feature will touch
+- do not interpret #96 as permission to start feature work freely anywhere
+- run a focused frontend hotspot foundation phase before serious feature implementation
+- feature planning may begin only after scoped inspection of the areas the feature will touch
 - do not expand API or browser smoke by momentum; add more smoke only when it protects a named production or release risk
 - select any next foundation work by production-readiness inspection
-- likely future candidates: frontend destructive flows, training runner/session UI behavior, browser-smoke CI promotion, Docker/local dev setup for deployability/onboarding, or scoped backend inspection only when product work touches that domain
+- start with `TrainingRunner` unless a concrete product feature selects another hotspot
+- do not recommend Docker, browser-smoke CI promotion, or backend refactor unless directly justified by the next goal
+
+Recommended focused frontend foundation sequence:
+1. Inspect `TrainingRunner` session-control responsibilities and seams.
+2. If inspection confirms value, extract a small `TrainingRunner` session-control hook/helper with tests.
+3. Inspect `RoutinesManager` editor/delete-impact orchestration.
+4. If justified, extract one `RoutinesManager` slice.
+5. Inspect `TaskBuilder` catalog search/song-loading/draft editing boundaries.
+6. If justified, extract one `TaskBuilder` slice.
 
 ## Files / Modules to Refactor First
 
-### First-wave backend
-- `apps/api/src/auth/auth.service.ts`
-- `apps/api/src/sessions/sessions.service.ts`
-- `apps/api/src/routines/routines.service.ts`
-
-### First-wave frontend
-- `apps/web/components/parent-dashboard.tsx`
+### Focused frontend foundation phase
 - `apps/web/components/training-runner.tsx`
 - `apps/web/components/routines-manager.tsx`
+- `apps/web/components/task-builder.tsx`
+- `apps/web/components/admin-catalog-manager.tsx`
+- `apps/web/components/parent-dashboard.tsx`
 
-### First-wave shared helpers
-- `apps/web/lib/api.ts`
-- `apps/web/lib/auth-storage.ts`
-- `apps/web/lib/use-auth-user.ts`
+### Backend inspection-only unless product work touches it
+- `apps/api/src/routines/routines.service.ts`
+- `apps/api/src/sessions/sessions.service.ts`
+- `apps/api/src/auth/auth.service.ts`
+- `apps/api/src/trainers/trainers.service.ts`
 
 ## Files / Modules to Defer
 Leave these mostly untouched until earlier phases reduce risk:
@@ -575,10 +621,10 @@ Leave these mostly untouched until earlier phases reduce risk:
 - docs updated when architectural expectations change
 
 ## Top 5 Immediate Next Tasks
-1. Start feature planning with a scoped inspection of the exact frontend/backend areas the feature will touch.
-2. Audit frontend destructive confirmation flows before changing `routines-manager` or dashboard behavior.
-3. Inspect frontend training runner/session UI mutation flow before extracting more UI structure.
-4. Inspect browser-smoke CI promotion only if the team wants browser smoke to become a required gate.
+1. Inspect frontend `TrainingRunner` session-control responsibilities and seams.
+2. If justified, extract a small `TrainingRunner` session-control hook/helper with focused tests.
+3. Inspect `RoutinesManager` editor/delete-impact orchestration before changing routine editor behavior.
+4. Inspect `TaskBuilder` catalog search/song-loading/draft editing boundaries before task-builder feature work.
 5. Keep docs and AI guidance current after each domain shift so stale plans do not drive future Codex work.
 
 ## Future Sessions Inspection Candidates

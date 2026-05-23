@@ -396,29 +396,40 @@ Avoid tests that rely on wall-clock-sensitive badge/progress behavior unless dat
 
 ## Current Recommended Next Work
 
-Title: feature-readiness checkpoint before new product work
+Title: focused frontend hotspot foundation phase
 
 Recommended posture:
-- the foundation is good enough to begin feature planning, but each feature should start with scoped inspection of the exact files and domains it will touch
+- the backend foundation and quality gates are much improved, but the app is not broadly ready for serious feature work anywhere
+- the largest remaining AI-maintainability risk is concentrated in large stateful frontend components
+- run a focused frontend hotspot foundation phase before serious feature implementation
+- if a concrete product feature is selected first, choose the hotspot based on that feature
+- if no feature is selected, start with `TrainingRunner` because it is core product behavior and already has API/browser smoke happy-path protection
 - routines and sessions backend refactoring remain paused by default
 - browser smoke remains local-first and should not be promoted to CI without a separate inspection of runtime, DB orchestration, artifact behavior, and flakiness
 - Docker/local dev setup remains deferred until deployability, onboarding, serious feature work, or browser-smoke CI promotion needs it
 
 Scope:
 - do not continue backend refactoring, smoke expansion, or infrastructure work by momentum
-- before feature implementation, inspect the touched frontend/backend areas for ownership, API shape, response assumptions, tests, and quality-gate coverage
+- do not treat smoke coverage as proof that all feature surfaces are ready
+- inspect the target frontend hotspot before implementation
 - add tests, docs, or small extractions only when inspection shows concrete production-readiness value
 
 Likely files:
-- feature-specific files selected after inspection
+- `apps/web/components/training-runner.tsx`
+- `apps/web/components/routines-manager.tsx`
+- `apps/web/components/task-builder.tsx`
+- `apps/web/components/admin-catalog-manager.tsx`
+- `apps/web/components/parent-dashboard.tsx`
 - strategic docs only when guidance becomes stale
 - CI workflow only in a later explicit CI-promotion PR
 
 Exact implementation tasks:
-1. Define the intended product feature or production-readiness goal.
-2. Inspect the exact files/routes/services/components involved before coding.
-3. Decide whether existing unit, API smoke, and browser smoke coverage is enough for that feature.
-4. Add only the smallest missing guardrail or extraction needed to make the feature safe.
+1. Inspect `TrainingRunner` session-control responsibilities and seams unless a selected feature points elsewhere.
+2. If inspection confirms value, extract a small `TrainingRunner` session-control hook/helper with focused tests.
+3. Inspect `RoutinesManager` editor/delete-impact orchestration.
+4. If justified, extract one `RoutinesManager` slice.
+5. Inspect `TaskBuilder` catalog search/song-loading/draft editing boundaries.
+6. If justified, extract one `TaskBuilder` slice.
 
 Validation commands:
 - `git diff --check`
@@ -430,12 +441,13 @@ CI impact:
 - none by default; browser-smoke CI promotion remains deferred
 
 Acceptance criteria:
-- feature planning is evidence-based and scoped
-- no old roadmap item drives automatic refactor or smoke expansion
+- frontend hotspot work is evidence-based and scoped
+- no old roadmap item drives automatic backend refactor or smoke expansion
 - browser smoke remains an optional/local confidence gate unless explicitly promoted
+- no broad frontend rewrite is started
 
 Risks:
-- starting feature work without scoped inspection could re-grow known hotspots
+- starting feature work without hotspot inspection could re-grow already large frontend components
 - promoting browser smoke to required CI too quickly could add runtime/flakiness before DB orchestration and local/CI behavior are understood
 
 Uncertainties:
@@ -443,8 +455,9 @@ Uncertainties:
 - exact CI promotion shape is still open and should be inspected separately if it becomes a goal
 
 Why this is the best first step:
-- the main foundation risks are now guarded enough for scoped feature planning
-- the remaining risks are feature-specific and should be evaluated against the actual product change rather than handled through generic refactor loops
+- the backend foundation is improved enough to pause backend momentum
+- the remaining foundation risk is concrete: large user-facing frontend components are still difficult for AI-assisted changes
+- a small frontend hotspot phase reduces real feature-change risk without restarting broad architecture work
 
 ## Maintenance Rules
 - Update this document after each quality-gate milestone.
