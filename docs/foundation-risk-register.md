@@ -16,6 +16,7 @@ This document is not a license to refactor by momentum. It is a routing document
 Current checkpoint:
 - Checkpoint 0: inventory and register skeleton
 - Checkpoint 1: backend/domain reconciliation
+- Checkpoint 2: frontend hotspot reconciliation
 - PR range considered: `#44` through `#99`
 - Current posture: routines backend, sessions backend, TrainingRunner, and RoutinesManager foundation work have reached checkpoints; further work should be selected by product/foundation priority, not by continuing the last thread.
 
@@ -184,12 +185,88 @@ This checkpoint reconciles backend/domain rows from current docs and targeted co
 
 | Area / module | Related PRs | Detailed docs | Current inventory note | Current status |
 | --- | --- | --- | --- | --- |
-| TrainingRunner | `#95`, `#98` | `docs/training-runner-foundation-plan.md`, `docs/browser-smoke-and-quality-gate-roadmap.md` | Session-control deterministic decisions are now helper-backed and tested; cancel, multi-task, in-flight, timer, and visual structure risks remain deferred. | `acceptable but inspect first` |
-| RoutinesManager | `#99` | `docs/routines-manager-foundation-plan.md` | Routine editor save-plan risk was reduced; delete-impact preview state, partial save failure, duplicate saves, rendered editor coverage, and `TaskBuilder` coupling remain deferred. | `acceptable but inspect first` |
-| TaskBuilder | Related through `#99`; direct PRs to be reconciled | `docs/routines-manager-foundation-plan.md`, `docs/refactor-roadmap.md` | Catalog search, song loading, draft editing, media fields, and delete callbacks share one component. | `needs targeted foundation` |
-| ParentDashboard | Earlier helper/view-model PRs to be reconciled | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md` | Helper/view-model layers exist; loading, selection, progress, badges, and rendering still converge in one component. | `acceptable but inspect first` |
-| AdminCatalogManager | To be completed in Checkpoint 2 | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md` | Multi-domain admin catalog UI remains one of the largest frontend hotspots. | `high-risk / not feature-ready` |
-| API client/auth storage | Earlier auth/API helper PRs to be reconciled | `docs/quality-gate-strategy.md`, `docs/refactor-roadmap.md` | Shared auth storage and `apiFetch` refresh behavior are tested and stable; auth UI changes remain sensitive. | `good enough` |
+| TrainingRunner | `#95`, `#98` | `docs/training-runner-foundation-plan.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, this register | Session-control deterministic decisions are now helper-backed and tested; cancel, multi-task, in-flight, timer, and visual structure risks remain deferred. | `acceptable but inspect first` |
+| RoutinesManager | `#99` | `docs/routines-manager-foundation-plan.md`, this register | Routine editor save-plan risk was reduced; delete-impact preview state, partial save failure, duplicate saves, rendered editor coverage, and `TaskBuilder` coupling remain deferred. | `acceptable but inspect first` |
+| TaskBuilder | Related through `#99`; older direct PR mapping uncertain | `docs/routines-manager-foundation-plan.md`, `docs/refactor-roadmap.md`, this register | Catalog search, song loading, draft editing, media fields, and delete callbacks share one component. #99 did not solve this hotspot. | `needs targeted foundation` |
+| ParentDashboard | Earlier helper/view-model PRs; direct PR mapping uncertain | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Helper/view-model layers exist; loading, selection, progress, badges, and rendering still converge in one component. | `acceptable but inspect first` |
+| AdminCatalogManager | Older direct PR mapping uncertain | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Multi-domain admin catalog UI remains one of the largest frontend hotspots and is not solved by admin backend service splits. | `high-risk / not feature-ready` |
+| API client/auth storage | Earlier auth/API helper PRs; direct PR mapping uncertain | `docs/quality-gate-strategy.md`, `docs/refactor-roadmap.md`, this register | Shared auth storage and `apiFetch` refresh behavior are tested and stable; auth UX changes remain sensitive. | `good enough` |
+
+## Checkpoint 2 Frontend Hotspot Reconciliation
+
+This checkpoint reconciles frontend hotspot rows from current docs and targeted code inspection. It does not restart frontend refactoring and does not define open-ended implementation plans.
+
+### Area: TrainingRunner
+- Area / module: `apps/web/components/training-runner.tsx`, `apps/web/lib/training-runner-session-control.ts`, and related runner helpers.
+- Related PRs: `#95` browser smoke experiment and `#98` TrainingRunner foundation experiment.
+- Detailed docs: `docs/training-runner-foundation-plan.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, `docs/quality-gate-strategy.md`.
+- Completed foundation work: Playwright local-first browser smoke covers runner standby and one-task completion; #98 added a pure session-control helper and focused tests; `TrainingRunner` uses that helper for complete-task payload construction, last-task finish decision, success copy, and error fallback copy. Existing runner view-model/image/format helpers have unit coverage.
+- Deferred risks: `TrainingRunner` still owns routine loading, API sequencing, React state, timer state, image state, rendering, routine refresh, and cancel behavior. Multi-task browser coverage, cancel flow, double-click/in-flight mutation behavior, timer/best-time logic, media rendering branches, and visual structure remain intentionally deferred.
+- Trigger conditions: runner redesign, start/complete/finish/cancel UX changes, multi-task flow changes, timer/best-time changes, in-flight mutation prevention, media rendering changes, badge/progress display in runner, or any feature that changes session-control sequencing.
+- Required reading before touching: this register, `docs/training-runner-foundation-plan.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, session API smoke docs, and runner helper tests.
+- Current safety coverage: `apps/web/lib/__tests__/training-runner-session-control.test.ts`, `training-runner-view-model.test.ts`, `training-runner-task-images.test.ts`, `training-runner-helpers.test.ts`, DB-backed API session lifecycle smoke, and local-first browser smoke for one-task runner completion.
+- Current status: `acceptable but inspect first`.
+- Next recommended action: do not continue runner refactoring by momentum. If product work touches runner behavior before the planned redesign, inspect the exact seam and add focused tests for cancel, multi-task, in-flight, timer, or media behavior as needed.
+
+### Area: RoutinesManager
+- Area / module: `apps/web/components/routines-manager.tsx`, `apps/web/lib/routines-manager-save-plan.ts`, and related routines manager helpers.
+- Related PRs: `#99` RoutinesManager foundation experiment.
+- Detailed docs: `docs/routines-manager-foundation-plan.md`, `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`.
+- Completed foundation work: #99 added a pure routine editor save-plan helper and focused tests, then wired it into `RoutinesManager`. The helper pins removed task/period id detection, task/period update/create ordering, endpoint/method planning, and sort-order semantics. Existing routines manager helper and payload tests cover draft mapping and payload construction.
+- Deferred risks: frontend delete-impact preview state remains in `RoutinesManager`; stale/competing delete preview risk, partial save failure behavior, duplicate save/in-flight mutation behavior, rendered routine editor save/delete coverage, and `TaskBuilder` coupling remain unsolved. Backend routines refactoring remains paused and is separate from this frontend hotspot.
+- Trigger conditions: routine/task/period deletion UX, destructive confirmation changes, routine editor save/delete UX changes, `TaskBuilder` delete callbacks, bulk/reorder/duplicate/archive features, richer editor states, or bugs around stale preview/wrong confirm target/accidental delete.
+- Required reading before touching: this register, `docs/routines-manager-foundation-plan.md`, `docs/routines-refactor-plan.md` if backend routines are touched, and backend delete-impact docs/tests if destructive preview behavior changes.
+- Current safety coverage: `apps/web/lib/__tests__/routines-manager-save-plan.test.ts`, `routines-manager-payloads.test.ts`, `routines-manager-helpers.test.ts`, routines backend delete-impact service tests, DB-backed routine API smoke, and local browser routine visibility smoke.
+- Current status: `acceptable but inspect first`.
+- Next recommended action: do not continue RoutinesManager extraction by momentum. Revisit delete-impact preview extraction only for a concrete destructive-flow feature, bug, or architect decision.
+
+### Area: TaskBuilder
+- Area / module: `apps/web/components/task-builder.tsx`.
+- Related PRs: related through `#99`; older direct PR mapping uncertain.
+- Detailed docs: `docs/routines-manager-foundation-plan.md`, `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`.
+- Completed foundation work: task draft mapping and routine payload behavior are covered by routines manager helper/payload tests; #99 explicitly left `TaskBuilder` internals unchanged.
+- Deferred risks: `TaskBuilder` still owns catalog search, song loading, task draft editing, media/audio/video fields, custom/catalog task composition, used-catalog filtering, and task delete-impact panel rendering. It also receives destructive callbacks from `RoutinesManager`, so delete UX changes can span both files.
+- Trigger conditions: catalog search UX, song loading, media fields, task draft editing, task delete callbacks, task reorder/duplicate/archive, richer task editor states, or destructive-flow UX touching task deletion.
+- Required reading before touching: this register, `docs/routines-manager-foundation-plan.md`, `apps/web/AGENTS.md`, routines manager helper/payload tests, and backend routines/delete-impact docs if delete behavior changes.
+- Current safety coverage: indirect coverage through `routines-manager-helpers.test.ts`, `routines-manager-payloads.test.ts`, and `routines-manager-save-plan.test.ts`; routine visibility browser smoke. There is no dedicated `TaskBuilder` unit/component test suite yet.
+- Current status: `needs targeted foundation`.
+- Next recommended action: before serious TaskBuilder feature work, run inspection first and choose one small seam, likely catalog search/song-loading/draft editing or delete callback behavior. Do not combine with RoutinesManager delete-impact extraction unless the product risk requires both.
+
+### Area: ParentDashboard
+- Area / module: `apps/web/components/parent-dashboard.tsx`, `apps/web/lib/parent-dashboard-helpers.ts`, and `apps/web/lib/parent-dashboard-view-model.ts`.
+- Related PRs: earlier helper/view-model work; direct PR mapping uncertain. Browser smoke coverage through `#95`.
+- Detailed docs: `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, `docs/quality-gate-strategy.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`.
+- Completed foundation work: parent dashboard helper and view-model modules exist with focused unit tests; DB-backed API smoke covers children, routines, session lifecycle, and post-finish session listing; local browser smoke covers real login, parent dashboard visibility, and owned child/routine visibility.
+- Deferred risks: `ParentDashboard` still owns loading, auth-token checks, selection state, progress/badge fetches, fallback selection behavior, recent sessions, and rendering. Progress/badge UI behavior is not exhaustively covered, and raw API response assumptions still matter.
+- Trigger conditions: dashboard loading/selection changes, child/routine/session visibility changes, progress or badge UI changes, response shape changes, multi-child UX changes, or authenticated landing/dashboard navigation changes.
+- Required reading before touching: this register, `docs/quality-gate-strategy.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, `parent-dashboard-*` helper tests, and backend children/routines/sessions docs for API-shape changes.
+- Current safety coverage: `parent-dashboard-helpers.test.ts`, `parent-dashboard-view-model.test.ts`, DB-backed API smoke for the dashboard data foundations, and local browser smoke for login/dashboard/child/routine visibility.
+- Current status: `acceptable but inspect first`.
+- Next recommended action: leave stable unless dashboard product work is selected; use feature-specific inspection and helper/view-model tests before changing loading, selection, progress, or badge behavior.
+
+### Area: AdminCatalogManager
+- Area / module: `apps/web/components/admin-catalog-manager.tsx`.
+- Related PRs: older direct PR mapping uncertain.
+- Detailed docs: `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, `docs/quality-gate-strategy.md`.
+- Completed foundation work: admin backend has service splits and backend tests; frontend admin catalog still uses a single large component for task, song, and equipment catalog management.
+- Deferred risks: `AdminCatalogManager` owns three catalog domains, multiple form states, selection state, save/delete mutations, difficulty levels, media URL shaping, equipment links, status handling, and rendering in one large file. It has no dedicated browser/API smoke path for admin catalog UI and should not be treated as safe for serious admin UI work without stabilization.
+- Trigger conditions: admin catalog UI feature work, task/song/equipment catalog CRUD changes, import/media/equipment linking UX, difficulty-level editing, destructive catalog deletion, admin role/permission UX, or backend catalog response shape changes.
+- Required reading before touching: this register, `docs/refactor-roadmap.md` admin sections, `docs/architecture-refactor-audit.md` admin UI notes, admin backend tests/docs, and `apps/web/AGENTS.md`.
+- Current safety coverage: backend admin service/activity/catalog-media tests and general typecheck/build/CI. Frontend admin catalog-specific coverage is light.
+- Current status: `high-risk / not feature-ready`.
+- Next recommended action: before admin catalog UI feature work, run a focused inspection/foundation checkpoint and split or test exactly one catalog domain or form seam. Do not start broad admin UI rewrite.
+
+### Area: API client/auth storage
+- Area / module: `apps/web/lib/api.ts`, `apps/web/lib/auth-storage.ts`, and `apps/web/lib/use-auth-user.ts`.
+- Related PRs: earlier auth/API helper PRs; direct PR mapping uncertain. Quality coverage through API/browser smoke PRs `#87-#95`.
+- Detailed docs: `docs/quality-gate-strategy.md`, `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`.
+- Completed foundation work: auth token storage keys and change events are centralized; `apiFetch` centralizes base URL handling, auth headers, JSON parsing, refresh retry, auth clearing, and retry-loop prevention; `useAuthUser` centralizes stored user synchronization.
+- Deferred risks: auth UX and redirect behavior remain sensitive; refresh failure behavior clears auth and may redirect; SSR/browser assumptions depend on current helper boundaries; broader auth UI changes can still break storage/event synchronization.
+- Trigger conditions: login/register/profile UX changes, refresh-token behavior changes, auth redirect changes, role-aware UI changes, API error-shape changes, storage key changes, or SSR/server-component usage of auth helpers.
+- Required reading before touching: this register, `docs/quality-gate-strategy.md`, `docs/architecture-refactor-audit.md` auth flow notes, `api.test.ts`, `auth-storage.test.ts`, and backend auth docs/tests if endpoint behavior changes.
+- Current safety coverage: `apps/web/lib/__tests__/api.test.ts`, `apps/web/lib/__tests__/auth-storage.test.ts`, DB-backed auth API smoke, local browser real UI login smoke, typecheck/build/CI.
+- Current status: `good enough`.
+- Next recommended action: keep stable; inspect before auth UX or token/refresh behavior changes. Do not duplicate auth/session handling in components.
 
 ### Quality / Infrastructure Areas To Reconcile
 
