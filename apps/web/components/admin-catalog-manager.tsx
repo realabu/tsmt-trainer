@@ -2,135 +2,41 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
+import {
+  buildEquipmentCatalogSavePayload,
+  buildSongCatalogSavePayload,
+  buildTaskCatalogSavePayload,
+  createEmptyEquipmentCatalogForm,
+  createEmptySongCatalogForm,
+  createEmptyTaskCatalogForm,
+  createEquipmentCatalogFormFromRecord,
+  createSongCatalogFormFromRecord,
+  createTaskCatalogFormFromRecord,
+  type AdminCatalogDifficultyLevelDraft,
+  type AdminCatalogEquipmentRecord,
+  type AdminCatalogSongRecord,
+  type AdminCatalogTaskRecord,
+  type AdminEquipmentCatalogFormState,
+  type AdminSongCatalogFormState,
+  type AdminTaskCatalogFormState,
+} from "../lib/admin-catalog-manager-forms";
 
-interface MediaAssetRecord {
-  id: string;
-  externalUrl?: string | null;
-}
+type SongCatalogRecord = AdminCatalogSongRecord;
 
-interface SongCatalogRecord {
-  id: string;
-  title: string;
-  lyrics?: string | null;
-  notes?: string | null;
-  isActive: boolean;
-  audioMedia?: MediaAssetRecord | null;
-  videoMedia?: MediaAssetRecord | null;
-}
-
-interface EquipmentCatalogRecord {
-  id: string;
-  name: string;
-  description?: string | null;
-  isActive: boolean;
-  iconMedia?: MediaAssetRecord | null;
+interface EquipmentCatalogRecord extends AdminCatalogEquipmentRecord {
   _count?: {
     taskLinks: number;
   };
 }
 
-interface TaskCatalogRecord {
-  id: string;
-  title: string;
-  summary?: string | null;
-  instructions?: string | null;
-  focusPoints?: string | null;
-  demoVideoUrl?: string | null;
-  isActive: boolean;
-  defaultSongId?: string | null;
+interface TaskCatalogRecord extends AdminCatalogTaskRecord {
   defaultSong?: SongCatalogRecord | null;
-  mediaLinks: Array<{
-    id: string;
-    label?: string | null;
-    mediaAsset: MediaAssetRecord;
-  }>;
   equipmentLinks: Array<{
     equipmentCatalogItem: EquipmentCatalogRecord;
-  }>;
-  difficultyLevels: Array<{
-    id: string;
-    name: string;
-    description?: string | null;
-    sortOrder: number;
   }>;
   _count?: {
     routineTasks: number;
   };
-}
-
-interface DifficultyLevelDraft {
-  name: string;
-  description: string;
-}
-
-interface TaskCatalogFormState {
-  title: string;
-  summary: string;
-  instructions: string;
-  focusPoints: string;
-  demoVideoUrl: string;
-  defaultSongId: string;
-  imageUrls: string;
-  equipmentIds: string[];
-  difficultyLevels: DifficultyLevelDraft[];
-  isActive: boolean;
-}
-
-interface SongCatalogFormState {
-  title: string;
-  lyrics: string;
-  audioExternalUrl: string;
-  videoExternalUrl: string;
-  notes: string;
-  isActive: boolean;
-}
-
-interface EquipmentCatalogFormState {
-  name: string;
-  description: string;
-  iconExternalUrl: string;
-  isActive: boolean;
-}
-
-const emptyTaskCatalogForm = (): TaskCatalogFormState => ({
-  title: "",
-  summary: "",
-  instructions: "",
-  focusPoints: "",
-  demoVideoUrl: "",
-  defaultSongId: "",
-  imageUrls: "",
-  equipmentIds: [],
-  difficultyLevels: [],
-  isActive: true,
-});
-
-const emptySongCatalogForm = (): SongCatalogFormState => ({
-  title: "",
-  lyrics: "",
-  audioExternalUrl: "",
-  videoExternalUrl: "",
-  notes: "",
-  isActive: true,
-});
-
-const emptyEquipmentCatalogForm = (): EquipmentCatalogFormState => ({
-  name: "",
-  description: "",
-  iconExternalUrl: "",
-  isActive: true,
-});
-
-function urlsToMediaLinks(imageUrls: string) {
-  return imageUrls
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((externalUrl) => ({
-      kind: "IMAGE" as const,
-      externalUrl,
-      label: "Alapertelmezett kep",
-    }));
 }
 
 export function AdminCatalogManager() {
@@ -140,9 +46,10 @@ export function AdminCatalogManager() {
   const [selectedTaskId, setSelectedTaskId] = useState("");
   const [selectedSongId, setSelectedSongId] = useState("");
   const [selectedEquipmentId, setSelectedEquipmentId] = useState("");
-  const [taskForm, setTaskForm] = useState<TaskCatalogFormState>(emptyTaskCatalogForm);
-  const [songForm, setSongForm] = useState<SongCatalogFormState>(emptySongCatalogForm);
-  const [equipmentForm, setEquipmentForm] = useState<EquipmentCatalogFormState>(emptyEquipmentCatalogForm);
+  const [taskForm, setTaskForm] = useState<AdminTaskCatalogFormState>(createEmptyTaskCatalogForm);
+  const [songForm, setSongForm] = useState<AdminSongCatalogFormState>(createEmptySongCatalogForm);
+  const [equipmentForm, setEquipmentForm] =
+    useState<AdminEquipmentCatalogFormState>(createEmptyEquipmentCatalogForm);
   const [status, setStatus] = useState("Toltes...");
 
   const accessToken =
@@ -189,58 +96,29 @@ export function AdminCatalogManager() {
 
   useEffect(() => {
     if (!selectedTask) {
-      setTaskForm(emptyTaskCatalogForm());
+      setTaskForm(createEmptyTaskCatalogForm());
       return;
     }
 
-    setTaskForm({
-      title: selectedTask.title,
-      summary: selectedTask.summary ?? "",
-      instructions: selectedTask.instructions ?? "",
-      focusPoints: selectedTask.focusPoints ?? "",
-      demoVideoUrl: selectedTask.demoVideoUrl ?? "",
-      defaultSongId: selectedTask.defaultSongId ?? "",
-      imageUrls: selectedTask.mediaLinks
-        .map((link) => link.mediaAsset.externalUrl)
-        .filter((url): url is string => Boolean(url))
-        .join("\n"),
-      equipmentIds: selectedTask.equipmentLinks.map((link) => link.equipmentCatalogItem.id),
-      difficultyLevels: selectedTask.difficultyLevels.map((level) => ({
-        name: level.name,
-        description: level.description ?? "",
-      })),
-      isActive: selectedTask.isActive,
-    });
+    setTaskForm(createTaskCatalogFormFromRecord(selectedTask));
   }, [selectedTask]);
 
   useEffect(() => {
     if (!selectedSong) {
-      setSongForm(emptySongCatalogForm());
+      setSongForm(createEmptySongCatalogForm());
       return;
     }
 
-    setSongForm({
-      title: selectedSong.title,
-      lyrics: selectedSong.lyrics ?? "",
-      audioExternalUrl: selectedSong.audioMedia?.externalUrl ?? "",
-      videoExternalUrl: selectedSong.videoMedia?.externalUrl ?? "",
-      notes: selectedSong.notes ?? "",
-      isActive: selectedSong.isActive,
-    });
+    setSongForm(createSongCatalogFormFromRecord(selectedSong));
   }, [selectedSong]);
 
   useEffect(() => {
     if (!selectedEquipment) {
-      setEquipmentForm(emptyEquipmentCatalogForm());
+      setEquipmentForm(createEmptyEquipmentCatalogForm());
       return;
     }
 
-    setEquipmentForm({
-      name: selectedEquipment.name,
-      description: selectedEquipment.description ?? "",
-      iconExternalUrl: selectedEquipment.iconMedia?.externalUrl ?? "",
-      isActive: selectedEquipment.isActive,
-    });
+    setEquipmentForm(createEquipmentCatalogFormFromRecord(selectedEquipment));
   }, [selectedEquipment]);
 
   function toggleTaskEquipment(equipmentId: string) {
@@ -252,7 +130,7 @@ export function AdminCatalogManager() {
     }));
   }
 
-  function updateDifficultyLevel(index: number, patch: Partial<DifficultyLevelDraft>) {
+  function updateDifficultyLevel(index: number, patch: Partial<AdminCatalogDifficultyLevelDraft>) {
     setTaskForm((current) => ({
       ...current,
       difficultyLevels: current.difficultyLevels.map((level, levelIndex) =>
@@ -280,24 +158,7 @@ export function AdminCatalogManager() {
       return;
     }
 
-    const payload = {
-      title: taskForm.title,
-      summary: taskForm.summary || undefined,
-      instructions: taskForm.instructions || undefined,
-      focusPoints: taskForm.focusPoints || undefined,
-      demoVideoUrl: taskForm.demoVideoUrl || undefined,
-      defaultSongId: taskForm.defaultSongId || undefined,
-      isActive: taskForm.isActive,
-      equipmentIds: taskForm.equipmentIds,
-      mediaLinks: urlsToMediaLinks(taskForm.imageUrls),
-      difficultyLevels: taskForm.difficultyLevels
-        .filter((level) => level.name.trim())
-        .map((level, index) => ({
-          name: level.name.trim(),
-          description: level.description.trim() || undefined,
-          sortOrder: index,
-        })),
-    };
+    const payload = buildTaskCatalogSavePayload(taskForm);
 
     try {
       await apiFetch(
@@ -309,7 +170,7 @@ export function AdminCatalogManager() {
         accessToken,
       );
       setSelectedTaskId("");
-      setTaskForm(emptyTaskCatalogForm());
+      setTaskForm(createEmptyTaskCatalogForm());
       await loadCatalogs();
       setStatus("Feladat katalogus mentve.");
     } catch (error) {
@@ -322,14 +183,7 @@ export function AdminCatalogManager() {
       return;
     }
 
-    const payload = {
-      title: songForm.title,
-      lyrics: songForm.lyrics || undefined,
-      audioExternalUrl: songForm.audioExternalUrl || undefined,
-      videoExternalUrl: songForm.videoExternalUrl || undefined,
-      notes: songForm.notes || undefined,
-      isActive: songForm.isActive,
-    };
+    const payload = buildSongCatalogSavePayload(songForm);
 
     try {
       await apiFetch(
@@ -341,7 +195,7 @@ export function AdminCatalogManager() {
         accessToken,
       );
       setSelectedSongId("");
-      setSongForm(emptySongCatalogForm());
+      setSongForm(createEmptySongCatalogForm());
       await loadCatalogs();
       setStatus("Dal vagy mondoka mentve.");
     } catch (error) {
@@ -354,12 +208,7 @@ export function AdminCatalogManager() {
       return;
     }
 
-    const payload = {
-      name: equipmentForm.name,
-      description: equipmentForm.description || undefined,
-      iconExternalUrl: equipmentForm.iconExternalUrl || undefined,
-      isActive: equipmentForm.isActive,
-    };
+    const payload = buildEquipmentCatalogSavePayload(equipmentForm);
 
     try {
       await apiFetch(
@@ -373,7 +222,7 @@ export function AdminCatalogManager() {
         accessToken,
       );
       setSelectedEquipmentId("");
-      setEquipmentForm(emptyEquipmentCatalogForm());
+      setEquipmentForm(createEmptyEquipmentCatalogForm());
       await loadCatalogs();
       setStatus("Segedeszkoz mentve.");
     } catch (error) {
@@ -573,7 +422,7 @@ export function AdminCatalogManager() {
                 className="button secondary"
                 onClick={() => {
                   setSelectedTaskId("");
-                  setTaskForm(emptyTaskCatalogForm());
+                  setTaskForm(createEmptyTaskCatalogForm());
                 }}
                 type="button"
               >
@@ -653,7 +502,7 @@ export function AdminCatalogManager() {
                 className="button secondary"
                 onClick={() => {
                   setSelectedSongId("");
-                  setSongForm(emptySongCatalogForm());
+                  setSongForm(createEmptySongCatalogForm());
                 }}
                 type="button"
               >
@@ -724,7 +573,7 @@ export function AdminCatalogManager() {
                 className="button secondary"
                 onClick={() => {
                   setSelectedEquipmentId("");
-                  setEquipmentForm(emptyEquipmentCatalogForm());
+                  setEquipmentForm(createEmptyEquipmentCatalogForm());
                 }}
                 type="button"
               >
