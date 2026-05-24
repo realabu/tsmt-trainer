@@ -495,6 +495,30 @@ Stop conditions:
 - Continuing would become a broad admin UI rewrite.
 - Continuing would change destructive behavior without an explicit product task.
 
+Gate result after Checkpoints 1-2:
+
+- Recommendation: stop implementation and proceed to Checkpoint 5 final outcome
+  review.
+- Checkpoints 1-2 addressed the highest concrete production and
+  AI-maintainability risk: deterministic task/song/equipment form defaults,
+  selected-record hydration, task media link conversion, difficulty filtering and
+  sort order, equipment id preservation, default-song optional behavior, and
+  save payload construction are now named and covered by focused unit tests.
+- `AdminCatalogManager` now uses the helper while API calls, selected-id method
+  selection, save/delete orchestration, reload timing, status copy, and rendering
+  remain in the component.
+- Catalog domain section splitting is still useful for reviewability, but it is
+  not must-have before final review because it would mostly move rendering and
+  props after the riskiest deterministic behavior has already been isolated.
+- Async fetch/hook extraction is not must-have now because catalog loading,
+  auth-token lookup, status copy, and mutation sequencing would require broader
+  async test/mocking decisions without a concrete product change.
+- Delete confirmation/destructive behavior work should remain deferred until
+  product work explicitly touches admin deletes; continuing there now would risk
+  changing behavior rather than preserving it.
+- Current PR is valuable and mergeable after final outcome review if validation
+  remains green. Do not continue to a Checkpoint 3 by momentum.
+
 ### Checkpoint 5: Final Outcome Review
 
 Type:
@@ -551,12 +575,11 @@ experiment.
 
 ## Recommended Next Checkpoint
 
-Proceed to Checkpoint 1: characterize admin catalog form and payload decisions
-with a small pure helper and focused unit tests.
+Proceed to Checkpoint 5: final outcome review.
 
-This is the best first step because it protects the highest-risk deterministic
-behavior without changing rendering, side effects, API sequencing, backend code,
-or destructive admin behavior.
+Checkpoints 1-2 completed the highest-value deterministic seam without changing
+rendering, side effects, API sequencing, backend code, or destructive admin
+behavior. Further extraction should require a fresh concrete trigger.
 
 ## Deferred Risks And Triggers
 
