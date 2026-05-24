@@ -224,15 +224,15 @@ This checkpoint reconciles frontend hotspot rows from current docs and targeted 
 
 ### Area: TaskBuilder
 - Area / module: `apps/web/components/task-builder.tsx`.
-- Related PRs: related through `#99`; older direct PR mapping uncertain.
-- Detailed docs: `docs/routines-manager-foundation-plan.md`, `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`.
-- Completed foundation work: task draft mapping and routine payload behavior are covered by routines manager helper/payload tests; #99 explicitly left `TaskBuilder` internals unchanged.
-- Deferred risks: `TaskBuilder` still owns catalog search, song loading, task draft editing, media/audio/video fields, custom/catalog task composition, used-catalog filtering, and task delete-impact panel rendering. It also receives destructive callbacks from `RoutinesManager`, so delete UX changes can span both files.
+- Related PRs: related through `#99`; TaskBuilder draft-operation foundation in `#101`; older direct PR mapping uncertain.
+- Detailed docs: `docs/task-builder-foundation-plan.md`, `docs/routines-manager-foundation-plan.md`, `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`.
+- Completed foundation work: task draft mapping and routine payload behavior are covered by routines manager helper/payload tests; #101 added a pure TaskBuilder draft helper, focused tests, and TaskBuilder usage for custom/catalog task defaults, default song sentinel behavior, duplicate catalog filtering, and task order normalization.
+- Deferred risks: `TaskBuilder` still owns catalog search, song loading, media/audio/video fields, field editing, and task delete-impact panel rendering. It also receives destructive callbacks from `RoutinesManager`, so delete UX changes can span both files.
 - Trigger conditions: catalog search UX, song loading, media fields, task draft editing, task delete callbacks, task reorder/duplicate/archive, richer task editor states, or destructive-flow UX touching task deletion.
-- Required reading before touching: this register, `docs/routines-manager-foundation-plan.md`, `apps/web/AGENTS.md`, routines manager helper/payload tests, and backend routines/delete-impact docs if delete behavior changes.
-- Current safety coverage: indirect coverage through `routines-manager-helpers.test.ts`, `routines-manager-payloads.test.ts`, and `routines-manager-save-plan.test.ts`; routine visibility browser smoke. There is no dedicated `TaskBuilder` unit/component test suite yet.
-- Current status: `needs targeted foundation`.
-- Next recommended action: before serious TaskBuilder feature work, run inspection first and choose one small seam, likely catalog search/song-loading/draft editing or delete callback behavior. Do not combine with RoutinesManager delete-impact extraction unless the product risk requires both.
+- Required reading before touching: this register, `docs/task-builder-foundation-plan.md`, `docs/routines-manager-foundation-plan.md`, `apps/web/AGENTS.md`, routines manager helper/payload tests, and backend routines/delete-impact docs if delete behavior changes.
+- Current safety coverage: dedicated `task-builder-draft.test.ts`; indirect coverage through `routines-manager-helpers.test.ts`, `routines-manager-payloads.test.ts`, and `routines-manager-save-plan.test.ts`; routine visibility browser smoke. There is still no rendered TaskBuilder component test suite.
+- Current status: `acceptable but inspect first`.
+- Next recommended action: do not continue TaskBuilder extraction by momentum. Before catalog search, song loading, media, or destructive-flow feature work, run scoped inspection and decide whether the deferred seam is needed.
 
 ### Area: ParentDashboard
 - Area / module: `apps/web/components/parent-dashboard.tsx`, `apps/web/lib/parent-dashboard-helpers.ts`, and `apps/web/lib/parent-dashboard-view-model.ts`.

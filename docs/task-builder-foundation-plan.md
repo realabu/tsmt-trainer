@@ -356,3 +356,77 @@ This is the smallest useful next step because it protects the highest-risk deter
 - Whether catalog search and song loading deserve extraction depends on upcoming product work. They are not must-have foundation work yet.
 - Delete-impact preview remains important but should be revisited only when destructive-flow UX is touched.
 - There is no rendered component coverage for TaskBuilder; adding it is not recommended until a concrete UI feature requires that level of protection.
+
+## Final Outcome Review
+
+Final experiment state:
+
+- Checkpoint 0 created this TaskBuilder foundation plan.
+- Checkpoint 1 added `apps/web/lib/task-builder-draft.ts` and focused unit tests in `apps/web/lib/__tests__/task-builder-draft.test.ts`.
+- Checkpoint 2 wired the draft helper into `apps/web/components/task-builder.tsx`.
+- Checkpoint 2.5 recorded the gate decision to stop implementation and not continue into catalog search, song loading, or delete callback extraction now.
+
+Files changed:
+
+- `docs/task-builder-foundation-plan.md`
+- `apps/web/lib/task-builder-draft.ts`
+- `apps/web/lib/__tests__/task-builder-draft.test.ts`
+- `apps/web/components/task-builder.tsx`
+
+Validation results reported during the experiment:
+
+- `pnpm --filter @tsmt/web test:unit` passed.
+- `pnpm --filter @tsmt/web build` passed.
+- `pnpm typecheck` passed. One overlapping build/typecheck run hit the known transient Next `.next/types` issue and passed on serial rerun.
+- `pnpm check:generated` passed.
+- `git diff --check` passed.
+- GitHub CI was green through Checkpoint 2.5.
+
+Behavior preserved:
+
+- UI copy unchanged.
+- Visible behavior intended unchanged.
+- API calls unchanged.
+- Endpoint paths unchanged.
+- Payload shapes unchanged.
+- Catalog search behavior unchanged.
+- Song loading behavior unchanged.
+- Debounce timing unchanged.
+- Duplicate catalog disabled behavior preserved and now helper-backed.
+- Task order and `sortOrder` behavior preserved and now helper-backed.
+- Delete-impact behavior unchanged.
+- RoutinesManager boundary unchanged.
+- Backend routines code unchanged.
+
+Risk reduced:
+
+- Custom task draft defaults are named and tested.
+- Catalog task draft defaults are named and tested.
+- Catalog default song sentinel behavior is named and tested.
+- Duplicate catalog task prevention is named and tested.
+- Task ordering normalization is named and tested.
+- Future AI-assisted changes can inspect deterministic draft behavior without reading the full `TaskBuilder` component.
+
+Deferred risks explicitly not solved:
+
+- Catalog search async behavior remains in `TaskBuilder`.
+- Song loading/options behavior remains in `TaskBuilder`.
+- Delete callback and delete-impact UI behavior remain connected to the RoutinesManager boundary.
+- Stale or wrong destructive preview risk is deferred to destructive-flow work.
+- Rendered TaskBuilder coverage was not added.
+- Media field UX/view-model extraction was not attempted.
+
+Trigger conditions for revisiting deferred seams:
+
+- Catalog search UX changes.
+- Song selection/default-song UX changes.
+- Task delete/destructive confirmation UX changes.
+- TaskBuilder media UX changes.
+- Routine editor delete/save UX changes.
+- Bugs around duplicate catalog add, wrong task defaults, wrong `sortOrder`, or stale delete preview.
+
+Final recommendation:
+
+- Merge all after final architect review unless final validation finds a problem.
+- Do not continue implementation now.
+- Do not start optional Checkpoint 3 by momentum.
