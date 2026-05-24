@@ -286,6 +286,16 @@ Recommended target shape:
 - Recommendation bias:
   - stop implementation unless a concrete remaining TaskBuilder risk clearly justifies one more small checkpoint.
 
+Checkpoint 2.5 gate result:
+
+- Checkpoints 1-2 addressed the highest concrete TaskBuilder production and AI-maintainability risk: deterministic task draft creation, catalog task defaults, default song sentinel behavior, duplicate catalog filtering, and task order normalization are now pure, tested, and used by `TaskBuilder`.
+- Catalog search extraction is not must-have before serious TaskBuilder feature work unless upcoming work changes search UX, debounce behavior, result status copy, or catalog API assumptions.
+- Song loading/options extraction is not must-have before serious TaskBuilder feature work unless upcoming work changes song selection UX, default song handling, or song catalog fallback behavior.
+- Delete callback/delete-impact extraction remains important but is destructive-flow work. It should be revisited only when a product feature, bug, or architect decision touches task deletion, delete-impact UI, destructive confirmation, or RoutinesManager delete-preview state.
+- Continuing now would mostly move into async UI, rendered-test, or destructive-flow territory. That could reduce some future maintainability risk, but it would also broaden the experiment beyond the approved draft-operation seam.
+- Current PR is valuable and mergeable after final outcome review if final validation remains green.
+- Gate recommendation: stop implementation and proceed to final outcome review. Do not start Checkpoint 3 by momentum.
+
 ### Optional Checkpoint 3: Catalog/Song Seam Only If Gate Approves
 
 - Type: test-only or narrow refactor
