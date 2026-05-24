@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "../lib/api";
 import { getDisplayRepetitionsLabel } from "../lib/repetitions";
+import {
+  canAddCatalogTask,
+  createCatalogTaskDraft,
+  createEmptyTaskDraft,
+  normalizeTaskDraftOrder,
+} from "../lib/task-builder-draft";
 
 export interface TaskDraft {
   id?: string;
@@ -76,29 +82,6 @@ interface DeleteImpactRecord {
   notes: string[];
 }
 
-function emptyTask(sortOrder: number): TaskDraft {
-  return {
-    sortOrder,
-    songSelection: "",
-    title: "",
-    details: "",
-    coachText: "",
-    repetitionsLabel: "",
-    repetitionCount: "",
-    repetitionUnitCount: "",
-    mediaImageUrl: "",
-    mediaAudioUrl: "",
-    mediaVideoUrl: "",
-  };
-}
-
-function normalizeTasks(tasks: TaskDraft[]) {
-  return tasks.map((task, index) => ({
-    ...task,
-    sortOrder: index + 1,
-  }));
-}
-
 export function TaskBuilder({
   tasks,
   onChange,
@@ -166,40 +149,20 @@ export function TaskBuilder({
     void loadSongs();
   }, [accessToken]);
 
-  const usedCatalogTaskIds = useMemo(
-    () => new Set(tasks.map((task) => task.catalogTaskId).filter((value): value is string => Boolean(value))),
-    [tasks],
-  );
-
   function updateTask(index: number, patch: Partial<TaskDraft>) {
     onChange(tasks.map((task, taskIndex) => (taskIndex === index ? { ...task, ...patch } : task)));
   }
 
   function addCustomTask() {
-    onChange(normalizeTasks([...tasks, emptyTask(tasks.length + 1)]));
+    onChange(normalizeTaskDraftOrder([...tasks, createEmptyTaskDraft(tasks.length + 1)]));
   }
 
   function addCatalogTask(item: TaskCatalogSearchResult) {
-    onChange(
-      normalizeTasks([
-        ...tasks,
-        {
-          ...emptyTask(tasks.length + 1),
-          catalogTaskId: item.id,
-          catalogTaskTitle: item.title,
-          catalogDifficultyLevels: item.difficultyLevels,
-          catalogDefaultSongId: item.defaultSong?.id,
-          catalogDefaultSongTitle: item.defaultSong?.title,
-          songSelection: item.defaultSong?.id ? "__DEFAULT__" : "",
-          title: item.title,
-          details: item.summary ?? "",
-        },
-      ]),
-    );
+    onChange(normalizeTaskDraftOrder([...tasks, createCatalogTaskDraft(item, tasks.length + 1)]));
   }
 
   function removeTask(index: number) {
-    onChange(normalizeTasks(tasks.filter((_, taskIndex) => taskIndex !== index)));
+    onChange(normalizeTaskDraftOrder(tasks.filter((_, taskIndex) => taskIndex !== index)));
   }
 
   return (
@@ -218,7 +181,7 @@ export function TaskBuilder({
           <div className="list">
             {results.map((item) => {
               const previewImage = item.mediaLinks[0]?.mediaAsset.externalUrl;
-              const alreadyUsed = usedCatalogTaskIds.has(item.id);
+              const alreadyUsed = !canAddCatalogTask(tasks, item.id);
 
               return (
                 <div className="list-item" key={item.id}>
