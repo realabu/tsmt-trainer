@@ -17,6 +17,7 @@ Current checkpoint:
 - Checkpoint 0: inventory and register skeleton
 - Checkpoint 1: backend/domain reconciliation
 - Checkpoint 2: frontend hotspot reconciliation
+- Checkpoint 3: quality/infrastructure reconciliation
 - PR range considered: `#44` through `#99`
 - Current posture: routines backend, sessions backend, TrainingRunner, and RoutinesManager foundation work have reached checkpoints; further work should be selected by product/foundation priority, not by continuing the last thread.
 
@@ -272,11 +273,75 @@ This checkpoint reconciles frontend hotspot rows from current docs and targeted 
 
 | Area / module | Related PRs | Detailed docs | Current inventory note | Current status |
 | --- | --- | --- | --- | --- |
-| API smoke | `#87-#93` | `docs/api-smoke-completion-experiment.md`, `docs/quality-gate-strategy.md` | DB-backed API smoke runs in CI and covers auth, children, routines, session lifecycle, and post-finish session listing. | `good enough` |
-| Browser smoke | `#94-#95` | `docs/browser-smoke-and-quality-gate-roadmap.md`, `docs/quality-gate-strategy.md` | Playwright local-first browser smoke covers app-load/auth, real login, dashboard, owned child/routine visibility, runner standby, and one-task completion; not CI-required. | `good enough` |
-| Generated artifact guard | `#81`, related docs `#82` | `docs/quality-gate-strategy.md`, `docs/architecture-refactor-audit.md` | `pnpm check:generated` guards tracked generated output. | `good enough` |
-| CI quality gates | `#81`, `#87`, later quality docs | `docs/quality-gate-strategy.md` | CI runs typecheck, tests, DB-backed API smoke, builds, migrations, and generated-output guard. | `good enough` |
-| Local dev / Docker deferred | To be completed in Checkpoint 3 | `docs/quality-gate-strategy.md`, `docs/browser-smoke-and-quality-gate-roadmap.md` | Docker/local DB orchestration is intentionally deferred until deployability, onboarding, or browser-smoke CI promotion needs it. | `deferred by decision` |
+| API smoke | `#87-#93` | `docs/api-smoke-completion-experiment.md`, `docs/quality-gate-strategy.md`, this register | DB-backed API smoke runs in CI and covers auth, children, routines, session lifecycle, and post-finish session listing. | `good enough` |
+| Browser smoke | `#94-#95` | `docs/browser-smoke-and-quality-gate-roadmap.md`, `docs/quality-gate-strategy.md`, this register | Playwright local-first browser smoke covers app-load/auth, real login, dashboard, owned child/routine visibility, runner standby, and one-task completion; not CI-required. | `good enough` |
+| Generated artifact guard | `#81`, related docs `#82` | `docs/quality-gate-strategy.md`, `docs/architecture-refactor-audit.md`, this register | `pnpm check:generated` guards tracked generated output, including `.test-dist`, `.next`, `dist`, and generated Prisma output. | `good enough` |
+| CI quality gates | `#81`, `#87`, later quality docs | `docs/quality-gate-strategy.md`, this register | CI runs generated-output guard, Prisma generate/migrate deploy, typecheck, unit tests, DB-backed API smoke, API build, and web build. Browser smoke is local-only. | `good enough` |
+| Local dev / Docker deferred | Deferred by explicit quality-gate decisions | `docs/quality-gate-strategy.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, this register | Docker/local DB orchestration is intentionally deferred until deployability, onboarding, browser-smoke CI promotion, or local DB reproducibility becomes a concrete goal. | `deferred by decision` |
+
+## Checkpoint 3 Quality / Infrastructure Reconciliation
+
+This checkpoint reconciles quality/infrastructure rows from current docs and targeted script/config inspection. It does not promote browser smoke to CI, add Docker, or define open-ended infrastructure work.
+
+### Area: API smoke
+- Area / module: `apps/api/test/smoke`, root `test:smoke`, and `@tsmt/api` `test:smoke`.
+- Related PRs: `#87-#93`.
+- Detailed docs: `docs/api-smoke-completion-experiment.md`, `docs/quality-gate-strategy.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`.
+- Completed foundation work: DB-backed API smoke boots the Nest `AppModule` in-process, uses deterministic smoke fixtures, runs against real Postgres in CI, and is exposed through `pnpm --filter @tsmt/api test:smoke` plus root `pnpm test:smoke`.
+- Deferred risks: API smoke is intentionally thin, not exhaustive. It does not cover destructive preview endpoints, badge permutations, progress read details, negative session ownership, admin/catalog API flows, payment/subscription behavior, or every API response contract.
+- Trigger conditions: browser smoke or product work exposes a backend gap; destructive UI work needs delete-impact endpoint confidence; admin/catalog product work resumes; API response-shape drift causes frontend risk; smoke runtime/flakiness worsens in CI.
+- Required reading before touching: this register, `docs/api-smoke-completion-experiment.md`, `docs/quality-gate-strategy.md`, `apps/api/test/smoke/smoke-helpers.ts`, and the specific smoke file being extended.
+- Current safety coverage: CI runs Postgres 16, `pnpm db:migrate:deploy`, then `pnpm --filter @tsmt/api test:smoke`. Covered flows are `/api/auth/login` -> `/api/auth/me`, `/api/children` ownership visibility/non-leak, `/api/routines?childId=...` routine ownership visibility/non-leak, session start, task completion, finish, and post-finish `GET /api/sessions?routineId=...`.
+- Current status: `good enough`.
+- Next recommended action: leave stable; add one targeted API smoke only when a named production, browser-smoke, or release risk justifies it.
+
+### Area: Browser smoke
+- Area / module: `apps/web/test/smoke`, `apps/web/playwright.smoke.config.ts`, and `apps/web/playwright.auth-smoke.config.ts`.
+- Related PRs: `#94-#95`.
+- Detailed docs: `docs/browser-smoke-and-quality-gate-roadmap.md`, `docs/quality-gate-strategy.md`, `docs/api-smoke-completion-experiment.md`.
+- Completed foundation work: Playwright was selected and installed; app-load/auth-panel smoke is DB-free through `pnpm --filter @tsmt/web test:smoke:app`; authenticated browser smoke is DB-backed through `pnpm --filter @tsmt/web test:smoke:auth`; full local browser smoke runs both through `pnpm --filter @tsmt/web test:smoke`.
+- Deferred risks: browser smoke is local-first and not CI-required; authenticated/full smoke requires `DATABASE_URL`, reachable Postgres, and applied migrations; it does not cover destructive previews, admin/catalog UI, badges, broader multi-task/multi-child journeys, or full e2e coverage.
+- Trigger conditions: decision to promote browser smoke to CI, browser smoke flakiness, deployability/release readiness, local DB reproducibility work, runner/routine/admin UI changes that need user-visible confidence, or broad auth/routing behavior changes.
+- Required reading before touching: this register, `docs/browser-smoke-and-quality-gate-roadmap.md`, `docs/quality-gate-strategy.md`, `apps/web/test/smoke/smoke-env.ts`, and both Playwright smoke configs.
+- Current safety coverage: local browser smoke covers unauthenticated app-load/auth panel, real UI login, parent dashboard, owned child/routine visibility, runner standby, and one-task runner completion. Playwright outputs are configured under `apps/web/.test-dist/...`.
+- Current status: `good enough`.
+- Next recommended action: do not expand or promote browser smoke by momentum. Inspect CI promotion separately only when runtime, DB orchestration, artifact handling, and flakiness are the concrete goal.
+
+### Area: Generated artifact guard
+- Area / module: `scripts/check-generated-artifacts.mjs`, `.gitignore`, and generated-output paths.
+- Related PRs: `#81`, related docs `#82`.
+- Detailed docs: `docs/quality-gate-strategy.md`, `docs/architecture-refactor-audit.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`.
+- Completed foundation work: `pnpm check:generated` runs `scripts/check-generated-artifacts.mjs` and fails if generated output is tracked. CI runs this guard before dependency install/build steps.
+- Deferred risks: the guard only checks tracked files, not untracked local clutter; future tools can create new generated directories that are not yet covered; Playwright/browser artifacts must continue to stay under ignored/guarded paths.
+- Trigger conditions: adding test runners, code generators, build output directories, browser/video/trace artifacts, Prisma output changes, package layout changes, or CI artifact upload/download changes.
+- Required reading before touching: this register, `docs/quality-gate-strategy.md`, `scripts/check-generated-artifacts.mjs`, `.gitignore`, and the tool config that produces generated files.
+- Current safety coverage: blocked tracked paths include `apps/api/.test-dist/`, `apps/web/.test-dist/`, `packages/db/generated/`, and path segments `.next` and `dist`.
+- Current status: `good enough`.
+- Next recommended action: keep as-is; extend the guard only when a new generated-output path is introduced.
+
+### Area: CI quality gates
+- Area / module: `.github/workflows/ci.yml` and root/app package scripts.
+- Related PRs: `#81`, `#87`, subsequent API/browser quality docs through `#95`.
+- Detailed docs: `docs/quality-gate-strategy.md`, `docs/api-smoke-completion-experiment.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, `docs/architecture-refactor-audit.md`.
+- Completed foundation work: CI has one `quality-gate` job with Postgres 16, generated-output guard, dependency install, Prisma generate, Prisma migrate deploy, `pnpm typecheck`, `pnpm test`, DB-backed API smoke, API build, and web build.
+- Deferred risks: browser smoke is not required in CI; lint script exists but current CI relies on typecheck/tests/build rather than a separate lint gate; CI does not validate Docker/local dev; DB-backed browser smoke CI orchestration has not been inspected.
+- Trigger conditions: release hardening, browser-smoke CI promotion, runtime/flakiness investigation, adding new package apps, introducing migrations/schema risk, changing package scripts, adding external services, or making local deployability/onboarding a goal.
+- Required reading before touching: this register, `.github/workflows/ci.yml`, `docs/quality-gate-strategy.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, and relevant package scripts.
+- Current safety coverage: required CI currently distinguishes every-PR gates from local-only browser smoke. Every-PR gates include generated artifact check, typecheck, unit tests, DB-backed API smoke, API build, web build, and migration deploy against CI Postgres.
+- Current status: `good enough`.
+- Next recommended action: keep CI stable. Add or promote one gate at a time only after inspection proves it is reliable, fast enough, and protects a named production/release risk.
+
+### Area: Local dev / Docker deferred
+- Area / module: local Postgres/dev environment, Docker/local DB orchestration, and browser-smoke DB prerequisites.
+- Related PRs: deferred by quality-gate decisions; no Docker/local DB implementation PR in the current register scope.
+- Detailed docs: `docs/quality-gate-strategy.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, `docs/architecture-refactor-audit.md`.
+- Completed foundation work: docs and browser smoke env errors make DB prerequisites explicit. CI provides real Postgres for API smoke, while local authenticated browser smoke requires a developer-provided migrated Postgres database.
+- Deferred risks: no standardized Docker/local DB orchestration exists; local authenticated/full browser smoke is not one-command reproducible on a fresh machine; local API smoke also depends on reachable Postgres; onboarding/deployability may still need more environment automation.
+- Trigger conditions: serious deployability work, onboarding friction, repeated local smoke failures due DB setup, browser smoke CI promotion, production deployment planning, or feature work requiring reliable local DB fixtures across multiple contributors.
+- Required reading before touching: this register, `docs/quality-gate-strategy.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, CI workflow, Prisma scripts, and browser smoke env helper.
+- Current safety coverage: CI-backed API smoke provides server-side DB confidence; DB-free app-load browser smoke remains locally runnable without Postgres; authenticated/full browser smoke fails with a clear `DATABASE_URL` prerequisite message when DB is missing.
+- Current status: `deferred by decision`.
+- Next recommended action: do not add Docker by momentum. Start an inspection-only local-dev/deployability plan only when onboarding, deployment, browser-smoke CI promotion, or repeated DB reproducibility pain becomes the concrete goal.
 
 ## Area Template For Later Checkpoints
 Use this template when reconciling each area.
