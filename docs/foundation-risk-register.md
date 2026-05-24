@@ -18,6 +18,7 @@ Current checkpoint:
 - Checkpoint 1: backend/domain reconciliation
 - Checkpoint 2: frontend hotspot reconciliation
 - Checkpoint 3: quality/infrastructure reconciliation
+- Checkpoint 4: final consistency review
 - PR range considered: `#44` through `#99`
 - Current posture: routines backend, sessions backend, TrainingRunner, and RoutinesManager foundation work have reached checkpoints; further work should be selected by product/foundation priority, not by continuing the last thread.
 
@@ -38,7 +39,7 @@ Explicit rule:
 - Do not treat `good enough` as `safe to change blindly`.
 
 ## Status Labels
-Use these labels consistently when filling later checkpoints:
+Use these labels consistently when adding or revising areas:
 
 | Status | Meaning |
 | --- | --- |
@@ -48,10 +49,10 @@ Use these labels consistently when filling later checkpoints:
 | `high-risk / not feature-ready` | Do not start serious feature work here without inspection and likely stabilization. |
 | `deferred by decision` | Known risk accepted for now; revisit only when trigger conditions occur. |
 | `historical reference` | Completed experiment or plan that informs future work but is not the active next-step guide. |
-| `to be reconciled` | Checkpoint 0 inventory entry; details must be completed in later checkpoints. |
+| `to be reconciled` | Temporary label for a newly discovered area that still needs scoped reconciliation. No current major area should remain in this state after Checkpoint 4. |
 
 ## Required Fields Per Area
-Each area should eventually include:
+Each reconciled area should include:
 
 | Field | Required content |
 | --- | --- |
@@ -343,6 +344,94 @@ This checkpoint reconciles quality/infrastructure rows from current docs and tar
 - Current status: `deferred by decision`.
 - Next recommended action: do not add Docker by momentum. Start an inspection-only local-dev/deployability plan only when onboarding, deployment, browser-smoke CI promotion, or repeated DB reproducibility pain becomes the concrete goal.
 
+## Current Refactor-Cycle Decision Support
+
+This section summarizes how to use the register after Checkpoints 0-4. It is not a new roadmap. It is a decision aid for choosing whether future work should proceed, inspect first, run a targeted foundation checkpoint, or stop for architect review.
+
+Area-specific experiment outcomes supersede older snapshot wording when the experiment was merged later. For example, `docs/training-runner-foundation-plan.md` and this register record the post-`#98` TrainingRunner state; older roadmap/audit snapshots that listed TrainingRunner as the next frontend candidate should be read as historical context for why `#98` happened, not as instruction to continue runner refactoring by momentum.
+
+### Currently `good enough`
+These areas have useful guardrails and can support normal scoped work, but touched paths still require inspection:
+- `RoutineDeleteImpactService`
+- `SessionBadgeAwardService`
+- API client/auth storage
+- API smoke
+- Browser smoke
+- Generated artifact guard
+- CI quality gates
+
+How to use this:
+- inspect the touched path
+- read the linked docs/tests
+- make a small behavior-preserving change if the work is clearly scoped
+- do not expand smoke, CI, or workflow boundaries just because the area is labeled `good enough`
+
+### Currently `acceptable but inspect first`
+These areas are not immediate blockers, but they remain broad or sensitive enough that future work must begin with scoped inspection:
+- Auth
+- Children
+- Routines backend
+- Sessions backend
+- Admin/catalog backend
+- TrainingRunner
+- RoutinesManager
+- ParentDashboard
+
+How to use this:
+- inspect the exact method, component section, or flow before implementation
+- identify whether existing tests/smoke cover the changed behavior
+- add targeted safety coverage if the work touches deferred risks
+- avoid continuing backend/frontend refactor work by momentum
+
+### Currently `needs targeted foundation`
+These areas should not receive serious feature work without an inspection-first foundation checkpoint tied to a concrete product or production-readiness risk:
+- Trainers
+- TaskBuilder
+
+How to use this:
+- start with inspection only
+- choose one small seam if the inspection confirms risk
+- add focused tests where behavior is critical
+- do not combine the foundation checkpoint with broad UX changes or multi-domain refactors
+
+### Currently `high-risk / not feature-ready`
+These areas need focused inspection and likely a small foundation slice before serious feature work:
+- AdminCatalogManager
+
+How to use this:
+- do not start admin catalog UI feature work directly
+- inspect the specific task/song/equipment catalog flow being touched
+- split or test exactly one catalog domain/form seam if needed
+- avoid a broad admin UI rewrite
+
+### Currently `deferred by decision`
+These areas are intentionally deferred until a concrete trigger appears:
+- Local dev / Docker deferred
+
+How to use this:
+- do not add Docker or local DB orchestration by momentum
+- revisit only for deployability, onboarding, browser-smoke CI promotion, repeated DB reproducibility pain, or production deployment planning
+
+### Choosing The Next Workstream
+Use this order of operations before starting future feature/refactor/UX/quality work:
+1. Identify the touched area in this register.
+2. Read the detailed area docs and tests listed in that row.
+3. Check trigger conditions against the requested work.
+4. If the area is `good enough`, proceed only with scoped changes and relevant validation.
+5. If the area is `acceptable but inspect first`, run a small inspection before implementation.
+6. If the area is `needs targeted foundation` or `high-risk / not feature-ready`, create a controlled foundation checkpoint before serious feature work.
+7. If the area is `deferred by decision`, proceed only if a listed trigger is present.
+
+Do not use this register to justify broad refactoring, smoke expansion, browser-smoke CI promotion, Docker work, or backend service-boundary extraction by momentum.
+
+### Remaining Highest-Risk Areas If Another Foundation Cycle Starts
+If no product feature selects a different hotspot, the strongest foundation candidates are:
+- `TaskBuilder`, because catalog search, song loading, draft editing, media fields, and delete callbacks remain mixed in one component.
+- `AdminCatalogManager`, because task/song/equipment admin UI remains a large multi-domain component with light frontend-specific coverage.
+- `Trainers`, because role/ownership checks and include-heavy queries have lighter direct safety coverage.
+
+These are candidates only. Start with inspection, not implementation.
+
 ## Area Template For Later Checkpoints
 Use this template when reconciling each area.
 
@@ -375,7 +464,7 @@ Validation:
 
 Acceptance criteria:
 - future prompts have one central register to inspect first
-- every known major area has a placeholder row
+- every known major area has an initial inventory row
 - later checkpoints have clear scope
 
 ### Checkpoint 1: Backend / Domain Reconciliation
@@ -455,7 +544,7 @@ Type:
 
 Scope:
 - check all area rows for consistency
-- remove stale `to be completed` placeholders where possible
+- remove stale incomplete-inventory language where possible
 - ensure every deferred risk has trigger conditions
 - ensure every high-risk area has required reading
 - ensure active roadmap docs point future Codex work to this register
@@ -478,7 +567,7 @@ Stop and ask for architect review if:
 - the register starts becoming a new broad roadmap instead of a risk routing document
 - future-work recommendations become implementation plans rather than triggers and required reading
 
-## Initial Uncertainties
-- Exact PR mapping for some earlier auth, children, parent dashboard, admin, and API-client helper work remains to be completed.
-- The register currently reflects docs and known checkpoint outcomes, not a fresh line-by-line code audit.
-- Some area statuses may change after Checkpoints 1-3 reconcile detailed docs and current code evidence.
+## Remaining Uncertainties
+- Exact PR mapping for some earlier auth, children, parent dashboard, admin, and API-client helper work remains uncertain. The register records this explicitly rather than pretending perfect provenance.
+- The register reflects current docs, known checkpoint outcomes, and targeted code/config inspection. It is not a substitute for scoped code inspection before future implementation.
+- Area statuses can change after future product work, bugs, incidents, or foundation checkpoints. Update this register when those changes alter risk routing.
