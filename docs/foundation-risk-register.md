@@ -249,14 +249,14 @@ This checkpoint reconciles frontend hotspot rows from current docs and targeted 
 ### Area: AdminCatalogManager
 - Area / module: `apps/web/components/admin-catalog-manager.tsx`.
 - Related PRs: older direct PR mapping uncertain.
-- Detailed docs: `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, `docs/quality-gate-strategy.md`.
-- Completed foundation work: admin backend has service splits and backend tests; frontend admin catalog still uses a single large component for task, song, and equipment catalog management.
-- Deferred risks: `AdminCatalogManager` owns three catalog domains, multiple form states, selection state, save/delete mutations, difficulty levels, media URL shaping, equipment links, status handling, and rendering in one large file. It has no dedicated browser/API smoke path for admin catalog UI and should not be treated as safe for serious admin UI work without stabilization.
+- Detailed docs: `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, `docs/quality-gate-strategy.md`, `docs/admin-catalog-manager-foundation-plan.md`.
+- Completed foundation work: admin backend has service splits and backend tests; PR `#102` added a frontend form/payload helper with focused tests and wired `AdminCatalogManager` to use it for deterministic task/song/equipment defaults, hydration, media/difficulty conversion, and save payload construction.
+- Deferred risks: `AdminCatalogManager` still owns three catalog domains, selection state, save/delete mutations, status handling, and rendering in one large file. Catalog domain section splitting, async fetch/hook extraction, destructive delete confirmation/preview, rendered admin catalog UI coverage, and import/media/equipment-linking redesign remain deferred.
 - Trigger conditions: admin catalog UI feature work, task/song/equipment catalog CRUD changes, import/media/equipment linking UX, difficulty-level editing, destructive catalog deletion, admin role/permission UX, or backend catalog response shape changes.
-- Required reading before touching: this register, `docs/refactor-roadmap.md` admin sections, `docs/architecture-refactor-audit.md` admin UI notes, admin backend tests/docs, and `apps/web/AGENTS.md`.
-- Current safety coverage: backend admin service/activity/catalog-media tests and general typecheck/build/CI. Frontend admin catalog-specific coverage is light.
-- Current status: `high-risk / not feature-ready`.
-- Next recommended action: before admin catalog UI feature work, run a focused inspection/foundation checkpoint and split or test exactly one catalog domain or form seam. Do not start broad admin UI rewrite.
+- Required reading before touching: this register, `docs/admin-catalog-manager-foundation-plan.md`, `docs/refactor-roadmap.md` admin sections, `docs/architecture-refactor-audit.md` admin UI notes, admin backend tests/docs, and `apps/web/AGENTS.md`.
+- Current safety coverage: backend admin service/activity/catalog-media tests, frontend admin form/payload unit tests, and general typecheck/build/CI. No dedicated browser/API smoke path covers admin catalog UI.
+- Current status: `acceptable but feature-specific inspection required`; destructive/import/media/equipment-linking/admin workflow work still needs scoped inspection before implementation.
+- Next recommended action: do not continue admin UI extraction by momentum. For future admin catalog UI work, inspect the plan and choose the seam based on the feature: section split for domain-specific UI work, async seam for loading/mutation UX, or destructive-flow inspection for delete/confirmation changes.
 
 ### Area: API client/auth storage
 - Area / module: `apps/web/lib/api.ts`, `apps/web/lib/auth-storage.ts`, and `apps/web/lib/use-auth-user.ts`.

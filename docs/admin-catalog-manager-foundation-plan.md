@@ -581,6 +581,90 @@ Checkpoints 1-2 completed the highest-value deterministic seam without changing
 rendering, side effects, API sequencing, backend code, or destructive admin
 behavior. Further extraction should require a fresh concrete trigger.
 
+## Final Outcome Review
+
+Final state:
+
+- Checkpoint 0 created this inspection and foundation plan.
+- Checkpoint 1 added `apps/web/lib/admin-catalog-manager-forms.ts` and focused
+  unit tests in `apps/web/lib/__tests__/admin-catalog-manager-forms.test.ts`.
+- Checkpoint 2 updated `apps/web/components/admin-catalog-manager.tsx` to use the
+  helper for deterministic form defaults, selected-record hydration, and
+  task/song/equipment save payload construction.
+- Checkpoint 2.5 recommended stopping implementation and moving to final review.
+
+Files changed by the experiment:
+
+- `docs/admin-catalog-manager-foundation-plan.md`
+- `apps/web/lib/admin-catalog-manager-forms.ts`
+- `apps/web/lib/__tests__/admin-catalog-manager-forms.test.ts`
+- `apps/web/components/admin-catalog-manager.tsx`
+
+Validation recorded during the experiment:
+
+- `pnpm --filter @tsmt/web test:unit` passed.
+- `pnpm --filter @tsmt/web build` passed.
+- `pnpm typecheck` passed.
+- `pnpm check:generated` passed.
+- `git diff --check` passed.
+- Optional `pnpm --filter @tsmt/web test:smoke:app` was attempted during
+  Checkpoint 2 but local port `3000` was already in use, so it did not validate
+  the smoke path locally.
+- GitHub CI was green before the final review checkpoint.
+
+Behavior preserved:
+
+- UI copy and visible behavior.
+- API calls, endpoint paths, and HTTP methods.
+- Payload shapes and optional-field semantics.
+- Empty-string-to-`undefined` behavior.
+- Difficulty `sortOrder` behavior, including current 0-based payload indexing.
+- Task image URL to `mediaLinks` behavior.
+- Selected-record hydration behavior.
+- Save/delete API sequencing.
+- Status copy and reload timing.
+- Delete behavior.
+- Backend admin/catalog services, DTOs, and Prisma schema.
+
+Risk reduced:
+
+- Task, song, and equipment form defaults are now named and tested.
+- Selected-record hydration is now named and tested.
+- Task, song, and equipment save payload construction is now named and tested.
+- Task image URL to `mediaLinks` conversion is now named and tested.
+- Difficulty filtering, trimming, and `sortOrder` behavior is now named and
+  tested.
+- Optional-field behavior is now named and tested.
+- Future AI-assisted changes can inspect form/payload behavior without reading
+  the full `AdminCatalogManager` component.
+
+Deferred risks not solved:
+
+- Catalog domain section splitting.
+- Async fetch/hook extraction.
+- Destructive admin delete confirmation or preview behavior.
+- Rendered admin catalog UI coverage.
+- Import/media/equipment-linking redesign.
+- Broader admin workflow state complexity.
+
+Trigger conditions for revisiting deferred seams:
+
+- Admin task, song, or equipment create/edit UX changes.
+- Media URL, media kind, default song, or equipment-linking UX changes.
+- Admin delete or destructive behavior changes.
+- Bugs around wrong save payloads, lost difficulty ordering, wrong media links,
+  or accidental catalog deletion.
+- Admin catalog import/media/equipment-linking redesign becomes active.
+- The component grows further due to broader admin workflows.
+
+Final recommendation:
+
+- Merge all after final architect review, unless final validation finds a
+  problem.
+- Do not continue implementation now.
+- Do not start catalog section splitting, async hook extraction, or destructive
+  delete work by momentum.
+
 ## Deferred Risks And Triggers
 
 Deferred risks:
