@@ -613,6 +613,20 @@ Decision options:
 - revise plan
 - discard
 
+Gate result after Checkpoint 2:
+- Checkpoints 1-2 addressed the highest concrete destructive-flow foundation risk that could be reduced without changing UX behavior: preview state transitions and target matching are now named, unit-tested, and used by `RoutinesManager`.
+- The helper preserves current competing-preview behavior rather than correcting it: routine preview success clears period/task previews; period preview success clears task but preserves routine; task preview success clears period but preserves routine.
+- API calls, status copy, confirm functions, reload timing, rendering structure, `TaskBuilder` public props, backend routines behavior, DTOs, Prisma schema, endpoint paths, delete semantics, and preview payloads remain unchanged.
+- A behavior change to clear all competing previews or unify active preview into one slot is not must-have before generic routine editor work. It should only happen as an explicit UX/product decision for destructive-flow work.
+- Pending/disabled in-flight guards are not must-have in this refactor checkpoint. They change visible interaction behavior and should remain product/UX-triggered.
+- Rendered component tests are not must-have now. They remain deferred until a future routine editor/destructive UX change needs DOM/event coverage.
+- Continuing implementation now would mostly enter behavior-changing UX territory rather than further behavior-preserving safety refactor.
+
+Recommendation:
+- Stop implementation and proceed to final outcome review.
+- Do not start preview-clearing, single-active-preview, pending/disabled, rendered coverage, or TaskBuilder boundary work by momentum.
+- If future routine editor UX work touches deletion, confirmation, stale preview behavior, or in-flight destructive actions, start with a scoped inspection that explicitly chooses whether one of those deferred seams is now required.
+
 ### Checkpoint 3: Optional Behavior Change Or Rendered Coverage, Only If Approved
 Type:
 - to be defined after Checkpoint 2.5
