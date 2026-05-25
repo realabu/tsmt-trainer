@@ -80,7 +80,7 @@ This is a high-level inventory only. Later checkpoints should reconcile each row
 | `RoutineDeleteImpactService` | `#75-#79` | `docs/routines-refactor-plan.md`, `docs/routines-domain-completion-experiment.md`, this register | First routines workflow-service boundary; owns delete-impact preview lookup/count orchestration, while public facade and actual deletes remain in `RoutinesService`. | `good enough` |
 | Sessions backend | `#83-#85`, `#84`, API smoke `#91-#92` | `docs/sessions-lifecycle-badge-experiment.md`, `docs/refactor-roadmap.md`, this register | Sessions lifecycle and badge orchestration are guarded; lifecycle/timing writes and response flow remain transaction-sensitive in `SessionsService`. | `acceptable but inspect first` |
 | `SessionBadgeAwardService` | `#84` | `docs/sessions-lifecycle-badge-experiment.md`, this register | First sessions workflow-service boundary; badge-only reads/writes, duplicate-prevention, and weekly streak orchestration moved out of `SessionsService`. | `good enough` |
-| Trainers | Older direct PR mapping uncertain | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Ownership/role checks and include-heavy overview queries need scoped inspection before trainer feature work. | `needs targeted foundation` |
+| Trainers | `#103`; older direct PR mapping uncertain | `docs/trainers-foundation-plan.md`, `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Ownership/role checks, assignment lifecycle, current admin scoped semantics, and include-heavy overview query shapes are now characterized; trainer feature work still needs scoped inspection. | `acceptable but inspect first` |
 | Admin/catalog backend | Older direct PR mapping uncertain; admin backend checkpoint documented | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Admin backend is more split than the frontend, but catalog/activity query shapes remain complex. Admin catalog UI risk is tracked separately in the frontend checkpoint. | `acceptable but inspect first` |
 
 ## Checkpoint 1 Backend / Domain Reconciliation
@@ -161,15 +161,15 @@ This checkpoint reconciles backend/domain rows from current docs and targeted co
 
 ### Area: Trainers
 - Area / module: `apps/api/src/trainers`
-- Related PRs: older direct PR mapping uncertain.
-- Detailed docs: `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`.
-- Completed foundation work: trainer assignment endpoints live in a dedicated module/service; role checks distinguish parent, trainer, and admin paths; ownership checks use routine/child relationships; overview/list methods assemble trainer-facing data.
-- Deferred risks: `TrainersService` is still broad, role/ownership checks are inline, overview/list queries are include-heavy, direct tests appear lighter than routines/sessions, and assignment revocation/visibility semantics are production-sensitive.
-- Trigger conditions: trainer assignment creation/revoke changes, trainer dashboard/overview features, sharing permissions, parent/trainer/admin role behavior, include/response shape changes, or subscription/entitlement coupling.
-- Required reading before touching: this register, `docs/refactor-roadmap.md` trainer rows, `docs/architecture-refactor-audit.md` trainer assignment notes, and `packages/db/prisma/schema.prisma` for routine assignment relationships.
-- Current safety coverage: typecheck/build/CI and any indirect API protections from auth/ownership patterns. No dedicated trainer smoke path or prominent trainer service tests were identified in this checkpoint.
-- Current status: `needs targeted foundation`.
-- Next recommended action: before serious trainer feature work, run an inspection-first foundation PR and likely add focused role/ownership/query-shape safety tests. Do not refactor trainer code without a concrete trainer feature or production risk.
+- Related PRs: `#103`; older direct PR mapping uncertain.
+- Detailed docs: `docs/trainers-foundation-plan.md`, `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`.
+- Completed foundation work: trainer assignment endpoints live in a dedicated module/service; role checks distinguish parent, trainer, and admin paths; ownership checks use routine/child relationships; overview/list methods assemble trainer-facing data; focused service-level characterization tests now cover role gates, ownership filters, current admin scoped semantics, duplicate active assignment behavior, trainer email normalization, status mapping, soft revoke behavior, and critical list/detail query shapes.
+- Deferred risks: `TrainersService` is still broad, role/policy helper extraction is deferred, query helper/service seam extraction is deferred, trainer API smoke is deferred, frontend trainer dashboard/detail/panel coverage remains light, global admin visibility remains a future product decision, and future subscription/entitlement coupling could affect trainer workflows.
+- Trigger conditions: trainer assignment creation/revoke changes, trainer dashboard/overview features, sharing permissions, parent/trainer/admin role behavior, include/select/order/take response shape changes, subscription/entitlement coupling, bugs around duplicate assignment, revoked assignment visibility, or trainer/parent data leakage, or trainer workflows becoming release-critical enough to justify API smoke.
+- Required reading before touching: this register, `docs/trainers-foundation-plan.md`, `docs/refactor-roadmap.md` trainer rows, `docs/architecture-refactor-audit.md` trainer assignment notes, `apps/api/test/trainers/trainers-service.test.ts`, and `packages/db/prisma/schema.prisma` for routine assignment relationships.
+- Current safety coverage: `apps/api/test/trainers/trainers-service.test.ts`, typecheck/build/CI, and indirect API protections from auth/ownership patterns. No dedicated trainer API smoke path exists.
+- Current status: `acceptable but inspect first`.
+- Next recommended action: keep trainer code stable unless concrete trainer product work resumes; inspect the touched service/query path first and add or adjust focused tests before changing role, ownership, assignment lifecycle, or response-shape behavior. Do not extract role/policy/query helpers by momentum.
 
 ### Area: Admin/catalog backend
 - Area / module: `apps/api/src/admin`, especially `AdminService`, `AdminCatalogService`, `AdminActivityService`, and `AdminUserService`.
@@ -373,6 +373,7 @@ These areas are not immediate blockers, but they remain broad or sensitive enoug
 - Routines backend
 - Sessions backend
 - Admin/catalog backend
+- Trainers
 - TrainingRunner
 - RoutinesManager
 - ParentDashboard
@@ -385,7 +386,6 @@ How to use this:
 
 ### Currently `needs targeted foundation`
 These areas should not receive serious feature work without an inspection-first foundation checkpoint tied to a concrete product or production-readiness risk:
-- Trainers
 - TaskBuilder
 
 How to use this:
@@ -428,7 +428,6 @@ Do not use this register to justify broad refactoring, smoke expansion, browser-
 If no product feature selects a different hotspot, the strongest foundation candidates are:
 - `TaskBuilder`, because catalog search, song loading, draft editing, media fields, and delete callbacks remain mixed in one component.
 - `AdminCatalogManager`, because task/song/equipment admin UI remains a large multi-domain component with light frontend-specific coverage.
-- `Trainers`, because role/ownership checks and include-heavy queries have lighter direct safety coverage.
 
 These are candidates only. Start with inspection, not implementation.
 
