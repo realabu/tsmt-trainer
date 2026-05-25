@@ -491,6 +491,25 @@ Stop conditions:
 - Extraction would change API shape, ownership behavior, role behavior, or
   response shape.
 
+Gate result after Checkpoint 1:
+
+- Recommendation: stop implementation and proceed to Checkpoint 5 final outcome
+  review.
+- Checkpoint 1 addressed the highest concrete Trainers risk by characterizing
+  role gates, ownership filters, current admin semantics, duplicate active
+  assignment behavior, email normalization, status mapping, soft revoke behavior,
+  and critical dashboard/detail query shapes.
+- Role/policy helper extraction is not must-have now. The decisions are named in
+  focused tests, and extracting them immediately would add abstraction with low
+  incremental risk reduction.
+- Query helper extraction is not must-have now. The include/order/take shapes are
+  characterized, and moving them now would risk response-shape drift or noisy
+  refactor without a concrete trainer feature.
+- Trainer API smoke remains deferred until trainer workflows become
+  release-critical or product work touches trainer-facing flows.
+- The current PR is valuable and mergeable after final outcome review if
+  validation remains green.
+
 ### Optional Checkpoint 3: Tiny Policy Or Query Seam
 
 Type:
@@ -571,13 +590,12 @@ behavior.
 
 ## Recommended Next Checkpoint
 
-Proceed to Checkpoint 1: add focused service-level characterization tests for
-Trainer role/ownership, assignment lifecycle, and critical query shapes.
+Proceed to Checkpoint 5: final outcome review.
 
-This is the smallest valuable foundation step because the main risk is not an
-obvious missing abstraction; it is unprotected access-control and response-shape
-behavior. Test-only characterization gives future trainer feature work guardrails
-without changing production behavior.
+Checkpoint 1 provided the intended guardrails without production changes.
+Further extraction should wait for a concrete trainer feature, permission change,
+or query-shape change that makes a named policy/query seam clearly safer than the
+current characterized service behavior.
 
 ## Deferred Risks And Triggers
 
