@@ -9,6 +9,17 @@ import {
   routinePeriodToDraft,
   routineTaskToDraft,
 } from "../lib/routines-manager-helpers";
+import {
+  applyPeriodPreviewSuccess,
+  applyRoutinePreviewSuccess,
+  applyTaskPreviewSuccess,
+  clearAllDeleteImpactPreviews,
+  clearPeriodPreview,
+  clearRoutinePreview,
+  clearTaskPreview,
+  isPeriodPreviewFor,
+  isRoutinePreviewFor,
+} from "../lib/routines-manager-delete-impact";
 import { buildCreateRoutinePayload } from "../lib/routines-manager-payloads";
 import { buildRoutineEditorSavePlan } from "../lib/routines-manager-save-plan";
 import { TaskBuilder, type TaskDraft } from "./task-builder";
@@ -152,6 +163,11 @@ export function RoutinesManager() {
   const [periodDeleteImpact, setPeriodDeleteImpact] = useState<DeleteImpactRecord | null>(null);
   const [taskDeleteImpact, setTaskDeleteImpact] = useState<DeleteImpactRecord | null>(null);
   const [status, setStatus] = useState("Jelentkezz be, majd toltsd be a sajat rutinlistat.");
+  const deleteImpactPreviewState = {
+    routine: routineDeleteImpact,
+    period: periodDeleteImpact,
+    task: taskDeleteImpact,
+  };
 
   async function loadInitial() {
     const accessToken = window.localStorage.getItem("tsmt.accessToken");
@@ -231,9 +247,10 @@ export function RoutinesManager() {
     setEditingPeriods(routine.periods.map(routinePeriodToDraft));
     setOriginalTaskIds(routine.tasks.map((task) => task.id));
     setOriginalPeriodIds(routine.periods.map((period) => period.id));
-    setRoutineDeleteImpact(null);
-    setPeriodDeleteImpact(null);
-    setTaskDeleteImpact(null);
+    const nextPreviewState = clearAllDeleteImpactPreviews<DeleteImpactRecord>();
+    setRoutineDeleteImpact(nextPreviewState.routine);
+    setPeriodDeleteImpact(nextPreviewState.period);
+    setTaskDeleteImpact(nextPreviewState.task);
   }
 
   function addPeriodDraft() {
@@ -266,9 +283,10 @@ export function RoutinesManager() {
 
     try {
       const result = await apiFetch<DeleteImpactRecord>(`/api/routines/${routineId}/delete-impact`, undefined, accessToken);
-      setRoutineDeleteImpact(result);
-      setPeriodDeleteImpact(null);
-      setTaskDeleteImpact(null);
+      const nextPreviewState = applyRoutinePreviewSuccess(result);
+      setRoutineDeleteImpact(nextPreviewState.routine);
+      setPeriodDeleteImpact(nextPreviewState.period);
+      setTaskDeleteImpact(nextPreviewState.task);
       setEditingRoutineId("");
       setStatus("Feladatsor torlesi elonezet betoltve.");
     } catch (error) {
@@ -284,7 +302,8 @@ export function RoutinesManager() {
 
     try {
       await apiFetch(`/api/routines/${routineDeleteImpact.entityId}`, { method: "DELETE" }, accessToken);
-      setRoutineDeleteImpact(null);
+      const nextPreviewState = clearRoutinePreview(deleteImpactPreviewState);
+      setRoutineDeleteImpact(nextPreviewState.routine);
       await loadInitial();
       setStatus("Feladatsor torolve.");
     } catch (error) {
@@ -304,8 +323,9 @@ export function RoutinesManager() {
         undefined,
         accessToken,
       );
-      setPeriodDeleteImpact(result);
-      setTaskDeleteImpact(null);
+      const nextPreviewState = applyPeriodPreviewSuccess(deleteImpactPreviewState, result);
+      setPeriodDeleteImpact(nextPreviewState.period);
+      setTaskDeleteImpact(nextPreviewState.task);
       setStatus("Idoszak torlesi elonezet betoltve.");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Nem sikerult betolteni az idoszak torlesi elonezetet.");
@@ -322,7 +342,8 @@ export function RoutinesManager() {
       await apiFetch(`/api/routines/periods/${periodId}`, { method: "DELETE" }, accessToken);
       setEditingPeriods((current) => current.filter((period) => period.id !== periodId));
       setOriginalPeriodIds((current) => current.filter((id) => id !== periodId));
-      setPeriodDeleteImpact(null);
+      const nextPreviewState = clearPeriodPreview(deleteImpactPreviewState);
+      setPeriodDeleteImpact(nextPreviewState.period);
       await loadInitial();
       setStatus("Idoszak torolve.");
     } catch (error) {
@@ -342,8 +363,9 @@ export function RoutinesManager() {
         undefined,
         accessToken,
       );
-      setTaskDeleteImpact(result);
-      setPeriodDeleteImpact(null);
+      const nextPreviewState = applyTaskPreviewSuccess(deleteImpactPreviewState, result);
+      setPeriodDeleteImpact(nextPreviewState.period);
+      setTaskDeleteImpact(nextPreviewState.task);
       setStatus("Feladat torlesi elonezet betoltve.");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Nem sikerult betolteni a feladat torlesi elonezetet.");
@@ -360,7 +382,8 @@ export function RoutinesManager() {
       await apiFetch(`/api/routines/tasks/${taskId}`, { method: "DELETE" }, accessToken);
       setEditingTasks((current) => current.filter((task) => task.id !== taskId).map((task, index) => ({ ...task, sortOrder: index + 1 })));
       setOriginalTaskIds((current) => current.filter((id) => id !== taskId));
-      setTaskDeleteImpact(null);
+      const nextPreviewState = clearTaskPreview(deleteImpactPreviewState);
+      setTaskDeleteImpact(nextPreviewState.task);
       await loadInitial();
       setStatus("Feladat torolve.");
     } catch (error) {
@@ -507,7 +530,10 @@ export function RoutinesManager() {
                     onRequestRemoveTask={(task) => task.id && void requestTaskDeleteImpact(task.id)}
                     taskDeleteImpact={taskDeleteImpact}
                     onConfirmDeleteTask={confirmTaskDelete}
-                    onCancelDeleteTask={() => setTaskDeleteImpact(null)}
+                    onCancelDeleteTask={() => {
+                      const nextPreviewState = clearTaskPreview(deleteImpactPreviewState);
+                      setTaskDeleteImpact(nextPreviewState.task);
+                    }}
                   />
                   <div className="list-item">
                     <div className="split-row">
@@ -553,7 +579,7 @@ export function RoutinesManager() {
                             >
                               Idoszak torlese
                             </button>
-                            {period.id && periodDeleteImpact?.entityId === period.id ? (
+                            {period.id && periodDeleteImpact && isPeriodPreviewFor(deleteImpactPreviewState, period.id) ? (
                               <div className="list-card" style={{ marginTop: 12, borderRadius: 18, padding: 16 }}>
                                 <h2 style={{ fontSize: "1rem" }}>Idoszak torlese</h2>
                                 <ImpactSummary impact={periodDeleteImpact} />
@@ -567,7 +593,10 @@ export function RoutinesManager() {
                                   </button>
                                   <button
                                     className="button secondary"
-                                    onClick={() => setPeriodDeleteImpact(null)}
+                                    onClick={() => {
+                                      const nextPreviewState = clearPeriodPreview(deleteImpactPreviewState);
+                                      setPeriodDeleteImpact(nextPreviewState.period);
+                                    }}
                                     type="button"
                                   >
                                     Megse
@@ -594,7 +623,7 @@ export function RoutinesManager() {
                   </div>
                 </div>
               ) : null}
-              {routineDeleteImpact?.entityId === routine.id ? (
+              {routineDeleteImpact && isRoutinePreviewFor(deleteImpactPreviewState, routine.id) ? (
                 <div className="list-card" style={{ marginTop: 16, borderRadius: 20, padding: 18 }}>
                   <h2 style={{ fontSize: "1.05rem" }}>Feladatsor torlese</h2>
                   <ImpactSummary impact={routineDeleteImpact} />
@@ -602,7 +631,14 @@ export function RoutinesManager() {
                     <button className="button primary" onClick={confirmRoutineDelete} type="button">
                       Vegleges torles
                     </button>
-                    <button className="button secondary" onClick={() => setRoutineDeleteImpact(null)} type="button">
+                    <button
+                      className="button secondary"
+                      onClick={() => {
+                        const nextPreviewState = clearRoutinePreview(deleteImpactPreviewState);
+                        setRoutineDeleteImpact(nextPreviewState.routine);
+                      }}
+                      type="button"
+                    >
                       Megse
                     </button>
                   </div>
