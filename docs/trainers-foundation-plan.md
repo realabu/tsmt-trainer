@@ -561,6 +561,85 @@ Validation:
 - `git diff --check`
 - `pnpm typecheck`
 
+Final outcome:
+
+- Checkpoint 0 created this plan and captured Trainers responsibilities,
+  endpoint/service/query maps, ownership and role-safety rules, coverage gaps,
+  target-state guidance, and checkpoint stop conditions.
+- Checkpoint 1 added focused service-level characterization tests in
+  `apps/api/test/trainers/trainers-service.test.ts`.
+- Checkpoint 2.5 concluded that the characterization tests address the highest
+  concrete Trainers risk and that further extraction should not continue by
+  momentum.
+
+Files changed by the experiment:
+
+- `docs/trainers-foundation-plan.md`
+- `apps/api/test/trainers/trainers-service.test.ts`
+- `docs/foundation-risk-register.md`
+
+Validation results recorded across the experiment:
+
+- `pnpm --filter @tsmt/api test:unit` passed after Checkpoint 1.
+- `pnpm --filter @tsmt/api typecheck` passed after Checkpoint 1.
+- `pnpm typecheck` passed after Checkpoints 0, 1, 2.5, and final outcome
+  review.
+- `git diff --check` passed after Checkpoints 0, 1, 2.5, and final outcome
+  review.
+
+Behavior preserved:
+
+- No production code changed.
+- API endpoint paths, HTTP methods, DTOs, Prisma schema, and API response shapes
+  were not changed.
+- Ownership behavior, role behavior, admin visibility semantics,
+  auth/subscription behavior, duplicate assignment behavior, revoke behavior,
+  and trainer query shapes were not changed.
+- Frontend behavior, browser smoke scope, CI wiring, Docker setup, and
+  children/routines/sessions refactoring were not changed.
+
+Risk reduced:
+
+- Parent/trainer/admin role gates are now characterized.
+- Parent ownership filters and trainer visibility filters are now
+  characterized.
+- Current admin scoped semantics are explicit in tests.
+- Duplicate active assignment behavior, trainer email normalization,
+  `ACTIVE`/`PENDING` status mapping, and soft revoke behavior are now covered.
+- Critical trainer list/detail include/order/take query shapes are now
+  characterized.
+- Future AI changes can inspect trainer rules in tests before changing service
+  code.
+
+Deferred risks:
+
+- Role/policy helper extraction remains deferred.
+- Query helper/service seam extraction remains deferred.
+- Trainer API smoke remains deferred.
+- Frontend trainer dashboard/detail/panel coverage remains light.
+- A future product decision about global admin visibility remains unresolved.
+- Subscription/entitlement coupling in trainer workflows remains deferred until
+  it becomes a concrete product concern.
+
+Trigger conditions for revisiting deferred seams:
+
+- Trainer assignment create/revoke UX changes.
+- Trainer dashboard/detail features.
+- Parent/trainer/admin role behavior changes.
+- Sharing permission changes.
+- Trainer query include/select/order/take response shape changes.
+- Subscription/entitlement coupling enters trainer workflows.
+- Bugs appear around duplicate assignment, revoked assignment visibility, or
+  trainer/parent data leakage.
+- Trainer workflow becomes release-critical enough to justify API smoke.
+
+Final recommendation:
+
+- Merge all after final architect review and validation.
+- Do not continue implementation now.
+- Do not start role/policy extraction, query extraction, or trainer API smoke by
+  momentum.
+
 ## Must-Not-Change Constraints
 
 - Do not change API endpoint paths.
