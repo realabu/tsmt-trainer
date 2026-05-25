@@ -121,13 +121,16 @@ Interpretation:
   - dedicated module exists: `apps/api/src/trainers`
   - service handles trainer assignment creation and trainer/parent listing views
   - ownership and role checks are inline in [apps/api/src/trainers/trainers.service.ts](/Users/bszabo/Oghma%20docs/codex/tmst-trainer/apps/api/src/trainers/trainers.service.ts)
+  - PR `#103` added focused service-level characterization tests for role gates, ownership filters, assignment lifecycle, current admin scoped semantics, and critical query shapes
 - Main risks:
   - assignment creation, ownership checks, and detailed overview queries are mixed in one service
   - role logic is explicit but not yet abstracted into focused policies
+  - trainer API smoke and frontend trainer dashboard/detail coverage remain deferred
 - Recommended next action:
   - keep stable unless trainer workflows become a near-term product focus
+  - inspect first before changing trainer permissions, assignment lifecycle, or include-heavy query shapes
 - Suggested PR granularity:
-  - one trainer assignment policy/query extraction per PR
+  - one trainer assignment policy/query extraction or one focused test adjustment per PR, only when triggered by product work or a concrete risk
 
 ### Subscriptions / Billing
 - Current state: `Unknown`
@@ -197,7 +200,7 @@ Interpretation:
   - one dashboard loading/selection extraction PR
 
 ### Admin UI
-- Current state: `Risky`
+- Current state: `Acceptable but inspect first`
 - Evidence from repo:
   - admin UI is present:
     - `admin-dashboard.tsx`
@@ -206,13 +209,16 @@ Interpretation:
     - `admin-session-detail.tsx`
   - `admin-catalog-manager.tsx` remains large (~744 lines) and handles multiple catalog domains in one component
   - `admin-dashboard.tsx` combines scoped admin data loading, user editing, and navigation/detail orchestration
+  - PR `#102` added focused form/payload helper coverage and wired it into `AdminCatalogManager`
 - Main risks:
   - multi-domain admin UI flows are still coupled
   - likely friction point for future feature work and regression risk
+  - section split, async orchestration, destructive delete, and rendered coverage are deferred
 - Recommended next action:
-  - split admin catalog UI by catalog domain or by shell/form sections before adding more behavior
+  - inspect the specific admin catalog feature first
+  - choose section split, async seam, destructive-flow seam, or no extraction based on that feature
 - Suggested PR granularity:
-  - one admin catalog sub-section extraction or one admin dashboard load-state extraction PR
+  - one admin catalog sub-section, async seam, destructive-flow guard, or dashboard load-state PR only when triggered
 
 ### Module Maturity Checkpoint
 Current repo-wide maturity after the API/browser smoke and backend workflow-boundary checkpoints:
@@ -224,13 +230,13 @@ Current repo-wide maturity after the API/browser smoke and backend workflow-boun
 | Children | Acceptable but feature-specific inspection required | CRUD, delete impact, and badge aggregation share one service. |
 | Routines backend | Acceptable but feature-specific inspection required | `RoutineDeleteImpactService` helped, but `RoutinesService` remains structurally broad. |
 | Sessions backend | Acceptable but feature-specific inspection required | `SessionBadgeAwardService` helped, but lifecycle/timing writes remain transaction-sensitive. |
-| Trainers | Needs targeted foundation before trainer feature work | Inline role/ownership checks and large include graphs have lighter direct coverage. |
+| Trainers | Acceptable but feature-specific inspection required | #103 characterized role/ownership, assignment lifecycle, current admin scoped semantics, and query shapes; extraction/API smoke remain deferred. |
 | Admin catalog backend | Acceptable but feature-specific inspection required | Backend boundaries are better; catalog query/write shapes remain complex. |
-| Catalog/admin UI | High-risk / not feature-ready | `admin-catalog-manager.tsx` combines multiple catalog domains. |
+| Catalog/admin UI | Acceptable but feature-specific inspection required | #102 added form/payload helper coverage; section split, async orchestration, destructive delete, and rendered UI coverage remain deferred. |
 | Parent dashboard | Acceptable but feature-specific inspection required | Loading, selection, progress, badges, and rendering converge in one component. |
-| Training runner | Needs targeted foundation before serious runner features | Timers, session API mutations, completion flow, media rendering, and UI state live in one component. |
-| Routines manager | High-risk / not feature-ready | Create/edit/delete impact/task/period orchestration live in one component. |
-| Task builder | Needs targeted foundation before task-builder features | Catalog search, song loading, task draft editing, media fields, and delete confirmation UI share one component. |
+| Training runner | Acceptable but feature-specific inspection required | #98 reduced session-control risk; timer, cancel, multi-task, in-flight, and visual structure risks remain deferred. |
+| Routines manager | Acceptable but feature-specific inspection required | #99 reduced save orchestration risk; delete-impact preview, partial save, duplicate save, and rendered editor coverage remain deferred. |
+| Task builder | Acceptable but feature-specific inspection required | #101 added draft-operation helper coverage; catalog search, song loading, media fields, delete callbacks, and rendered coverage remain deferred. |
 | Database/schema | Acceptable but feature-specific inspection required | Cascades are powerful; subscription exists without an application boundary. |
 | Shared types | Acceptable but light | Useful, but not a strong API contract boundary yet. |
 | CI/quality gates | Good enough | API smoke runs in CI; browser smoke remains local-first. |
@@ -239,7 +245,7 @@ Current repo-wide maturity after the API/browser smoke and backend workflow-boun
 Strategic conclusion:
 - the backend foundation and quality gates are much improved
 - the app is not broadly ready for serious feature work anywhere
-- the next foundation phase should target frontend hotspots, not backend refactor momentum
+- any next foundation phase should be selected by feature-triggered inspection, not backend or frontend refactor momentum
 - serious feature work should start only after scoped inspection and, where needed, stabilization of the relevant hotspot
 - this is not a broad frontend rewrite; it is a small, inspection-led foundation phase
 
@@ -381,23 +387,23 @@ Strategic conclusion:
 ## Candidate Next PRs
 These are candidate next PRs, not final strategy decisions.
 
-1. Inspect `TrainingRunner` session-control responsibilities and seams.
-2. If inspection confirms value, extract a small `TrainingRunner` session-control hook/helper with focused tests.
-3. Inspect `RoutinesManager` editor/delete-impact orchestration before changing routine editor behavior.
-4. If justified, extract one `RoutinesManager` slice.
-5. Inspect `TaskBuilder` catalog search/song-loading/draft editing boundaries before task-builder feature work.
-6. If justified, extract one `TaskBuilder` slice.
+1. Inspect `TrainingRunner` runner-control, cancel, timer, or visual seams only when runner UX/product work selects them.
+2. If inspection confirms value, extract or test exactly one runner seam.
+3. Inspect `RoutinesManager` editor/delete-impact orchestration before changing routine editor or destructive behavior.
+4. If justified by that feature, extract or test exactly one `RoutinesManager` seam.
+5. Inspect `TaskBuilder` catalog search/song-loading/media/delete-callback boundaries before task-builder feature work.
+6. If justified by the selected feature, extract one `TaskBuilder` slice.
 7. Keep sessions and routines backend refactoring paused by default unless inspection identifies a concrete production risk.
 
 RoutinesManager destructive-flow guard:
 - `docs/routines-manager-foundation-plan.md` must be required reading before work touches `routines-manager.tsx`, `task-builder.tsx`, routine/task/period deletion UX, destructive confirmations, or routine editor save/delete flow.
 - The deferred frontend delete-impact seam should be revisited only when destructive-flow product work, a bug, or an architect decision makes it concrete.
 8. Inspect browser-smoke CI promotion only if local-first browser smoke should become a required gate.
-9. Split `apps/web/components/admin-catalog-manager.tsx` only if admin catalog product work resumes.
+9. Inspect `apps/web/components/admin-catalog-manager.tsx` only if admin catalog product work resumes; choose a section split, async seam, or destructive-flow seam based on that feature.
 10. Keep docs freshness checks as a recurring AI-maintainability task after domain shifts.
 
 ## Uncertain / Not Fully Inspected
 - No dedicated subscription/billing application module was found, but schema/types support exists.
 - API smoke and local-first browser smoke now exist, but neither is exhaustive and browser smoke is not required in CI.
 - Docker/local dev orchestration is not present and remains deferred until deployability/onboarding or CI browser-smoke work needs it.
-- Trainer module was inspected at service level, but not exhaustively audited line-by-line beyond visible ownership/query patterns.
+- Trainer module now has focused service-level characterization from #103, but future trainer feature work still needs scoped inspection rather than automatic policy/query extraction.

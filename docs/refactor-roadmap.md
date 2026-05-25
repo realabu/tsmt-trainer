@@ -502,13 +502,13 @@ Serious feature work should not begin until the relevant frontend hotspot has be
 | Children | Acceptable but feature-specific inspection required | CRUD is compact, but delete impact and badge aggregation share the same service. |
 | Routines backend | Acceptable but feature-specific inspection required | `RoutineDeleteImpactService` helped, but `RoutinesService` remains broad and actual delete semantics are unchanged. |
 | Sessions backend | Acceptable but feature-specific inspection required | `SessionBadgeAwardService` helped, but lifecycle/timing writes remain transaction-sensitive in `SessionsService`. |
-| Trainers | Needs targeted foundation before trainer feature work | Ownership/role checks and large include graphs are inline with lighter direct coverage. |
+| Trainers | Acceptable but feature-specific inspection required | #103 characterized role/ownership, assignment lifecycle, current admin scoped semantics, and query shapes; extraction/API smoke remain deferred. |
 | Admin catalog backend | Acceptable but feature-specific inspection required | Backend split exists; catalog query/write shapes remain complex but stable enough unless admin work resumes. |
-| Catalog/admin UI | High-risk / not feature-ready | `admin-catalog-manager.tsx` manages multiple catalog domains in one large component. |
+| Catalog/admin UI | Acceptable but feature-specific inspection required | #102 added form/payload helper coverage; section split, async orchestration, destructive delete, and rendered UI coverage remain deferred. |
 | Parent dashboard | Acceptable but feature-specific inspection required | Helpers exist, but data loading, child/routine selection, progress, badges, and rendering still converge in one component. |
-| Training runner | Needs targeted foundation before serious runner features | Timers, session API mutations, completion flow, media rendering, and UI state live in one component. |
-| Routines manager | High-risk / not feature-ready | Create/edit/delete impact/task/period orchestration live in one large component. |
-| Task builder | Needs targeted foundation before task-builder features | Catalog search, song loading, draft editing, media fields, and delete confirmation UI share one component. |
+| Training runner | Acceptable but feature-specific inspection required | #98 reduced session-control risk; timer, cancel, multi-task, in-flight, and visual structure risks remain deferred. |
+| Routines manager | Acceptable but feature-specific inspection required | #99 reduced save orchestration risk; delete-impact preview, partial save, duplicate save, and rendered editor coverage remain deferred. |
+| Task builder | Acceptable but feature-specific inspection required | #101 added draft-operation helper coverage; catalog search, song loading, media fields, delete callbacks, and rendered coverage remain deferred. |
 | Database/schema | Acceptable but feature-specific inspection required | Cascades are powerful and subscription concepts exist without an app boundary. |
 | Shared types | Acceptable but light | Useful, but not yet a strong API contract boundary. |
 | CI/quality gates | Good enough | Unit tests, DB-backed API smoke, builds, and generated-artifact guard run in CI. Browser smoke is local-first. |
@@ -520,20 +520,20 @@ Recommended posture:
 - do not continue routines by momentum
 - do not continue sessions service-boundary extraction by momentum
 - do not interpret #96 as permission to start feature work freely anywhere
-- run a focused frontend hotspot foundation phase before serious feature implementation
+- use feature-triggered scoped inspection before serious feature implementation
 - feature planning may begin only after scoped inspection of the areas the feature will touch
 - do not expand API or browser smoke by momentum; add more smoke only when it protects a named production or release risk
 - select any next foundation work by production-readiness inspection
-- start with `TrainingRunner` unless a concrete product feature selects another hotspot
+- if future runner/routine editor UX work is selected, start with a joint TrainingRunner/RoutinesManager decision audit
 - do not recommend Docker, browser-smoke CI promotion, or backend refactor unless directly justified by the next goal
 
-Recommended focused frontend foundation sequence:
-1. Inspect `TrainingRunner` session-control responsibilities and seams.
-2. If inspection confirms value, extract a small `TrainingRunner` session-control hook/helper with tests.
-3. Inspect `RoutinesManager` editor/delete-impact orchestration.
-4. If justified, extract one `RoutinesManager` slice.
-5. Inspect `TaskBuilder` catalog search/song-loading/draft editing boundaries.
-6. If justified, extract one `TaskBuilder` slice.
+Recommended feature-triggered inspection sequence:
+1. Inspect `TrainingRunner` runner-control, cancel, timer, or visual seams only when runner UX/product work selects them.
+2. If inspection confirms value, extract or test exactly one runner seam.
+3. Inspect `RoutinesManager` editor/delete-impact orchestration before changing routine editor or destructive behavior.
+4. If justified by that feature, extract or test exactly one `RoutinesManager` seam.
+5. Inspect `TaskBuilder` catalog search/song-loading/media/delete-callback boundaries if a selected feature touches them.
+6. If justified by that feature, extract one `TaskBuilder` slice.
 
 RoutinesManager guard:
 - `docs/routines-manager-foundation-plan.md` records the routine editor save-plan seam and the deferred delete-impact seam.
@@ -626,10 +626,10 @@ Leave these mostly untouched until earlier phases reduce risk:
 - docs updated when architectural expectations change
 
 ## Top 5 Immediate Next Tasks
-1. Inspect frontend `TrainingRunner` session-control responsibilities and seams.
-2. If justified, extract a small `TrainingRunner` session-control hook/helper with focused tests.
-3. Inspect `RoutinesManager` editor/delete-impact orchestration before changing routine editor behavior.
-4. Inspect `TaskBuilder` catalog search/song-loading/draft editing boundaries before task-builder feature work.
+1. If runner/routine editor UX work is next, run a joint `TrainingRunner` + `RoutinesManager` decision audit.
+2. If justified, extract or test exactly one runner or routine-editor seam.
+3. Inspect `TaskBuilder` catalog search/song-loading/media/delete-callback boundaries before task-builder feature work.
+4. Inspect `AdminCatalogManager` section/async/destructive seams before admin catalog UI work.
 5. Keep docs and AI guidance current after each domain shift so stale plans do not drive future Codex work.
 
 If routine editor or destructive-flow work is selected next, read `docs/routines-manager-foundation-plan.md` first and explicitly decide whether the deferred delete-impact seam is required before UX changes.

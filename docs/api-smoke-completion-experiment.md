@@ -7,6 +7,10 @@ The goal is not exhaustive API coverage. The goal is a small, stable, DB-backed 
 
 ## Part A: Current API Smoke Baseline
 
+Historical note: this section records the baseline at planning time before the
+experiment PRs were implemented. The final outcome section later in this
+document records the completed API smoke state after `#91` and `#92`.
+
 Baseline main commit at planning time: `9796ed88330b0ea6bb4fccd5a5b583c2058473f9`
 
 Current merged smoke milestones:
@@ -34,7 +38,7 @@ Current protected smoke coverage:
 - Children ownership path: login, call `/api/children`, verify owned child appears and unrelated child does not.
 - Routine ownership path: login, call `/api/routines?childId=...`, verify owned child routine appears and unrelated routine does not.
 
-Current limitations:
+Current limitations at planning time:
 - No API smoke covers session start, task completion, or finish.
 - No API smoke verifies a post-finish observable consequence such as session history or progress.
 - No API smoke covers badge behavior; this is currently protected by service/domain tests.
