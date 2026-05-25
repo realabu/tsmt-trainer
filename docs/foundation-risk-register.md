@@ -19,8 +19,8 @@ Current checkpoint:
 - Checkpoint 2: frontend hotspot reconciliation
 - Checkpoint 3: quality/infrastructure reconciliation
 - Checkpoint 4: final consistency review
-- PR range considered: `#44` through `#99`
-- Current posture: routines backend, sessions backend, TrainingRunner, and RoutinesManager foundation work have reached checkpoints; further work should be selected by product/foundation priority, not by continuing the last thread.
+- PR range considered: `#44` through `#103`
+- Current posture: routines backend, sessions backend, TrainingRunner, RoutinesManager, TaskBuilder, AdminCatalogManager, and Trainers foundation work have reached checkpoints; further work should be selected by product/foundation priority, not by continuing the last thread.
 
 ## How Future Codex Prompts Should Use This Register
 Future feature, refactor, UX, data, or quality-gate prompts must inspect this register first.
@@ -82,6 +82,8 @@ This is a high-level inventory only. Later checkpoints should reconcile each row
 | `SessionBadgeAwardService` | `#84` | `docs/sessions-lifecycle-badge-experiment.md`, this register | First sessions workflow-service boundary; badge-only reads/writes, duplicate-prevention, and weekly streak orchestration moved out of `SessionsService`. | `good enough` |
 | Trainers | `#103`; older direct PR mapping uncertain | `docs/trainers-foundation-plan.md`, `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Ownership/role checks, assignment lifecycle, current admin scoped semantics, and include-heavy overview query shapes are now characterized; trainer feature work still needs scoped inspection. | `acceptable but inspect first` |
 | Admin/catalog backend | Older direct PR mapping uncertain; admin backend checkpoint documented | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Admin backend is more split than the frontend, but catalog/activity query shapes remain complex. Admin catalog UI risk is tracked separately in the frontend checkpoint. | `acceptable but inspect first` |
+| Subscription / entitlement | Schema/auth registration support exists; no entitlement implementation PR | `docs/architecture-refactor-audit.md`, this register | `Subscription` and `SubscriptionEvent` exist in schema, and auth registration seeds a free subscription, but there is no application entitlement boundary yet. | `deferred by decision` |
+| MediaAsset / media ownership | Older direct PR mapping uncertain; admin/routine media helper work exists | `docs/admin-catalog-manager-foundation-plan.md`, `docs/refactor-roadmap.md`, this register | `MediaAsset.ownerId` is nullable/plain ownership metadata rather than a fully enforced app permission boundary. Real upload/media library/permission work needs explicit design first. | `acceptable but inspect first` |
 
 ## Checkpoint 1 Backend / Domain Reconciliation
 
@@ -183,15 +185,39 @@ This checkpoint reconciles backend/domain rows from current docs and targeted co
 - Current status: `acceptable but inspect first`.
 - Next recommended action: keep backend stable unless admin product work resumes; inspect the exact service and add focused safety coverage before changing catalog query/write shapes or destructive admin behavior. Track admin catalog UI risk in the frontend checkpoint, not here.
 
+### Area: Subscription / entitlement
+- Area / module: `packages/db/prisma/schema.prisma` subscription models and auth registration subscription seeding.
+- Related PRs: no dedicated entitlement implementation PR; schema/types support existed before this register.
+- Detailed docs: `docs/architecture-refactor-audit.md`, `docs/refactor-roadmap.md`, this register.
+- Completed foundation work: `Subscription` and `SubscriptionEvent` models exist; shared subscription plan/status types exist; auth registration creates a default free subscription.
+- Deferred risks: no dedicated application entitlement boundary exists; no product enforcement rules are centralized; future monetization could otherwise scatter ad hoc checks across auth, routines, trainers, admin, or frontend code.
+- Trigger conditions: monetization work, plan limits, billing/provider integration, subscription event processing, trainer entitlement coupling, feature gating, or any product work that changes what FREE/PRO users can do.
+- Required reading before touching: this register, `docs/architecture-refactor-audit.md` subscription section, `packages/db/prisma/schema.prisma`, `packages/types`, and `apps/api/src/auth/auth.service.ts`.
+- Current safety coverage: auth registration and smoke fixtures seed free subscriptions; no entitlement-specific tests or smoke paths exist.
+- Current status: `deferred by decision`.
+- Next recommended action: do not add entitlement checks opportunistically. Start with a dedicated inspection/design checkpoint before implementing subscription or monetization behavior.
+
+### Area: MediaAsset / media ownership
+- Area / module: `MediaAsset` schema, admin catalog media helpers, routine task media links, song/equipment media relations.
+- Related PRs: older direct PR mapping uncertain; admin catalog/media helper coverage exists; AdminCatalogManager form/payload foundation in `#102`.
+- Detailed docs: `docs/admin-catalog-manager-foundation-plan.md`, `docs/refactor-roadmap.md`, this register.
+- Completed foundation work: admin/routine media helper tests cover current media kind/link payload behavior; catalog and routine task media relations are represented in schema; catalog references mostly detach or cascade through join rows according to current Prisma relations.
+- Deferred risks: `MediaAsset.ownerId` is nullable metadata and is not a fully enforced application permission boundary; no upload/media library workflow is defined; deleting media can cascade through media-link rows while some catalog/routine references detach with `SetNull`.
+- Trigger conditions: real uploads, media library UX, media ownership/permissions, storage provider integration, media deletion UX, import/media redesign, or user-owned media sharing.
+- Required reading before touching: this register, `packages/db/prisma/schema.prisma`, admin catalog media tests, routine task media tests, and `docs/admin-catalog-manager-foundation-plan.md` if admin UI is involved.
+- Current safety coverage: admin catalog media/kind tests, routine task media helper tests, typecheck/build/CI. No permission-level media tests exist.
+- Current status: `acceptable but inspect first`.
+- Next recommended action: leave as metadata-only until a concrete media/upload feature appears; then run explicit permission/storage/design inspection before implementation.
+
 ### Frontend Areas To Reconcile
 
 | Area / module | Related PRs | Detailed docs | Current inventory note | Current status |
 | --- | --- | --- | --- | --- |
 | TrainingRunner | `#95`, `#98` | `docs/training-runner-foundation-plan.md`, `docs/browser-smoke-and-quality-gate-roadmap.md`, this register | Session-control deterministic decisions are now helper-backed and tested; cancel, multi-task, in-flight, timer, and visual structure risks remain deferred. | `acceptable but inspect first` |
 | RoutinesManager | `#99` | `docs/routines-manager-foundation-plan.md`, this register | Routine editor save-plan risk was reduced; delete-impact preview state, partial save failure, duplicate saves, rendered editor coverage, and `TaskBuilder` coupling remain deferred. | `acceptable but inspect first` |
-| TaskBuilder | Related through `#99`; older direct PR mapping uncertain | `docs/routines-manager-foundation-plan.md`, `docs/refactor-roadmap.md`, this register | Catalog search, song loading, draft editing, media fields, and delete callbacks share one component. #99 did not solve this hotspot. | `needs targeted foundation` |
+| TaskBuilder | `#101`; related through `#99`; older direct PR mapping uncertain | `docs/task-builder-foundation-plan.md`, `docs/routines-manager-foundation-plan.md`, `docs/refactor-roadmap.md`, this register | Draft-operation foundation is complete; catalog search, song loading, media fields, delete callbacks, and rendered coverage remain deferred and trigger-based. | `acceptable but inspect first` |
 | ParentDashboard | Earlier helper/view-model PRs; direct PR mapping uncertain | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Helper/view-model layers exist; loading, selection, progress, badges, and rendering still converge in one component. | `acceptable but inspect first` |
-| AdminCatalogManager | Older direct PR mapping uncertain | `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Multi-domain admin catalog UI remains one of the largest frontend hotspots and is not solved by admin backend service splits. | `high-risk / not feature-ready` |
+| AdminCatalogManager | `#102`; older direct PR mapping uncertain | `docs/admin-catalog-manager-foundation-plan.md`, `docs/refactor-roadmap.md`, `docs/architecture-refactor-audit.md`, this register | Form/payload foundation is complete; section split, async orchestration, destructive admin delete, rendered coverage, and import/media/equipment-linking risks remain deferred and trigger-based. | `acceptable but inspect first` |
 | API client/auth storage | Earlier auth/API helper PRs; direct PR mapping uncertain | `docs/quality-gate-strategy.md`, `docs/refactor-roadmap.md`, this register | Shared auth storage and `apiFetch` refresh behavior are tested and stable; auth UX changes remain sensitive. | `good enough` |
 
 ## Checkpoint 2 Frontend Hotspot Reconciliation
@@ -377,6 +403,8 @@ These areas are not immediate blockers, but they remain broad or sensitive enoug
 - TrainingRunner
 - RoutinesManager
 - ParentDashboard
+- TaskBuilder
+- AdminCatalogManager
 
 How to use this:
 - inspect the exact method, component section, or flow before implementation
@@ -385,32 +413,31 @@ How to use this:
 - avoid continuing backend/frontend refactor work by momentum
 
 ### Currently `needs targeted foundation`
-These areas should not receive serious feature work without an inspection-first foundation checkpoint tied to a concrete product or production-readiness risk:
-- TaskBuilder
+No current major area remains in this status after `#101`, `#102`, and `#103`.
 
 How to use this:
-- start with inspection only
-- choose one small seam if the inspection confirms risk
+- if a future audit moves an area here, start with inspection only
+- choose one small seam if inspection confirms concrete risk
 - add focused tests where behavior is critical
 - do not combine the foundation checkpoint with broad UX changes or multi-domain refactors
 
 ### Currently `high-risk / not feature-ready`
-These areas need focused inspection and likely a small foundation slice before serious feature work:
-- AdminCatalogManager
+No current major area remains in this status after `#101`, `#102`, and `#103`.
 
 How to use this:
-- do not start admin catalog UI feature work directly
-- inspect the specific task/song/equipment catalog flow being touched
-- split or test exactly one catalog domain/form seam if needed
-- avoid a broad admin UI rewrite
+- if a future audit moves an area here, stop before feature implementation
+- require focused inspection and likely a small foundation slice
+- avoid broad rewrites and keep recommendations trigger-based
 
 ### Currently `deferred by decision`
 These areas are intentionally deferred until a concrete trigger appears:
 - Local dev / Docker deferred
+- Subscription / entitlement
 
 How to use this:
 - do not add Docker or local DB orchestration by momentum
-- revisit only for deployability, onboarding, browser-smoke CI promotion, repeated DB reproducibility pain, or production deployment planning
+- do not scatter entitlement checks by momentum
+- revisit only when a listed trigger appears, such as deployability/onboarding for Docker or monetization/plan limits for subscriptions
 
 ### Choosing The Next Workstream
 Use this order of operations before starting future feature/refactor/UX/quality work:
@@ -424,12 +451,14 @@ Use this order of operations before starting future feature/refactor/UX/quality 
 
 Do not use this register to justify broad refactoring, smoke expansion, browser-smoke CI promotion, Docker work, or backend service-boundary extraction by momentum.
 
-### Remaining Highest-Risk Areas If Another Foundation Cycle Starts
-If no product feature selects a different hotspot, the strongest foundation candidates are:
-- `TaskBuilder`, because catalog search, song loading, draft editing, media fields, and delete callbacks remain mixed in one component.
-- `AdminCatalogManager`, because task/song/equipment admin UI remains a large multi-domain component with light frontend-specific coverage.
+### Remaining Inspect-First Areas If Another Foundation Cycle Starts
+After `#101`, `#102`, and `#103`, no Red/Orange area remains as an unfocused black box. The strongest future candidates are feature-triggered, not automatic:
+- `TrainingRunner` and `RoutinesManager` if upcoming UX/product work changes runner or routine editor flows.
+- `TaskBuilder` if upcoming work changes catalog search, song loading, media fields, or task deletion callbacks.
+- `AdminCatalogManager` if upcoming work changes admin catalog CRUD UX, async loading, destructive delete behavior, or import/media/equipment-linking.
+- `Trainers` if upcoming work changes assignment permissions, query shapes, dashboard/detail flows, or global admin visibility.
 
-These are candidates only. Start with inspection, not implementation.
+Start with scoped inspection, not implementation.
 
 ## Area Template For Later Checkpoints
 Use this template when reconciling each area.

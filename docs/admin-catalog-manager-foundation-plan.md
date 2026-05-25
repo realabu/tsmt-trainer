@@ -102,7 +102,7 @@ characterized.
 
 ## Production-Risk Findings
 
-High-risk deterministic behavior currently lives inline:
+At Checkpoint 0, high-risk deterministic behavior lived inline:
 
 - Task save payload construction, including `summary`, `instructions`,
   `focusPoints`, `demoVideoUrl`, `defaultSongId`, `isActive`, `equipmentIds`,

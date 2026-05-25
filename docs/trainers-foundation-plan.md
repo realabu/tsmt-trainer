@@ -130,7 +130,7 @@ Do not change include/select/order/take behavior without explicit contract work.
 
 ## Existing Coverage Map
 
-Current direct trainer coverage:
+Current direct trainer coverage at Checkpoint 0 baseline:
 
 - No dedicated `apps/api/test/trainers/*` tests were found.
 - No DB-backed API smoke path covers `/api/trainers/*`.
@@ -142,8 +142,11 @@ Indirect coverage:
 - Auth guard and API smoke cover general authentication paths.
 - Browser smoke covers parent/routine/session happy paths, not trainer flows.
 
-This means trainer role/ownership and response-shape behavior is currently
-under-protected relative to its production sensitivity.
+At Checkpoint 0, trainer role/ownership and response-shape behavior was
+under-protected relative to its production sensitivity. The final outcome review
+below records that `#103` added focused service-level characterization tests and
+that Trainers is now acceptable-but-inspect-first rather than
+needs-targeted-foundation.
 
 ## Missing Coverage Map
 

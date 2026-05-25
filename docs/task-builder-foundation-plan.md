@@ -14,7 +14,7 @@ This plan is connected to `docs/routines-manager-foundation-plan.md`: `TaskBuild
 - Experiment branch: `experiment/task-builder-foundation`
 - Draft PR title: `refactor(web): task builder foundation experiment`
 - Current checkpoint: Checkpoint 0, inspection and extraction plan only
-- Current risk-register status: Orange, needs targeted foundation before serious TaskBuilder feature work
+- Current risk-register status at Checkpoint 0 baseline: Orange, needs targeted foundation before serious TaskBuilder feature work. Final status after `#101`: acceptable but inspect first; see the final outcome review below and `docs/foundation-risk-register.md`.
 
 ## Current Responsibility Map
 
@@ -81,7 +81,7 @@ TaskBuilder does not directly save routine/task payloads. Those shapes are owned
 - `apps/web/lib/routines-manager-payloads.ts`
 - `apps/web/lib/routines-manager-save-plan.ts`
 
-## Existing Coverage
+## Existing Coverage At Checkpoint 0 Baseline
 
 Current safety coverage relevant to TaskBuilder:
 

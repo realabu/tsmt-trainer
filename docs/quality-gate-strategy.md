@@ -401,9 +401,8 @@ Title: focused frontend hotspot foundation phase
 Recommended posture:
 - the backend foundation and quality gates are much improved, but the app is not broadly ready for serious feature work anywhere
 - the largest remaining AI-maintainability risk is concentrated in large stateful frontend components
-- run a focused frontend hotspot foundation phase before serious feature implementation
-- if a concrete product feature is selected first, choose the hotspot based on that feature
-- if no feature is selected, start with `TrainingRunner` because it is core product behavior and already has API/browser smoke happy-path protection
+- use feature-triggered scoped inspection before serious feature implementation
+- if future runner/routine editor UX work is selected, start with a joint TrainingRunner/RoutinesManager decision audit
 - routines and sessions backend refactoring remain paused by default
 - browser smoke remains local-first and should not be promoted to CI without a separate inspection of runtime, DB orchestration, artifact behavior, and flakiness
 - Docker/local dev setup remains deferred until deployability, onboarding, serious feature work, or browser-smoke CI promotion needs it
@@ -424,12 +423,12 @@ Likely files:
 - CI workflow only in a later explicit CI-promotion PR
 
 Exact implementation tasks:
-1. Inspect `TrainingRunner` session-control responsibilities and seams unless a selected feature points elsewhere.
-2. If inspection confirms value, extract a small `TrainingRunner` session-control hook/helper with focused tests.
-3. Inspect `RoutinesManager` editor/delete-impact orchestration.
-4. If justified, extract one `RoutinesManager` slice.
-5. Inspect `TaskBuilder` catalog search/song-loading/draft editing boundaries.
-6. If justified, extract one `TaskBuilder` slice.
+1. Inspect `TrainingRunner` runner-control, cancel, timer, or visual seams only when runner UX/product work selects them.
+2. If inspection confirms value, extract or test exactly one runner seam.
+3. Inspect `RoutinesManager` editor/delete-impact orchestration before changing routine editor or destructive behavior.
+4. If justified by that feature, extract or test exactly one `RoutinesManager` seam.
+5. Inspect `TaskBuilder` catalog search/song-loading/media/delete-callback boundaries if a selected feature touches them.
+6. If justified by that feature, extract one `TaskBuilder` slice.
 
 Validation commands:
 - `git diff --check`
