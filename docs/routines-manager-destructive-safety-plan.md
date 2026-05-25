@@ -692,14 +692,81 @@ Optional, environment-dependent:
 - Any behavior-changing Checkpoint 3 should be split unless the architect explicitly decides it belongs in this experiment.
 - If characterization reveals current behavior is unsafe enough to require product/UX decision, stop and ask for architect review before implementation.
 
-## Recommended Next Checkpoint
-Proceed to Checkpoint 1: characterize delete-impact preview state with a tiny pure helper and focused unit tests.
+## Final Outcome Review
+Final experiment state:
+- Checkpoint 0 created this destructive-flow inspection and safety plan.
+- Checkpoint 1 added `apps/web/lib/routines-manager-delete-impact.ts` with a tiny pure delete-impact preview state helper plus focused unit tests in `apps/web/lib/__tests__/routines-manager-delete-impact.test.ts`.
+- Checkpoint 2 wired the helper into `RoutinesManager` for preview success transitions, cancel/open-editor clearing, and routine/period render target matching.
+- Checkpoint 2.5 recorded the gate decision to stop implementation before behavior-changing UX work.
 
-This is the smallest safety step because it protects the current destructive-flow decisions without changing behavior, moving API calls, adding rendered test tooling, or rewriting the editor.
+Files changed:
+- `docs/routines-manager-destructive-safety-plan.md`
+- `apps/web/lib/routines-manager-delete-impact.ts`
+- `apps/web/lib/__tests__/routines-manager-delete-impact.test.ts`
+- `apps/web/components/routines-manager.tsx`
+
+Validation results:
+- `pnpm --filter @tsmt/web test:unit`: passed
+- `pnpm --filter @tsmt/web build`: passed
+- `pnpm typecheck`: passed
+- `pnpm check:generated`: passed
+- `git diff --check`: passed
+- `pnpm --filter @tsmt/web test:smoke:app`: attempted in Checkpoint 2 but not completed because port `3000` was already in use
+
+Behavior preserved:
+- UI copy
+- visible behavior
+- API calls
+- endpoint paths
+- HTTP methods
+- preview API payloads
+- delete semantics
+- delete confirmation behavior
+- preview clearing behavior
+- period/task preserve-routine-preview behavior
+- cancel behavior
+- reload timing
+- status copy
+- `TaskBuilder` public props
+- backend routines behavior
+- DTOs
+- Prisma schema
+- browser smoke scope
+
+Risk reduced:
+- Destructive preview state transitions are now named and unit-tested.
+- Routine, period, and task target matching is now named.
+- Current preview clearing behavior is pinned, including routine preview success clearing period/task previews and period/task preview success preserving routine preview.
+- Future AI changes can inspect focused helper/tests before changing destructive preview behavior.
+- `RoutinesManager` no longer owns these transitions only as inline scattered state updates.
+
+Deferred risks not solved:
+- stale competing preview UX decision
+- behavior-changing clear-all competing preview cleanup
+- behavior-changing single active preview model
+- pending/disabled in-flight delete/save guards
+- rendered destructive-flow coverage
+- browser smoke for routine editor destructive previews
+- broader `TaskBuilder` delete callback UX
+- partial save / duplicate save behavior
+
+Trigger conditions for revisiting deferred seams:
+- routine editor destructive UX redesign
+- task, period, or routine delete confirmation UX changes
+- product decision to change competing-preview behavior
+- pending/disabled action UX work
+- bugs around wrong delete target, stale preview, duplicate delete, or accidental cascade
+- rendered component test strategy becomes approved
+- browser smoke promotion for routine editor flows becomes release-critical
+
+Final recommendation:
+- Merge all Checkpoints 0-2.5 after final architect review and final validation, unless validation finds a problem.
+- Do not continue implementation now.
+- Do not start behavior-changing preview cleanup, single-active-preview work, pending/disabled guards, rendered tests, browser smoke, or TaskBuilder boundary work by momentum.
 
 ## Risks And Uncertainties
 - The current period/task preview request behavior does not clear `routineDeleteImpact`; this may be acceptable current behavior or a future UX cleanup candidate.
 - Period and task confirm functions rely on rendered target matching rather than requiring preview state inside the confirm function.
 - Duplicate/in-flight delete and save clicks remain unguarded and should not be changed without a product UX decision.
 - There is no rendered routine editor destructive-flow coverage today.
-- Backend delete-impact previews are well characterized, but frontend preview state is not yet.
+- Backend delete-impact previews are well characterized, and frontend preview state now has focused pure-helper coverage.
