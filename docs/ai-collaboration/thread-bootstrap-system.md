@@ -87,6 +87,7 @@ In Engineering mode, committed product/UX direction and current code reality mus
 A bootstrap prompt should usually include:
 
 ```text
+Repository:
 Mode:
 Framework docs to use:
 Current focus:
@@ -149,6 +150,9 @@ Use requests such as:
 
 ```text
 Use the AI collaboration framework for this thread.
+
+Repository:
+https://github.com/realabu/tsmt-trainer
 
 Mode:
 Product Discovery
