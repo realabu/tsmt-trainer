@@ -6,6 +6,8 @@ UX / Design mode translates product direction into usable experience structure.
 
 It turns product principles and decisions into journeys, flows, screen responsibilities, wireframes, interaction models, and design principles.
 
+It should preserve the product North Star while translating direction into experience: product vision, emotional goals, core user problems, and the distinction between product direction and feature ideas.
+
 ## Scope
 
 Use this mode for:
@@ -32,6 +34,7 @@ Do not use this mode to finalize implementation details or create technical arch
 - Support physical/digital hybrid thinking.
 - Separate journey, screen architecture, wireframe, and visual design layers.
 - Do not add new product features unless discovery has established them.
+- Do not treat every feature idea as a committed screen or flow.
 
 ## Design Layers
 
@@ -58,6 +61,8 @@ These layers should stay distinct until the product direction is stable enough t
 In this mode, ChatGPT or Codex should translate product intent into experience structure.
 
 The assistant should name tradeoffs, keep the experience understandable, and avoid premature precision. It should protect the user from turning every product idea into a new screen.
+
+When useful, the assistant may refer to comparable products, UX patterns, and precedents to support design reasoning.
 
 ## Expected Outputs
 

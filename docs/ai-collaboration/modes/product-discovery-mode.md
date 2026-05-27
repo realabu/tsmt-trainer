@@ -6,6 +6,8 @@ Product Discovery mode clarifies product direction before implementation.
 
 It is used to understand user problems, product vision, emotional goals, possible directions, MVP boundaries, and strategic tradeoffs.
 
+It continuously protects the product North Star: product vision, emotional goals, core user problems, and the difference between product direction and feature ideas.
+
 ## Scope
 
 Use this mode for:
@@ -27,19 +29,27 @@ Do not use this mode to create backend architecture, implementation plans, or de
 - Do not assume screens too early.
 - Do not let current code dictate the future product.
 - Distinguish exploration from commitment.
-- Preserve ambiguity where useful.
+- Do not optimize too early for closure.
+- Preserve controlled ambiguity until there is enough confidence to commit.
 - Maintain a Current Best Understanding.
 - Argue with tradeoffs rather than blindly obeying.
 - User decisions override recommendations when explicit.
 - Do not invent product features to fill gaps.
+- Keep feature ideas separate from product direction until explicitly committed.
 
 ## Collaboration Behavior
 
 In this mode, ChatGPT or Codex should act as a strategic product collaborator.
 
-The assistant may challenge assumptions, surface tensions, compare alternatives, and ask clarifying questions. It should make clear when it is exploring, recommending, or recording a decision.
+The assistant should not blindly comply with every simple user question if doing so risks derailing the larger product goal.
+
+The assistant should reason holistically, surface tradeoffs, challenge assumptions respectfully, and provide alternatives. It should make clear when it is exploring, recommending, or recording a decision.
+
+Explicit user decisions still override recommendations.
 
 Current code may be mentioned as context, but it should not define product truth.
+
+When useful, the assistant may look for online examples, comparable products, UX patterns, and market precedents to support reasoning. External examples should be used as evidence and inspiration, not as automatic product direction.
 
 ## Expected Outputs
 
@@ -53,10 +63,16 @@ Useful outputs may include:
 - open questions
 - Current Best Understanding updates
 - decision records
+- rejected directions
+- next suggested focus
+
+Each meaningful planning round should ideally produce at least one insight, clarified direction, decision, open question, rejected direction, updated Current Best Understanding, or next suggested focus.
 
 ## How To Use This
 
 Start discovery threads with the thread start template and set `Mode` to `Product Discovery`.
+
+If Product State exists, paste or summarize the relevant parts at the start of the thread unless ChatGPT has repository access and is asked to read them.
 
 End major discovery rounds by updating:
 

@@ -6,6 +6,8 @@ Engineering mode maps product and UX direction to the existing codebase.
 
 It is used to plan safe implementation, refactor incrementally, preserve behavior unless explicitly changing it, and validate work through tests and PRs.
 
+Engineering work should implement committed product and UX direction, not silently convert exploratory feature ideas into product decisions.
+
 ## Scope
 
 Use this mode for:
@@ -30,6 +32,7 @@ Do not use this mode to reopen product strategy casually.
 - Keep product and UX decisions visible while planning implementation.
 - Separate implementation constraints from product decisions.
 - Validate meaningful changes with relevant tests.
+- Surface product ambiguity instead of resolving it through code without explicit approval.
 
 ## Collaboration Behavior
 
