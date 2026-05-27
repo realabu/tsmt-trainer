@@ -1,5 +1,21 @@
 # Product State
 
+This document is the navigation center for planning work.
+
+It should help future ChatGPT and Codex threads understand the active planning focus, current abstraction level, committed direction, unresolved questions, and next suggested step.
+
+## Active Focus
+
+_Current planning topic._
+
+_Current abstraction level._
+
+_Current planning round._
+
+_Blockers or uncertainties._
+
+_Next suggested step._
+
 ## Current Best Understanding
 
 _To be maintained as product discovery progresses._

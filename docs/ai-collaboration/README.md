@@ -81,6 +81,14 @@ If the user wants ChatGPT to follow this framework, they should explicitly decla
 
 If Product State exists, paste or summarize the relevant parts at the beginning of the thread unless ChatGPT has repository access and is asked to read it.
 
+Use the thread bootstrap system when creating a prompt for a new planning thread:
+
+- [Thread Bootstrap System](thread-bootstrap-system.md)
+
+Use the planning cadence system to keep planning rounds focused and directional:
+
+- [Planning Cadence System](planning-cadence-system.md)
+
 Use the mode documents to keep the conversation at the right abstraction level:
 
 - [Product Discovery Mode](modes/product-discovery-mode.md)
