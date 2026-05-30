@@ -89,6 +89,14 @@ Use the planning cadence system to keep planning rounds focused and directional:
 
 - [Planning Cadence System](planning-cadence-system.md)
 
+Use the discovery facilitator system to protect active focus, manage Parking Lot items, and require evidence before review or merge decisions:
+
+- [Discovery Facilitator System](discovery-facilitator-system.md)
+
+Use the product development map to keep the wider route from discovery to implementation visible:
+
+- [Product Development Map](../product/product-development-map.md)
+
 Use the mode documents to keep the conversation at the right abstraction level:
 
 - [Product Discovery Mode](modes/product-discovery-mode.md)
@@ -110,6 +118,10 @@ Record stable decisions with:
 - Prefer short, linked markdown files over huge mixed-purpose documents.
 - Separate exploration from commitment.
 - Do not optimize too early for closure.
+- Protect one active focus at a time.
+- Capture relevant interruptions in Parking Lot instead of switching focus silently.
+- Check actual evidence before approval, merge, rejection, or completion decisions.
+- Keep the Product Development Map status visible when planning spans multiple rounds.
 - Do not invent product features to fill gaps.
 - Do not create technical architecture plans during product discovery.
 - Treat explicit user decisions as authoritative unless reopened.

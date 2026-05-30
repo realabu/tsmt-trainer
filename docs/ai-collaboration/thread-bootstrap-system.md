@@ -8,11 +8,13 @@ Use this with:
 
 - [AI Collaboration Framework](README.md)
 - [Product Development Framework](product-development-framework.md)
+- [Discovery Facilitator System](discovery-facilitator-system.md)
 - [Product Discovery Mode](modes/product-discovery-mode.md)
 - [UX / Design Mode](modes/ux-design-mode.md)
 - [Engineering Mode](modes/engineering-mode.md)
 - [Product State](state/product-state.md)
 - [Thread Start Template](templates/thread-start-template.md)
+- [Product Development Map](../product/product-development-map.md)
 
 ## Why This Exists
 
@@ -26,6 +28,8 @@ The bootstrap system exists to reconstruct:
 - committed directions
 - open questions
 - exploration topics
+- round state
+- Parking Lot
 - current abstraction level
 - requested output
 
@@ -56,6 +60,8 @@ ChatGPT:
 - reconstructs Current Best Understanding
 - separates committed direction from exploration
 - protects the selected operating mode
+- checks Product Development Map and Parking Lot before starting a new planning round
+- includes a compact status block at the beginning of planning responses when useful
 - avoids premature closure
 
 ### Codex
@@ -73,10 +79,11 @@ When preparing a new thread, use sources in this order:
 
 1. Explicit user instruction in the current message
 2. Current Product State document
-3. Relevant product documents, such as product vision or journey docs
-4. Relevant mode document
-5. Current conversation summary, if provided
-6. Repository/code reality, only when the mode requires it
+3. Product Development Map
+4. Relevant product documents, such as product vision or journey docs
+5. Relevant mode document
+6. Current conversation summary, if provided
+7. Repository/code reality, only when the mode requires it
 
 In Product Discovery mode, product truth is more important than current code reality.
 
@@ -90,14 +97,18 @@ A bootstrap prompt should usually include:
 Repository:
 Mode:
 Framework docs to use:
+Product Development Map:
 Current focus:
+Round State:
 Current Best Understanding:
 Committed Directions:
 Exploration Zone:
 Open Questions:
+Parking Lot:
 Rejected Directions:
 Current abstraction level:
 Requested output:
+Evidence required before decisions:
 Rules for this thread:
 What not to do:
 Relevant source documents:
@@ -120,12 +131,17 @@ At the start of a new thread, ChatGPT should:
 
 - identify the mode
 - identify the current abstraction level
+- identify the Product Development Map position
+- identify the Round State
 - summarize Current Best Understanding
 - separate committed decisions from exploratory ideas
 - list open questions
+- check Parking Lot for relevant items
 - identify what source docs should be read or pasted
 - ask for only missing critical context
 - then continue from the reconstructed state
+
+When useful, ChatGPT should begin planning responses with a compact status block showing mode, active focus, round state, map position, relevant Parking Lot items, and requested output.
 
 ## Handling Incomplete Context
 
@@ -160,12 +176,19 @@ Product Discovery
 Framework docs to use:
 - docs/ai-collaboration/README.md
 - docs/ai-collaboration/product-development-framework.md
+- docs/ai-collaboration/discovery-facilitator-system.md
 - docs/ai-collaboration/modes/product-discovery-mode.md
 - docs/ai-collaboration/state/product-state.md
 - docs/ai-collaboration/templates/thread-start-template.md
 
+Product Development Map:
+Use docs/product/product-development-map.md to identify the current map position and avoid jumping ahead.
+
 Current focus:
 TSMT Trainer MVP planning.
+
+Round State:
+Exploring
 
 Current Best Understanding:
 Use the current Product State if available. Preserve the product north star: product vision, emotional goals, core user problems, and the difference between product direction and feature ideas.
@@ -179,6 +202,9 @@ MVP boundaries, motivation principles, user problems, and possible product direc
 Open Questions:
 Identify open questions from Product State or ask for critical missing context.
 
+Parking Lot:
+Check Product State for Parking Lot items before starting. Capture new relevant topics there instead of switching focus silently.
+
 Rejected Directions:
 Use only directions explicitly marked as rejected.
 
@@ -188,11 +214,16 @@ Product strategy and MVP definition, not UX screen design or implementation.
 Requested output:
 Produce clarified direction, open questions, and next suggested focus. Do not produce implementation tasks.
 
+Evidence required before decisions:
+Before saying a PR, document, or artifact is approved, mergeable, rejected, or complete, read the actual artifact where possible, compare it to the request and committed directions, and state what was checked.
+
 Rules for this thread:
+- Follow the One Active Focus Rule.
 - Preserve controlled ambiguity until there is enough confidence to commit.
 - Distinguish exploration from commitment.
 - Reason holistically and surface tradeoffs.
 - Challenge assumptions respectfully.
+- Classify new topics as current focus, parking lot, candidate focus switch, or unrelated.
 - Explicit user decisions override recommendations.
 
 What not to do:

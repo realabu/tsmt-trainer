@@ -21,6 +21,11 @@ None
 Next suggested step:
 Explore what information children and parents need in order to understand progress, completion, and current position in the therapy journey.
 
+## Round State
+
+Current round state:
+_To be updated during active planning._
+
 ## Current Best Understanding
 
 TSMT Trainer is not primarily a gamification product.
@@ -134,14 +139,65 @@ _To be added when options are explicitly rejected._
 
 ## Parking Lot
 
-- Parent Experience Discovery: explore how parents interact with the system, what support they need during home practice, and how their role relates to the child experience.
-- Trainer Experience Discovery: explore how therapists/trainers interact with the system, what value they receive, and how the system supports assignment, tracking, and review.
-- Cross-role interaction model: later clarify how child, parent, and trainer experiences connect without overloading the Child Experience document.
+### Parent Experience Discovery
 
-These should likely become separate discovery documents:
+Status:
+Captured
 
-- `docs/product/discovery/parent-experience-discovery.md`
-- `docs/product/discovery/trainer-experience-discovery.md`
+Why it matters:
+Explore how parents interact with the system, what support they need during home practice, and how their role relates to the child experience.
+
+Source/context:
+Identified while protecting the Child Experience document from expanding into parent responsibilities.
+
+Suggested future mode:
+Product Discovery
+
+Suggested future artifact:
+`docs/product/discovery/parent-experience-discovery.md`
+
+Resolution notes:
+_To be added when this item is scheduled, resolved, rejected, or moved to an artifact._
+
+### Trainer Experience Discovery
+
+Status:
+Captured
+
+Why it matters:
+Explore how therapists/trainers interact with the system, what value they receive, and how the system supports assignment, tracking, and review.
+
+Source/context:
+Identified as a separate role experience that should not be collapsed into Child Experience Discovery.
+
+Suggested future mode:
+Product Discovery
+
+Suggested future artifact:
+`docs/product/discovery/trainer-experience-discovery.md`
+
+Resolution notes:
+_To be added when this item is scheduled, resolved, rejected, or moved to an artifact._
+
+### Cross-role interaction model
+
+Status:
+Captured
+
+Why it matters:
+Clarify how child, parent, and trainer experiences connect without overloading the Child Experience document.
+
+Source/context:
+Identified after separating child, parent, and trainer experience discovery concerns.
+
+Suggested future mode:
+Product Discovery
+
+Suggested future artifact:
+_To be determined._
+
+Resolution notes:
+_To be added when this item is scheduled, resolved, rejected, or moved to an artifact._
 
 ## Next Suggested Focus
 

@@ -34,6 +34,20 @@ explore
 
 The goal is not to force a decision every time. The goal is to make the state of the work clearer than it was before.
 
+## Round State Model
+
+Round states:
+
+- Exploring
+- Clarifying
+- Ready to Commit
+- Documenting
+- Reviewing
+- Documented
+- Closed
+
+ChatGPT should name the current round state when planning is long, multi-step, or at risk of losing focus.
+
 ## When To Update Documentation
 
 Do not update docs after every message.
@@ -48,6 +62,20 @@ Update docs when:
 - the Active Focus changes
 - the abstraction level changes
 - a planning round is closed
+- a Parking Lot item changes status
+- Product Development Map status changes
+
+## Parking Lot Checks
+
+At the start of a planning round, check Parking Lot for relevant items.
+
+At the end of a planning round, propose which Parking Lot items should be:
+
+- kept
+- moved into active focus
+- documented
+- rejected
+- removed
 
 ## Product State As Navigation Center
 
@@ -75,6 +103,33 @@ Each meaningful planning round should end with at least one of:
 - explicit decision to continue exploration
 
 Continuing exploration is valid when ambiguity is intentional and useful. It should still be named explicitly.
+
+## Evidence Before Decision
+
+Before review, merge, approval, rejection, or completion decisions, ChatGPT must:
+
+- read the actual PR, document, or artifact where possible
+- compare it to the request and relevant committed directions
+- state what was checked
+- only then make the decision
+
+ChatGPT must not claim something is mergeable based only on a PR number or summary.
+
+## Product Development Map
+
+Update the [Product Development Map](../product/product-development-map.md) when a major phase changes status.
+
+Use the map to decide whether the next focus should continue the current phase, move to a related discovery topic, or wait before jumping into UX, specification, or engineering.
+
+## Planning Round Closure
+
+Planning round closure should include:
+
+- summary
+- decision or defer/reject/continue
+- documentation recommendation
+- Parking Lot update
+- next focus
 
 ## When To Start A New Thread
 
