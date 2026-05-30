@@ -6,35 +6,127 @@ It should help future ChatGPT and Codex threads understand the active planning f
 
 ## Active Focus
 
-_Current planning topic._
+Current planning topic:
+Progress Understanding System
 
-_Current abstraction level._
+Current abstraction level:
+Product Understanding
 
-_Current planning round._
+Current planning round:
+Understanding the emotional and motivational foundations of TSMT Trainer
 
-_Blockers or uncertainties._
+Blocked by:
+None
 
-_Next suggested step._
+Next suggested step:
+Explore what information children and parents need in order to understand progress, completion, and current position in the therapy journey.
 
 ## Current Best Understanding
 
-_To be maintained as product discovery progresses._
+TSMT Trainer is not primarily a gamification product.
 
-_Should preserve product vision, emotional goals, core user problems, and the difference between product direction and feature ideas._
+The primary value is helping children understand:
+
+- what they are doing
+- where they are
+- how much remains
+- how they are progressing
+- when they will be finished
+
+Many children are not resistant because they are unmotivated.
+
+They are resistant because a long, repetitive, difficult process is hard to understand and difficult to relate to.
+
+The first responsibility of the product is therefore progress understanding.
+
+Motivational systems are secondary and build on top of this foundation.
 
 ## Committed Directions
 
-_To be added when decisions are made._
+### Progress Understanding First
+
+The primary value of TSMT Trainer is not gamification.
+
+The primary value is:
+
+- making the process understandable
+- making progress visible
+- showing self-improvement compared to the child's own previous performance
+
+Children should understand:
+
+- what they are doing now
+- how much remains in the current task
+- how much remains in the current session
+- where they are within the current practice period
+- whether they are improving compared to themselves
+- when they will be finished
+
+### Foundation Before Motivation
+
+The product consists of:
+
+Foundation:
+
+- Player
+- Visible progress
+- Session completion
+- Progress understanding
+- Self-comparison
+
+Motivation Toolbox:
+
+- Themes
+- Badges
+- Stories
+- Characters
+- Physical rewards
+- Other optional motivational tools
+
+Motivational systems build on top of the foundation.
+
+### Parent-Curated Motivation Toolbox
+
+Motivational tools are not activated automatically.
+
+The system may:
+
+- recommend
+- educate
+- suggest
+
+The parent decides:
+
+- which motivational tools to use
+- when to introduce them
+- in what order
+
+### Positive Reinforcement Only
+
+The system:
+
+- does not remove earned progress
+- does not punish
+- does not shame
+- does not rely on fear-of-loss mechanics
+
+Missed practice may delay progress but should not create regression or loss.
 
 ## Exploration Zone
 
-_To be added during active discovery._
-
-_May contain ambiguity, alternatives, hypotheses, and feature ideas that are not yet committed._
+- Progress Understanding System details
+- Parent guidance philosophy
+- Theme system
+- Badge philosophy
+- Story system
+- Physical reward integration
 
 ## Open Questions
 
-_To be added as unresolved questions appear._
+- How should progress be represented across task level, session level, and practice-period level?
+- What information provides children with the strongest feeling of control and safety?
+- How should self-improvement be represented without creating unhealthy pressure?
+- How should optional motivational tools be recommended to parents?
 
 ## Rejected Directions
 
@@ -42,4 +134,11 @@ _To be added when options are explicitly rejected._
 
 ## Next Suggested Focus
 
-_To be updated at the end of planning rounds._
+Explore the Progress Understanding System.
+
+Focus on:
+
+- what children need to understand
+- what parents need to understand
+- which time horizons matter
+- what creates a feeling of progress, control, predictability, and completion
