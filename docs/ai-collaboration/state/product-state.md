@@ -132,6 +132,17 @@ Missed practice may delay progress but should not create regression or loss.
 
 _To be added when options are explicitly rejected._
 
+## Parking Lot
+
+- Parent Experience Discovery: explore how parents interact with the system, what support they need during home practice, and how their role relates to the child experience.
+- Trainer Experience Discovery: explore how therapists/trainers interact with the system, what value they receive, and how the system supports assignment, tracking, and review.
+- Cross-role interaction model: later clarify how child, parent, and trainer experiences connect without overloading the Child Experience document.
+
+These should likely become separate discovery documents:
+
+- `docs/product/discovery/parent-experience-discovery.md`
+- `docs/product/discovery/trainer-experience-discovery.md`
+
 ## Next Suggested Focus
 
 Explore the Progress Understanding System.
