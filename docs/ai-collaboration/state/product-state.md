@@ -199,6 +199,46 @@ _To be determined._
 Resolution notes:
 _To be added when this item is scheduled, resolved, rejected, or moved to an artifact._
 
+### Motivation Layer Model
+
+Status:
+Captured
+
+Why it matters:
+The current Motivation Toolbox documentation captures only high-level categories. It does not yet capture the intended layer model, activation philosophy, or the relationship between progress understanding and optional motivational layers.
+
+Source/context:
+Captured during Parent Experience Discovery. The parent-facing insight is that the parent should control when additional motivation layers become visible, but the detailed layer model belongs to the Motivation Toolbox concept model rather than the Parent Experience round.
+
+Current captured understanding:
+
+- Progress understanding is the always-present foundation, not an optional motivation layer.
+- Additional motivation layers are available in the system but may be hidden from the child until the parent activates them.
+- The parent activates a new layer when they feel the child is no longer motivated enough by the existing experience.
+- The system should not diagnose, automate, or strongly guide when to activate a new layer because every child is different.
+- Once a motivation layer is activated, it should ideally remain available rather than being repeatedly toggled on and off.
+- Motivation layers should remain consistent with Positive Reinforcement Only: no punishment, no shame, no removal of earned progress, and no fear-of-loss mechanics.
+
+Candidate layers to explore:
+
+- Theme selection
+- Stickers / badges
+- Daily story / narrative episode
+- Monthly recognition certificate
+- Main hero character
+- Character accessories earned through practice points or progress
+- Physical rewards
+- Other optional motivational tools
+
+Suggested future mode:
+Product Discovery / Concept Model Discovery
+
+Suggested future artifact:
+`docs/product/concepts/motivation-toolbox.md`
+
+Resolution notes:
+Move to the Motivation Toolbox concept model when that concept is actively explored.
+
 ## Next Suggested Focus
 
 Explore the Progress Understanding System.
