@@ -142,7 +142,7 @@ _To be added when options are explicitly rejected._
 ### Parent Experience Discovery
 
 Status:
-Captured
+Moved to Artifact
 
 Why it matters:
 Explore how parents interact with the system, what support they need during home practice, and how their role relates to the child experience.
@@ -157,7 +157,7 @@ Suggested future artifact:
 `docs/product/discovery/parent-experience-discovery.md`
 
 Resolution notes:
-_To be added when this item is scheduled, resolved, rejected, or moved to an artifact._
+Discovery artifact created at `docs/product/discovery/parent-experience-discovery.md`. Keep this Parking Lot entry as lifecycle history and use the artifact for future Parent Experience Discovery updates.
 
 ### Trainer Experience Discovery
 
@@ -238,6 +238,38 @@ Suggested future artifact:
 
 Resolution notes:
 Move to the Motivation Toolbox concept model when that concept is actively explored.
+
+### Guided Training Manager Attention Layer
+
+Status:
+Captured
+
+Why it matters:
+The Training Manager may later help both parent and child follow the practice flow by visually guiding attention toward the next important action or screen element. This could reduce cognitive load, make the interaction smoother, and support the child's sense of control without turning the MVP into a coaching or tutorial-heavy experience.
+
+Source/context:
+Captured during Parent Experience Discovery while discussing how the parent and child share the same Training Manager screen during practice. The current MVP direction should remain simpler: consistent layout, current task focus, time tracking, progress tracking, and child-owned actions such as pressing the next-task button.
+
+Current captured understanding:
+
+- Direct parent coaching text was not part of the original MVP vision.
+- Some parents may benefit from optional text feedback or suggested phrasing, but this should remain lightweight and mostly invisible.
+- If text exists, it should be logically generated from current task/progress state rather than requiring a separate content-writing workflow.
+- Text may be addressed to the child, while the parent decides whether to read, interpret, or ignore it.
+- A stronger future direction may be visual next-best-action guidance rather than explicit instruction.
+- The Training Manager could guide attention using animation, glow, pulsing, emphasis, or subtle highlighting.
+- Examples include highlighting the start button when a new task loads, pulsing around the next-task button when the child is ready to continue, emphasizing task name/repetition count/rhyme or song text when relevant, drawing attention to the next task near the end of the current one, or making the next action more noticeable when timing approaches a previous best.
+- This should not be treated as MVP.
+- This belongs to a later Execution Support System / UX interaction design round.
+
+Suggested future mode:
+UX / Design Exploration, after Execution Support System concept exploration
+
+Suggested future artifact:
+`docs/product/concepts/execution-support-system.md` or a later Training Manager UX artifact
+
+Resolution notes:
+Keep parked until the Training Manager interaction model is actively explored.
 
 ## Next Suggested Focus
 

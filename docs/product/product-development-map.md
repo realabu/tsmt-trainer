@@ -30,7 +30,7 @@ It is a planning navigation map.
 ### Product Discovery
 
 - Child Experience Discovery: Documented
-- Parent Experience Discovery: Not Started
+- Parent Experience Discovery: Clarifying
 - Trainer Experience Discovery: Not Started
 - Cross-role Interaction Model: Not Started
 - Product Vision Synthesis: Not Started
