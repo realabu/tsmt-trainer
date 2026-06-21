@@ -24,7 +24,7 @@ Explore what information children and parents need in order to understand progre
 ## Round State
 
 Current round state:
-_To be updated during active planning._
+Clarifying
 
 ## Current Best Understanding
 
@@ -119,7 +119,7 @@ Missed practice may delay progress but should not create regression or loss.
 
 ## Exploration Zone
 
-- Progress Understanding System details
+- Progress Understanding System details: concept draft at `docs/product/concepts/progress-understanding-system.md`
 - Parent guidance philosophy
 - Theme system
 - Badge philosophy
@@ -270,6 +270,35 @@ Suggested future artifact:
 
 Resolution notes:
 Keep parked until the Training Manager interaction model is actively explored.
+
+### Parent Practice Review & Notes Layer
+
+Status:
+Captured
+
+Why it matters:
+Counted but marked practice days may later need parent review. Parents may also need a place to correct task-level completion and preserve lightweight observations without overloading the shared child-facing progress experience.
+
+Source/context:
+Captured during Progress Understanding System concept drafting while clarifying how uncertain or interrupted practice should count toward weekly and cycle progress.
+
+Current captured understanding:
+
+- A parent may later confirm or correct a marked practice day.
+- Task-level completed/not-completed correction belongs outside the core shared progress view.
+- An uncertainty marker may be removed after confirmation.
+- A fully voided day should no longer affect child-facing weekly or cycle progress.
+- Parent notes may later capture observations such as easy/hard, liked/disliked, improvement, or therapist-relevant context.
+- Detailed review behavior is not part of the current concept core or MVP definition.
+
+Suggested future mode:
+Product Discovery / Concept Model, before UX / Design Exploration
+
+Suggested future artifact:
+`docs/product/concepts/parent-practice-review-notes.md`
+
+Resolution notes:
+Keep parked until parent review and correction becomes an active concept focus.
 
 ## Next Suggested Focus
 
