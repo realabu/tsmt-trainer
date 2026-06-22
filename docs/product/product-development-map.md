@@ -38,7 +38,7 @@ It is a planning navigation map.
 
 ### Concept Models
 
-- Progress Understanding System: Clarifying
+- Progress Understanding System: Documented
 - Motivation Toolbox: Exploring
 - Execution Support System: Not Started
 - Meaning & Education System: Not Started

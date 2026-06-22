@@ -3,10 +3,10 @@
 ## Status
 
 Current maturity:
-Concept model drafted
+Documented concept model
 
 Confidence:
-Medium
+Medium-High
 
 Mode:
 Product Discovery / Concept Model
@@ -17,7 +17,7 @@ This document captures the current concept-level understanding of how TSMT Train
 
 This is not a UX wireframe, screen specification, implementation plan, acceptance criteria document, or technical architecture document.
 
-The concepts in this document remain subject to clarification. They should not be treated as detailed product specifications or implementation commitments.
+This concept is documented at the Product Discovery / Concept Model level. Exact presentation, specification, and implementation remain later work.
 
 ## Core Product Truth
 
@@ -262,51 +262,139 @@ Use language like:
 
 Avoid language that implies a professionally defined therapeutic phase unless such a phase is explicitly defined later.
 
-## Counted Marked Progress
+## Resolved Concept Decisions
 
-Current concept direction:
-If a practice session was started, the system should count it toward progress by default, even if completion or measurement quality is uncertain.
+### Started Practice Counts
 
-This applies conceptually to:
+A practice day counts toward weekly progress, full cycle progress, and large-map movement once the first task has been started.
 
-- weekly progress
-- full cycle progress
-- large-map movement
+The operational concept is:
 
-The main progress should not separate it as:
+- the practice set starts with the first task
+- each task has a start action and a finish/completion action
+- once the start action for the first task has been pressed, the day counts as a completed practice day for progress purposes
+
+This remains true even if:
+
+- the browser is closed
+- the session is interrupted
+- not every task has a completed measurement
+- the first task has a start time but no finish time
+- later tasks have no measurement
+- the measurement is incomplete or uncertain
+
+The day remains counted unless the parent later voids it by marking all tasks as not completed.
+
+### Clean Vs Marked Counted Practice
+
+A clean counted practice day means the practice has complete measurement/completion data for the relevant tasks.
+
+A marked counted practice day means the day still counts fully toward weekly and cycle progress, but the measurement/completion data is incomplete or uncertain.
+
+Examples:
+
+- first task started but not finished
+- browser closed during practice
+- task measurement missing
+- one or more tasks not fully measured
+- interrupted practice
+
+The main progress should not show marked days as a separate count, for example:
 
 "2 complete + 1 uncertain"
 
-It should show the main progress as:
+It should still show normal progress, for example:
 
 "3/4 complete"
 
-However, the relevant day may receive a subtle marker indicating:
+The subtle marker belongs to the relevant day/practice detail, not to the main progress number.
 
-- measurement was incomplete
-- completion was uncertain
-- something was not fully clean
-- a task may have been skipped, modified, interrupted, or not tracked
+### Parent Correction / Voiding
 
-This marker should preserve trust without punishing real-life interruptions.
+The parent may later review and correct a marked practice day.
 
-The exact conditions for counting and marking remain an open product question.
+If the parent marks all tasks as completed, the uncertainty marker can be removed.
 
-## Parent Correction Later
+If the parent marks all tasks as not completed, the practice day is voided:
 
-Parents may later review and correct a marked practice day.
+- it no longer contributes to weekly progress
+- it no longer contributes to full cycle progress
+- it disappears from child-facing/shared progress history as a measured practice day
 
-Current concept direction:
+Internal audit/event-history behavior remains a later product/technical decision and is not specified here.
 
-- If the parent confirms the relevant tasks/session as completed, the uncertainty marker can be removed.
-- If the parent marks all tasks as not completed, the day should no longer contribute to weekly or cycle progress.
-- A voided day should disappear from child-facing progress history.
-- Detailed task-level review, corrections, and notes belong to a later Parent Practice Review & Notes layer.
+### Week Days Are Allowed; Family Calendar Is Out Of Scope
 
-Important distinction:
+Showing the days of the week or remaining weekly opportunities is allowed and likely necessary.
 
-- child-facing / shared progress history should remove the progress impact of a fully voided day
-- internal/audit/event history is a later technical/product decision and should not be specified here
+The product may show:
+
+- days of the week
+- which days had practice
+- how many practices are complete this week
+- how many opportunities/days remain
+- neutral future or inactive days
+
+The product should not become a family calendar or scheduling assistant.
+
+Out of scope:
+
+- planning in advance which family day will be used for practice
+- managing family events
+- maintaining a household calendar
+- scheduling non-TSMT activities
+
+The product answers:
+
+"Where are we compared to the TSMT practice rhythm?"
+
+It does not answer:
+
+"When is the family free?"
+
+### Child-Facing Weekly Rhythm
+
+The child-facing/shared view should communicate:
+
+- when practice happened
+- how much progress is complete
+- what remains as neutral opportunity
+- positive progress toward the weekly rhythm
+
+Avoid:
+
+- red weeks
+- punitive warning states
+- failed-day X marks on days without practice
+- child-facing failure states such as "the week is impossible" or "you failed"
+
+Neutral days may remain neutral. If a child is mature enough to infer that neutral means no practice happened, that is acceptable. The product should not add extra emotional failure signaling.
+
+### Large-Map Progress Points
+
+Large-map progress points are conceptually accepted. Their exact selection and presentation depend on later UX / Design work.
+
+Examples may include:
+
+- first week started
+- halfway reached
+- final week reached
+- only a little remains
+- full cycle completed
+
+The exact final set is not an open Progress Understanding discovery question.
+
+### Timing And Self-Comparison
+
+Timing and self-comparison are not explored further in this Progress Understanding System concept round.
+
+Self-comparison remains a foundation-level progress concept. It compares the child to their own earlier performance or experience, never to other children.
+
+It can support the child's feeling of improvement, the parent's understanding of progress, and later trainer/therapist interpretation.
+
+It belongs to later Measurement / Progress Quality / Execution Support exploration and may also be relevant to Trainer Experience Discovery. It must avoid unhealthy pressure, shame, speed-chasing, or movement-quality distortion.
+
+This deferred work does not block closing the current Progress Understanding System concept round.
 
 ## Parent And Child Roles
 
@@ -368,16 +456,6 @@ Keep these out of this artifact except as Parking Lot references:
 - database or API model
 - acceptance criteria
 
-## Open Questions
-
-- What exact conditions should make a started session count toward weekly and cycle progress?
-- What information is needed to distinguish a clean completion from a counted but marked practice day?
-- How should remaining days/opportunities be understood without turning the product into a calendar or scheduling assistant?
-- What level of weekly rhythm information is supportive for the child without transferring schedule pressure?
-- Which large-map progress points are meaningful across different cycle lengths?
-- How should timing and self-comparison relate to progress meaning without distorting movement quality?
-- When should parent review and correction become available, and what should remain outside the shared child-facing history?
-
 ## Parking Lot / Related Future Work
 
 ### Motivation Toolbox / Badge Layer
@@ -388,10 +466,13 @@ Keep these out of this artifact except as Parking Lot references:
 
 ### Parent Practice Review & Notes Layer
 
-- parent can review practice details later
-- task-level completed/not-completed correction
-- uncertainty marker cleanup
-- parent notes such as easy/hard, liked/disliked, improvement, and therapist-relevant observations
+- parent can view past practice sessions
+- parent can open a specific practice session
+- parent can review task-level measurements
+- parent can mark each task completed or not completed
+- parent can remove uncertainty markers by confirming completion
+- parent can void a practice day by marking all tasks not completed
+- parent can write a review note for the practice set
 - belongs to later Product Discovery / Concept Model work before any UX exploration
 
 ### Guided Training Manager Attention Layer
