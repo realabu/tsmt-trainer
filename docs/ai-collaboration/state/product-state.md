@@ -301,6 +301,36 @@ Suggested future artifact:
 Resolution notes:
 Keep parked until parent review and correction becomes an active concept focus.
 
+### Self-Comparison and Progress Quality Layer
+
+Status:
+Captured
+
+Why it matters:
+Self-comparison remains a foundation-level progress concept and should continue to support understandable improvement without becoming competition or unhealthy pressure.
+
+Source/context:
+Clarified while closing the Progress Understanding System concept round. The detailed relationship between measurement, progress quality, and self-comparison belongs outside the documented concept core.
+
+Current captured understanding:
+
+- Self-comparison compares the child to their own earlier performance or experience, not to other children.
+- It can help the child feel improvement over time.
+- It can help the parent understand progress.
+- It may later support trainer/therapist interpretation.
+- It must avoid unhealthy pressure, shame, speed-chasing, and movement-quality distortion.
+- It likely belongs to later Measurement / Progress Quality / Execution Support exploration and may connect to Trainer Experience Discovery.
+- It does not block closing the current Progress Understanding System concept round.
+
+Suggested future mode:
+Product Discovery / Concept Model, with later UX / Design Exploration only after the concept is clarified
+
+Suggested future artifact:
+`docs/product/concepts/progress-quality-and-self-comparison.md` or a relevant Execution Support concept artifact
+
+Resolution notes:
+Keep parked until measurement, progress quality, or self-comparison becomes an active concept focus.
+
 ## Next Suggested Focus
 
 Explore the Motivation Toolbox concept model.

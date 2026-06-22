@@ -386,9 +386,15 @@ The exact final set is not an open Progress Understanding discovery question.
 
 ### Timing And Self-Comparison
 
-Timing and self-comparison are deferred to later measurement, progress-quality, or Execution Support concept work.
+Timing and self-comparison are not explored further in this Progress Understanding System concept round.
 
-They are not explored further in this documented concept model.
+Self-comparison remains a foundation-level progress concept. It compares the child to their own earlier performance or experience, never to other children.
+
+It can support the child's feeling of improvement, the parent's understanding of progress, and later trainer/therapist interpretation.
+
+It belongs to later Measurement / Progress Quality / Execution Support exploration and may also be relevant to Trainer Experience Discovery. It must avoid unhealthy pressure, shame, speed-chasing, or movement-quality distortion.
+
+This deferred work does not block closing the current Progress Understanding System concept round.
 
 ## Parent And Child Roles
 
