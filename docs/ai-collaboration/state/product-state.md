@@ -7,24 +7,24 @@ It should help future ChatGPT and Codex threads understand the active planning f
 ## Active Focus
 
 Current planning topic:
-Progress Understanding System
+Motivation Toolbox
 
 Current abstraction level:
-Product Understanding
+Product Discovery / Concept Model
 
 Current planning round:
-Understanding the emotional and motivational foundations of TSMT Trainer
+Preparing Motivation Toolbox concept exploration after documenting the Progress Understanding System
 
 Blocked by:
 None
 
 Next suggested step:
-Explore what information children and parents need in order to understand progress, completion, and current position in the therapy journey.
+Explore how optional motivation layers build on the documented Progress Understanding System.
 
 ## Round State
 
 Current round state:
-Clarifying
+Documented
 
 ## Current Best Understanding
 
@@ -45,6 +45,8 @@ They are resistant because a long, repetitive, difficult process is hard to unde
 The first responsibility of the product is therefore progress understanding.
 
 Motivational systems are secondary and build on top of this foundation.
+
+The Progress Understanding System is documented at `docs/product/concepts/progress-understanding-system.md` for the current Product Discovery / Concept Model level.
 
 ## Committed Directions
 
@@ -119,7 +121,7 @@ Missed practice may delay progress but should not create regression or loss.
 
 ## Exploration Zone
 
-- Progress Understanding System details: concept draft at `docs/product/concepts/progress-understanding-system.md`
+- Motivation Toolbox concept model
 - Parent guidance philosophy
 - Theme system
 - Badge philosophy
@@ -128,9 +130,6 @@ Missed practice may delay progress but should not create regression or loss.
 
 ## Open Questions
 
-- How should progress be represented across task level, session level, and practice-period level?
-- What information provides children with the strongest feeling of control and safety?
-- How should self-improvement be represented without creating unhealthy pressure?
 - How should optional motivational tools be recommended to parents?
 
 ## Rejected Directions
@@ -284,11 +283,13 @@ Captured during Progress Understanding System concept drafting while clarifying 
 
 Current captured understanding:
 
-- A parent may later confirm or correct a marked practice day.
-- Task-level completed/not-completed correction belongs outside the core shared progress view.
-- An uncertainty marker may be removed after confirmation.
-- A fully voided day should no longer affect child-facing weekly or cycle progress.
+- A parent may later view past practice sessions and open a specific practice session.
+- A parent may review task-level measurements and mark each task completed or not completed.
+- Confirming completion may remove an uncertainty marker.
+- Marking all tasks not completed voids the practice day so it no longer affects child-facing weekly or cycle progress.
+- A parent may write a review note for the practice set.
 - Parent notes may later capture observations such as easy/hard, liked/disliked, improvement, or therapist-relevant context.
+- Task-level review and correction belong outside the core shared progress view.
 - Detailed review behavior is not part of the current concept core or MVP definition.
 
 Suggested future mode:
@@ -302,11 +303,11 @@ Keep parked until parent review and correction becomes an active concept focus.
 
 ## Next Suggested Focus
 
-Explore the Progress Understanding System.
+Explore the Motivation Toolbox concept model.
 
 Focus on:
 
-- what children need to understand
-- what parents need to understand
-- which time horizons matter
-- what creates a feeling of progress, control, predictability, and completion
+- how optional motivation layers build on documented progress understanding
+- how the parent controls when optional layers become available
+- how motivation remains consistent with Positive Reinforcement Only
+- which questions belong to later Motivation Toolbox discovery rather than the current closed round
