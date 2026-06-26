@@ -122,6 +122,9 @@ Record stable decisions with:
 - Capture relevant interruptions in Parking Lot instead of switching focus silently.
 - Check actual evidence before approval, merge, rejection, or completion decisions.
 - Keep the Product Development Map status visible when planning spans multiple rounds.
+- Keep Product Discovery as the controlling phase until relevant discovery tracks are documented, deferred, skipped by the product owner, or superseded by a confirmed focus switch.
+- Treat Concept Models as discovery-derived capability models, not automatic next-focus targets.
+- Check Product State and Product Development Map consistency when planning rounds close or documentation PRs change navigation, status, or focus.
 - Do not invent product features to fill gaps.
 - Do not create technical architecture plans during product discovery.
 - Treat explicit user decisions as authoritative unless reopened.

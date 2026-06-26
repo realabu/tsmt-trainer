@@ -21,6 +21,10 @@ Conversation state lives in:
 
 - [Product State](state/product-state.md)
 
+Product State currently lives under `docs/ai-collaboration/` for continuity with the framework.
+
+Product-specific planning state conceptually belongs with product documentation. A later cleanup may relocate Product State under `docs/product/`; if that happens, all framework links, bootstrap prompts, and planning references must be updated together.
+
 The wider planning path lives in:
 
 - [Product Development Map](../product/product-development-map.md)
@@ -32,6 +36,14 @@ The wider planning path lives in:
 Product Discovery clarifies product vision, user problems, emotional goals, possible directions, MVP boundaries, and strategic tradeoffs.
 
 This mode protects controlled ambiguity until there is enough confidence to commit.
+
+During Product Discovery, Product Discovery remains the controlling phase until the relevant discovery tracks are documented, intentionally deferred, explicitly skipped by the product owner, or superseded by a confirmed focus switch.
+
+Concept Models may be drafted during Product Discovery when stable product understanding emerges, but documenting one concept does not automatically make the next Concept Model the next active focus.
+
+Before suggesting the next active focus after a concept artifact is documented, the assistant must check unresolved Product Discovery tracks, relevant Parking Lot items, Product State, and the Product Development Map.
+
+The default next focus should remain in Product Discovery if important discovery tracks are still unresolved.
 
 ### UX / Design Exploration
 
@@ -93,6 +105,26 @@ Relevant topics that should not interrupt the current planning round.
 
 Parking Lot items should have a lifecycle: Captured, Scheduled, In Progress, Resolved, Rejected, or Moved to Artifact.
 
+## Discovery Tracks And Concept Models
+
+Product Discovery tracks and Concept Models are related but not identical.
+
+Discovery tracks explore product problems, roles, perspectives, emotional goals, and capability needs.
+
+Concept Models organize stable discovery understanding into reusable product capability models.
+
+Concept Models are still pre-UX, pre-specification, and pre-engineering artifacts. They stabilize the conceptual logic of a product capability before UX / Design Exploration.
+
+A Concept Model may be created during Product Discovery, but it must have at least one of:
+
+- explicit discovery source/support
+- a clearly identified discovery track it belongs to
+- a clear statement that it is a cross-cutting synthesis from multiple discovery tracks
+
+A Concept Model should not be promoted as the next active focus merely because it appears next in the Product Development Map.
+
+The Product Development Map should not imply that role/perspective discovery and capability concepts are unrelated dimensions. Future map cleanup may show role/perspective discovery tracks, product capability discovery tracks, and concept model artifacts derived from them.
+
 ## Documentation Philosophy
 
 Documentation should help future conversations resume with less friction.
@@ -102,6 +134,29 @@ It should not pretend uncertainty is resolved. It should make the state of uncer
 When useful, the assistant may look for online examples, comparable products, UX patterns, and market precedents to support reasoning. These references should inform judgment, not replace product ownership.
 
 Before saying a PR, document, or artifact is approved, mergeable, rejected, or complete, the assistant must read the actual artifact where possible, compare it to the request and relevant committed directions, and state what was checked.
+
+## Product State And Map Consistency
+
+When a meaningful planning or documentation change occurs, the assistant must check whether the following need updates:
+
+- Product State
+- Product Development Map
+- relevant product artifacts
+- Open Questions
+- Parking Lot items
+- Next Suggested Focus
+- Active Focus
+- status labels
+- related concept/discovery documents
+- Product Principles or other synthesis documents, if stable principles emerged
+
+The assistant should not update only the artifact that was directly edited if the change affects navigation, status, focus, or related documentation.
+
+The Product Development Map is a high-level product development navigation map. It is not a backlog or delivery roadmap.
+
+Use the map to show the wider route, prevent premature jumps, and check focus changes, phase closures, concept artifact documentation, and next-focus proposals.
+
+Framework maintenance should not be confused with product development progress unless it is explicitly tracked as meta-work.
 
 ## Planning Round Outcomes
 
