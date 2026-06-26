@@ -208,7 +208,7 @@ The parent controls motivational tools. The system should not automatically diag
 The detailed Motivation Layer Model belongs later to:
 `docs/product/concepts/motivation-toolbox.md`
 
-See the `Motivation Layer Model` Parking Lot item in `docs/ai-collaboration/state/product-state.md`.
+See the `Motivation Layer Model` Parking Lot item in `docs/product/state/product-state.md`.
 
 ## Explicitly Out Of Scope / Not MVP
 

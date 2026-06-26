@@ -19,11 +19,11 @@ This document describes the overall collaboration model. Mode-specific rules liv
 
 Conversation state lives in:
 
-- [Product State](state/product-state.md)
+- [Product State](../product/state/product-state.md)
 
-Product State currently lives under `docs/ai-collaboration/` for continuity with the framework.
+`docs/ai-collaboration/` contains the generic AI Collaboration Framework.
 
-Product-specific planning state conceptually belongs with product documentation. A later cleanup may relocate Product State under `docs/product/`; if that happens, all framework links, bootstrap prompts, and planning references must be updated together.
+Product-specific planning state lives with product documentation at `docs/product/state/product-state.md` so it can evolve with the product while still being governed by this framework.
 
 The wider planning path lives in:
 

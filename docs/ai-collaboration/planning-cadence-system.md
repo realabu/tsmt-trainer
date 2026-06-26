@@ -83,7 +83,7 @@ At the end of a planning round, propose which Parking Lot items should be:
 
 ## Product State As Navigation Center
 
-[product-state.md](state/product-state.md) is the navigation center for planning work.
+[product-state.md](../product/state/product-state.md) is the navigation center for planning work.
 
 It should help a future thread quickly understand:
 

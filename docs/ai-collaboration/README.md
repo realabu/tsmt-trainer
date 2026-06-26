@@ -105,7 +105,7 @@ Use the mode documents to keep the conversation at the right abstraction level:
 
 Maintain shared planning state here:
 
-- [Product State](state/product-state.md)
+- [Product State](../product/state/product-state.md)
 
 Record stable decisions with:
 
