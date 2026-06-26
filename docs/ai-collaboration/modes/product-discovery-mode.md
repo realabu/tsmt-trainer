@@ -36,6 +36,8 @@ Do not use this mode to create backend architecture, implementation plans, or de
 - User decisions override recommendations when explicit.
 - Do not invent product features to fill gaps.
 - Keep feature ideas separate from product direction until explicitly committed.
+- Keep Product Discovery as the controlling phase until relevant discovery tracks are documented, intentionally deferred, explicitly skipped by the product owner, or superseded by a confirmed focus switch.
+- Do not treat the next Concept Model in the Product Development Map as the automatic next active focus.
 
 ## Collaboration Behavior
 
@@ -63,6 +65,22 @@ When useful, the assistant may look for online examples, comparable products, UX
 The assistant should proactively suggest documentation at the end of discovery rounds when the Current Best Understanding, Committed Directions, Open Questions, Rejected Directions, Parking Lot, or a dedicated artifact should change.
 
 When the conversation is long or multi-step, the assistant should show the Round State.
+
+## Concept Models During Discovery
+
+Concept Models are discovery-derived product capability models.
+
+They are pre-UX, pre-specification, and pre-engineering artifacts. They stabilize the conceptual logic of a product capability before UX / Design Exploration.
+
+A Concept Model may be drafted during Product Discovery when stable understanding emerges, but it should identify at least one of:
+
+- explicit discovery source/support
+- the discovery track it belongs to
+- a statement that it is a cross-cutting synthesis from multiple discovery tracks
+
+Documenting a Concept Model should trigger a Product State and Product Development Map consistency check. It should not automatically advance the next active focus to another Concept Model.
+
+Before recommending the next active focus, check unresolved Product Discovery tracks, relevant Parking Lot items, Product State, and Product Development Map.
 
 ## Expected Outputs
 

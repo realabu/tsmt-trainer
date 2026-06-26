@@ -34,6 +34,10 @@ explore
 
 The goal is not to force a decision every time. The goal is to make the state of the work clearer than it was before.
 
+During Product Discovery, closing or documenting a Concept Model does not automatically advance the active focus to the next Concept Model.
+
+Before defining the next focus, check unresolved Product Discovery tracks, relevant Parking Lot items, Product State, and the Product Development Map.
+
 ## Round State Model
 
 Round states:
@@ -121,6 +125,10 @@ Update the [Product Development Map](../product/product-development-map.md) when
 
 Use the map to decide whether the next focus should continue the current phase, move to a related discovery topic, or wait before jumping into UX, specification, or engineering.
 
+The map is a high-level navigation map, not a backlog or delivery roadmap. It should be checked when focus changes, phases close, concept artifacts are documented, or the next focus is proposed.
+
+Framework maintenance should not be treated as product development progress unless it is explicitly tracked as meta-work.
+
 ## Planning Round Closure
 
 Planning round closure should include:
@@ -130,6 +138,22 @@ Planning round closure should include:
 - documentation recommendation
 - Parking Lot update
 - next focus
+
+Before closing a planning round or recommending a documentation PR as complete, check:
+
+- Did Current Best Understanding change?
+- Did a Committed Direction change or emerge?
+- Did an Open Question become resolved, rejected, deferred, or stale?
+- Did a Parking Lot item change status or become important enough to preserve elsewhere?
+- Did Active Focus change?
+- Did Next Suggested Focus change?
+- Did the abstraction level or operating mode change?
+- Does Product Development Map need a status or structure update?
+- Does Product State need to be updated?
+- Did any related artifact become stale?
+- Did a new Product Principle emerge?
+- Is the next suggested focus still consistent with unresolved discovery work?
+- Are we accidentally moving from discovery to concept, UX, specification, or engineering without an explicit confirmed mode/focus switch?
 
 ## When To Start A New Thread
 
