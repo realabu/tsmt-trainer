@@ -12,7 +12,7 @@ Use this with:
 - [Product Discovery Mode](modes/product-discovery-mode.md)
 - [UX / Design Mode](modes/ux-design-mode.md)
 - [Engineering Mode](modes/engineering-mode.md)
-- [Product State](state/product-state.md)
+- [Product State](../product/state/product-state.md)
 - [Thread Start Template](templates/thread-start-template.md)
 - [Product Development Map](../product/product-development-map.md)
 
@@ -178,7 +178,7 @@ Framework docs to use:
 - docs/ai-collaboration/product-development-framework.md
 - docs/ai-collaboration/discovery-facilitator-system.md
 - docs/ai-collaboration/modes/product-discovery-mode.md
-- docs/ai-collaboration/state/product-state.md
+- docs/product/state/product-state.md
 - docs/ai-collaboration/templates/thread-start-template.md
 
 Product Development Map:
