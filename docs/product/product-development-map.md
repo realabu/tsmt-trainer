@@ -30,15 +30,17 @@ Canonical current planning state lives in [Product State](state/product-state.md
 - Closed: finished for the current planning phase unless explicitly reopened
 - Blocked: cannot progress without missing information or a product-owner decision
 
-## Current Position
+## Current Product Position
 
 This section summarizes Product State for navigation. It should remain consistent with [Product State](state/product-state.md), but it does not replace it.
 
-- Current mode: Product Discovery / Framework and map-state cleanup
-- Current cleanup focus: Product Development Map restructure
+- Current product phase: Product Discovery
+- Product discovery status: discovery tracks require review before choosing the next product focus
 - Current product focus: Product Discovery continuation after map/state cleanup
-- Next product focus: decide after Product State cleanup and unresolved discovery track review
-- Do not proceed to Motivation Toolbox concept work, UX, specification, or engineering yet.
+- Next product decision: choose the next Product Discovery track after Product State cleanup and unresolved discovery track review
+- Guardrail: do not proceed to Motivation Toolbox concept work, UX, specification, or engineering yet.
+
+Canonical active planning state lives in [Product State](state/product-state.md).
 
 ## Meta / Collaboration Framework
 

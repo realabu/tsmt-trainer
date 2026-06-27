@@ -7,19 +7,19 @@ It should help future ChatGPT and Codex threads understand the active planning f
 ## Active Focus
 
 Current planning topic:
-Product Development Map / Product State cleanup
+Product State / Product Development Map alignment cleanup
 
 Current abstraction level:
-Product Discovery / Map-State Cleanup
+Product Discovery / Documentation State Cleanup
 
 Current planning round:
-Restructuring the Product Development Map after moving Product State under product documentation
+Aligning Product State with the redesigned Product Development Map and reviewing unresolved discovery tracks before choosing the next product focus.
 
 Blocked by:
 None
 
 Next suggested step:
-Clean up Product State and review unresolved discovery tracks before choosing the next product focus.
+Complete Product State cleanup, then choose the next Product Discovery track to continue. Do not proceed to Motivation Toolbox concept work until unresolved discovery tracks and discovery support are reviewed.
 
 ## Round State
 
@@ -47,6 +47,8 @@ The first responsibility of the product is therefore progress understanding.
 Motivational systems are secondary and build on top of this foundation.
 
 The Progress Understanding System is documented at `docs/product/concepts/progress-understanding-system.md` for the current Product Discovery / Concept Model level.
+
+Motivation Toolbox remains a captured candidate Concept Model. It is not the active next concept focus until discovery support and unresolved Product Discovery tracks are reviewed.
 
 ## Committed Directions
 
@@ -121,16 +123,80 @@ Missed practice may delay progress but should not create regression or loss.
 
 ## Exploration Zone
 
-- Motivation Toolbox concept model
-- Parent guidance philosophy
-- Theme system
-- Badge philosophy
-- Story system
-- Physical reward integration
+- Role / Perspective Discovery review
+- Product Capability Discovery review
+- Product Synthesis candidates
+- Motivation / Reinforcement Discovery support review
+- Motivation Toolbox as a captured candidate Concept Model, not active concept work
 
 ## Open Questions
 
+- Which Product Discovery track should become the next active focus?
+- Should Parent Experience Discovery remain Clarifying, move toward Documented, or be split between role discovery and future concept work?
+- Which captured Product Principles should later be synthesized into a dedicated artifact?
 - How should optional motivational tools be recommended to parents?
+
+## Emerging Product Principles
+
+These principles are captured from prior Product Discovery and concept work. They are not yet a dedicated Product Principles artifact.
+
+- Progress understanding first.
+- Foundation before motivation.
+- Positive reinforcement only.
+- No punitive child-facing weekly rhythm.
+- Parent-curated motivation layers.
+- Product should not become a family calendar.
+- TSMT weekly rhythm matters and cannot simply be compressed later.
+- Child-facing progress should avoid failure and shame pressure.
+- Self-comparison means comparing the child to their own prior performance, never to other children.
+- Concept Models remain reopenable if later discovery changes assumptions.
+
+## Product Development Map Alignment
+
+Current map position:
+Product Discovery remains the controlling phase.
+
+Role / Perspective Discovery:
+
+- Child Experience Discovery: Documented
+- Parent Experience Discovery: Clarifying
+- Trainer Experience Discovery: Captured
+- Cross-role Interaction Discovery: Captured
+
+Product Capability Discovery:
+
+- Progress / Completion / Understanding Discovery: Documented
+- Motivation / Reinforcement Discovery: Captured
+- Execution / Practice Support Discovery: Captured
+- Meaning / Education Discovery: Not Started
+- Physical / Digital Hybrid Discovery: Not Started
+- Parent Practice Review & Notes Discovery: Captured
+- Self-Comparison / Progress Quality Discovery: Captured
+
+Product Synthesis:
+
+- Product Vision Synthesis: Not Started
+- Product Principles: Captured
+- MVP Boundary Synthesis: Not Started
+
+Concept Models:
+
+- Progress Understanding System: Documented
+- Motivation Toolbox: Captured
+- Execution Support System: Captured
+- Meaning & Education System: Not Started
+- Physical / Digital Hybrid System: Not Started
+- Parent Practice Review & Notes: Captured
+- Self-Comparison / Progress Quality: Captured
+
+Downstream phases:
+UX / Design, Specification, and Engineering remain Not Started.
+
+## Parent Experience Discovery Status
+
+Parent Experience Discovery has a documented artifact at `docs/product/discovery/parent-experience-discovery.md`, but its status remains Clarifying.
+
+It should be reviewed before being treated as closed because parent review, notes, correction, shared progress, and motivation-layer concerns may belong partly to Parent Experience Discovery and partly to future Product Capability Discovery or Concept Model work.
 
 ## Rejected Directions
 
@@ -178,7 +244,7 @@ Suggested future artifact:
 Resolution notes:
 _To be added when this item is scheduled, resolved, rejected, or moved to an artifact._
 
-### Cross-role interaction model
+### Cross-role Interaction Discovery
 
 Status:
 Captured
@@ -198,7 +264,7 @@ _To be determined._
 Resolution notes:
 _To be added when this item is scheduled, resolved, rejected, or moved to an artifact._
 
-### Motivation Layer Model
+### Motivation Layer Model / Motivation Toolbox
 
 Status:
 Captured
@@ -230,13 +296,13 @@ Candidate layers to explore:
 - Other optional motivational tools
 
 Suggested future mode:
-Product Discovery / Concept Model Discovery
+Product Discovery / Product Capability Discovery, then Concept Model work only after discovery support is reviewed
 
 Suggested future artifact:
 `docs/product/concepts/motivation-toolbox.md`
 
 Resolution notes:
-Move to the Motivation Toolbox concept model when that concept is actively explored.
+Keep captured. Do not start active Motivation Toolbox concept work until unresolved Product Discovery tracks and discovery support are reviewed.
 
 ### Guided Training Manager Attention Layer
 
@@ -262,7 +328,7 @@ Current captured understanding:
 - This belongs to a later Execution Support System / UX interaction design round.
 
 Suggested future mode:
-UX / Design Exploration, after Execution Support System concept exploration
+Product Discovery / Product Capability Discovery, then UX / Design Exploration only after Execution Support System concept exploration
 
 Suggested future artifact:
 `docs/product/concepts/execution-support-system.md` or a later Training Manager UX artifact
@@ -333,11 +399,14 @@ Keep parked until measurement, progress quality, or self-comparison becomes an a
 
 ## Next Suggested Focus
 
-Explore the Motivation Toolbox concept model.
+Review unresolved Product Discovery tracks and choose the next Product Discovery focus.
 
-Focus on:
+Candidate next discovery focuses:
 
-- how optional motivation layers build on documented progress understanding
-- how the parent controls when optional layers become available
-- how motivation remains consistent with Positive Reinforcement Only
-- which questions belong to later Motivation Toolbox discovery rather than the current closed round
+- Parent Experience Discovery review / closure decision
+- Trainer Experience Discovery
+- Cross-role Interaction Discovery
+- Product Principles synthesis
+- Motivation / Reinforcement Discovery support review
+
+Motivation Toolbox may remain a captured candidate Concept Model, but it is not the next active concept focus until discovery support is reviewed.
