@@ -19,6 +19,10 @@ Examples:
 - screen architecture pass
 - implementation mapping
 
+Before starting a new planning round, run the Startup Consistency Gate from the [Thread Bootstrap System](thread-bootstrap-system.md).
+
+This is the opening counterpart to the closure checklist: it checks whether Product State, Product Development Map, relevant artifacts, and next-focus guidance are fresh and consistent enough to continue from.
+
 ## Planning Loop
 
 Each planning round should follow:

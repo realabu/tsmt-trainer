@@ -24,6 +24,11 @@ Parking Lot items relevant to this thread:
 Rejected Directions:
 Current abstraction level:
 State / map consistency check:
+Startup consistency check:
+State freshness:
+State / map mismatches:
+Artifact status mismatches:
+Documentation update needed before planning:
 Requested output:
 Evidence required before decisions:
 What not to do:

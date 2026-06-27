@@ -98,6 +98,29 @@ In Engineering mode, committed product/UX direction and current code reality mus
 
 Examples and templates are illustrative only. They must not override explicit user instruction, current Product State, or the Product Development Map.
 
+## Startup Consistency Gate
+
+Before starting a new planning round, ChatGPT should check whether the documented state is fresh, internally consistent, and safe to continue from.
+
+Check:
+
+- whether Active Focus still reflects the current work
+- whether Round State is still accurate
+- whether Next Suggested Focus is still consistent with Product State, Product Development Map, Open Questions, and Parking Lot
+- whether Product State and Product Development Map agree on phase, statuses, active focus, and downstream readiness
+- whether relevant product artifacts agree with Product State and Product Development Map status
+- whether recently completed documentation or framework cleanup left stale wording in Product State, Product Development Map, bootstrap examples, or related framework docs
+- whether open questions are truly blocking, already resolved, intentionally deferred, or should move to Parking Lot
+- whether any Concept Model is being treated as active next focus without discovery support
+- whether the conversation is about product-development state or framework/documentation cleanup state
+
+If inconsistencies are found:
+
+- do not start the next planning round yet
+- state the inconsistency
+- recommend the smallest safe documentation alignment update
+- only recommend a next planning focus after the state is safe to continue from, or clearly mark the recommendation as provisional
+
 ## Bootstrap Prompt Structure
 
 A bootstrap prompt should usually include:
@@ -119,6 +142,11 @@ Parking Lot:
 Rejected Directions:
 Current abstraction level:
 State / map consistency check:
+Startup consistency check:
+State freshness:
+State / map mismatches:
+Artifact status mismatches:
+Documentation update needed before planning:
 Requested output:
 Evidence required before decisions:
 Rules for this thread:
@@ -151,6 +179,7 @@ At the start of a new thread, ChatGPT should:
 - list open questions
 - check Parking Lot for relevant items
 - check whether Product State and Product Development Map are consistent before accepting Active Focus or Next Suggested Focus as stable
+- run the Startup Consistency Gate before starting a new planning round
 - identify whether the current round is still active, ready to review, ready to close, or should move to next focus
 - check unresolved Product Discovery tracks before recommending the next Concept Model
 - distinguish product-development position from framework or documentation cleanup position
@@ -242,8 +271,23 @@ Reconstruct from Product State and the selected mode.
 State / map consistency check:
 Before recommending the next step, check whether Product State and Product Development Map agree on active focus, round state, Product Discovery status, captured Concept Models, and downstream UX/spec/engineering status.
 
+Startup consistency check:
+Before starting a new planning round, report whether the documented state is fresh, internally consistent, and safe to continue from. Check Active Focus, Round State, Next Suggested Focus, Product State, Product Development Map, relevant artifacts, Open Questions, Parking Lot, captured Concept Models, and whether the conversation is about product-development state or framework/documentation cleanup state.
+
+State freshness:
+State whether Product State and Product Development Map appear current enough to continue from.
+
+State / map mismatches:
+List any mismatch between Product State and Product Development Map, or say none found.
+
+Artifact status mismatches:
+List any mismatch between product artifacts and their recorded status, or say none found.
+
+Documentation update needed before planning:
+If alignment is needed, recommend the smallest safe documentation update before planning. If no update is needed, say that planning can continue from the reconstructed state.
+
 Requested output:
-Recommend the next planning step according to the AI Collaboration Framework. If context is incomplete, ask only for critical missing information.
+Recommend the next planning step according to the AI Collaboration Framework. If documentation alignment is needed, recommend that before starting the next planning round. If context is incomplete, ask only for critical missing information.
 
 Evidence required before decisions:
 Before saying a PR, document, or artifact is approved, mergeable, rejected, or complete, read the actual artifact where possible, compare it to the request and committed directions, and state what was checked.
