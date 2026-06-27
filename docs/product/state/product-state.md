@@ -7,19 +7,19 @@ It should help future ChatGPT and Codex threads understand the active planning f
 ## Active Focus
 
 Current planning topic:
-Product State / Product Development Map alignment cleanup
+Product Discovery next-focus selection
 
 Current abstraction level:
-Product Discovery / Documentation State Cleanup
+Product Discovery / Planning Navigation
 
 Current planning round:
-Aligning Product State with the redesigned Product Development Map and reviewing unresolved discovery tracks before choosing the next product focus.
+Reviewing Product State and Product Development Map after framework cleanup to choose the next Product Discovery focus.
 
 Blocked by:
 None
 
 Next suggested step:
-Complete Product State cleanup, then choose the next Product Discovery track to continue. Do not proceed to Motivation Toolbox concept work until unresolved discovery tracks and discovery support are reviewed.
+Use Product State, Product Development Map, and relevant discovery artifacts to decide whether any discovery track should be closed, continued, or started next. Do not proceed to Motivation Toolbox concept work until unresolved discovery tracks and discovery support are reviewed.
 
 ## Round State
 

@@ -8,6 +8,7 @@ Use this with:
 
 - [AI Collaboration Framework](README.md)
 - [Product Development Framework](product-development-framework.md)
+- [Planning Cadence System](planning-cadence-system.md)
 - [Discovery Facilitator System](discovery-facilitator-system.md)
 - [Product Discovery Mode](modes/product-discovery-mode.md)
 - [UX / Design Mode](modes/ux-design-mode.md)
@@ -57,10 +58,16 @@ ChatGPT:
 - generates a thread bootstrap prompt when asked
 - identifies missing context
 - asks for only critical missing information
+- reconstructs state before planning
 - reconstructs Current Best Understanding
 - separates committed direction from exploration
 - protects the selected operating mode
+- reads Product State and Product Development Map when repository access exists and the user asks to use the repository or framework
 - checks Product Development Map and Parking Lot before starting a new planning round
+- checks whether Product State and Product Development Map are consistent before accepting Active Focus or Next Suggested Focus as stable
+- checks unresolved Product Discovery tracks before recommending the next Concept Model
+- distinguishes product-development position from framework or documentation cleanup position
+- avoids treating captured Concept Models as active next focus unless Product State and the framework support that
 - includes a compact status block at the beginning of planning responses when useful
 - avoids premature closure
 
@@ -89,6 +96,31 @@ In Product Discovery mode, product truth is more important than current code rea
 
 In Engineering mode, committed product/UX direction and current code reality must both be considered.
 
+Examples and templates are illustrative only. They must not override explicit user instruction, current Product State, or the Product Development Map.
+
+## Startup Consistency Gate
+
+Before starting a new planning round, ChatGPT should check whether the documented state is fresh, internally consistent, and safe to continue from.
+
+Check:
+
+- whether Active Focus still reflects the current work
+- whether Round State is still accurate
+- whether Next Suggested Focus is still consistent with Product State, Product Development Map, Open Questions, and Parking Lot
+- whether Product State and Product Development Map agree on phase, statuses, active focus, and downstream readiness
+- whether relevant product artifacts agree with Product State and Product Development Map status
+- whether recently completed documentation or framework cleanup left stale wording in Product State, Product Development Map, bootstrap examples, or related framework docs
+- whether open questions are truly blocking, already resolved, intentionally deferred, or should move to Parking Lot
+- whether any Concept Model is being treated as active next focus without discovery support
+- whether the conversation is about product-development state or framework/documentation cleanup state
+
+If inconsistencies are found:
+
+- do not start the next planning round yet
+- state the inconsistency
+- recommend the smallest safe documentation alignment update
+- only recommend a next planning focus after the state is safe to continue from, or clearly mark the recommendation as provisional
+
 ## Bootstrap Prompt Structure
 
 A bootstrap prompt should usually include:
@@ -97,8 +129,10 @@ A bootstrap prompt should usually include:
 Repository:
 Mode:
 Framework docs to use:
-Product Development Map:
-Current focus:
+Product documents to read:
+Product Development Map position:
+Product State summary:
+Active Focus:
 Round State:
 Current Best Understanding:
 Committed Directions:
@@ -107,11 +141,16 @@ Open Questions:
 Parking Lot:
 Rejected Directions:
 Current abstraction level:
+State / map consistency check:
+Startup consistency check:
+State freshness:
+State / map mismatches:
+Artifact status mismatches:
+Documentation update needed before planning:
 Requested output:
 Evidence required before decisions:
 Rules for this thread:
 What not to do:
-Relevant source documents:
 Missing context to ask for if needed:
 ```
 
@@ -130,13 +169,21 @@ If the correct mode is unclear, ask ChatGPT to recommend a mode before starting 
 At the start of a new thread, ChatGPT should:
 
 - identify the mode
+- reconstruct state before planning
 - identify the current abstraction level
 - identify the Product Development Map position
+- summarize Product State
 - identify the Round State
 - summarize Current Best Understanding
 - separate committed decisions from exploratory ideas
 - list open questions
 - check Parking Lot for relevant items
+- check whether Product State and Product Development Map are consistent before accepting Active Focus or Next Suggested Focus as stable
+- run the Startup Consistency Gate before starting a new planning round
+- identify whether the current round is still active, ready to review, ready to close, or should move to next focus
+- check unresolved Product Discovery tracks before recommending the next Concept Model
+- distinguish product-development position from framework or documentation cleanup position
+- avoid treating captured Concept Models as active next focus unless Product State and the framework support that
 - identify what source docs should be read or pasted
 - ask for only missing critical context
 - then continue from the reconstructed state
@@ -173,46 +220,74 @@ https://github.com/realabu/tsmt-trainer
 Mode:
 Product Discovery
 
+If the mode is not explicit in my request, identify the intended mode from Product State and the Product Development Map before planning.
+
 Framework docs to use:
 - docs/ai-collaboration/README.md
 - docs/ai-collaboration/product-development-framework.md
+- docs/ai-collaboration/planning-cadence-system.md
 - docs/ai-collaboration/discovery-facilitator-system.md
 - docs/ai-collaboration/modes/product-discovery-mode.md
-- docs/product/state/product-state.md
 - docs/ai-collaboration/templates/thread-start-template.md
 
-Product Development Map:
-Use docs/product/product-development-map.md to identify the current map position and avoid jumping ahead.
+Product documents to read:
+- docs/product/state/product-state.md
+- docs/product/product-development-map.md
+- any product discovery or concept artifacts referenced by Product State or the Product Development Map
 
-Current focus:
-TSMT Trainer MVP planning.
+Product Development Map position:
+Read the current map position from docs/product/product-development-map.md.
+
+Product State summary:
+Read and summarize docs/product/state/product-state.md.
+
+Active Focus:
+Reconstruct from current Product State. Do not rely on this example as the focus.
 
 Round State:
-Exploring
+Reconstruct from current Product State and the Planning Cadence System.
 
 Current Best Understanding:
-Use the current Product State if available. Preserve the product north star: product vision, emotional goals, core user problems, and the difference between product direction and feature ideas.
+Use current Product State and relevant product artifacts. Preserve the product north star: product vision, emotional goals, core user problems, and the difference between product direction and feature ideas.
 
 Committed Directions:
-Use only decisions explicitly recorded in Product State or provided in this prompt.
+Use only decisions explicitly recorded in Product State, Product Development Map, relevant product artifacts, or provided in my current instruction.
 
 Exploration Zone:
-MVP boundaries, motivation principles, user problems, and possible product directions.
+Reconstruct from Product State. Separate active exploration from captured future work.
 
 Open Questions:
-Identify open questions from Product State or ask for critical missing context.
+Identify unresolved questions from Product State and relevant artifacts.
 
 Parking Lot:
 Check Product State for Parking Lot items before starting. Capture new relevant topics there instead of switching focus silently.
 
 Rejected Directions:
-Use only directions explicitly marked as rejected.
+Use only directions explicitly marked as rejected in Product State, Product Development Map, relevant artifacts, or my current instruction.
 
 Current abstraction level:
-Product strategy and MVP definition, not UX screen design or implementation.
+Reconstruct from Product State and the selected mode.
+
+State / map consistency check:
+Before recommending the next step, check whether Product State and Product Development Map agree on active focus, round state, Product Discovery status, captured Concept Models, and downstream UX/spec/engineering status.
+
+Startup consistency check:
+Before starting a new planning round, report whether the documented state is fresh, internally consistent, and safe to continue from. Check Active Focus, Round State, Next Suggested Focus, Product State, Product Development Map, relevant artifacts, Open Questions, Parking Lot, captured Concept Models, and whether the conversation is about product-development state or framework/documentation cleanup state.
+
+State freshness:
+State whether Product State and Product Development Map appear current enough to continue from.
+
+State / map mismatches:
+List any mismatch between Product State and Product Development Map, or say none found.
+
+Artifact status mismatches:
+List any mismatch between product artifacts and their recorded status, or say none found.
+
+Documentation update needed before planning:
+If alignment is needed, recommend the smallest safe documentation update before planning. If no update is needed, say that planning can continue from the reconstructed state.
 
 Requested output:
-Produce clarified direction, open questions, and next suggested focus. Do not produce implementation tasks.
+Recommend the next planning step according to the AI Collaboration Framework. If documentation alignment is needed, recommend that before starting the next planning round. If context is incomplete, ask only for critical missing information.
 
 Evidence required before decisions:
 Before saying a PR, document, or artifact is approved, mergeable, rejected, or complete, read the actual artifact where possible, compare it to the request and committed directions, and state what was checked.
@@ -221,6 +296,7 @@ Rules for this thread:
 - Follow the One Active Focus Rule.
 - Preserve controlled ambiguity until there is enough confidence to commit.
 - Distinguish exploration from commitment.
+- Check unresolved Product Discovery tracks before recommending the next Concept Model.
 - Reason holistically and surface tradeoffs.
 - Challenge assumptions respectfully.
 - Classify new topics as current focus, parking lot, candidate focus switch, or unrelated.
@@ -232,9 +308,8 @@ What not to do:
 - Do not assume screens too early.
 - Do not let current code dictate future product direction.
 - Do not turn feature ideas into committed product direction without an explicit decision.
-
-Relevant source documents:
-Read or use the relevant Product State and Product Discovery mode docs. If you cannot access them, ask me to paste or summarize them.
+- Do not treat captured Concept Models as active next focus unless Product State and the framework support that.
+- Do not make repository changes unless I explicitly ask for documentation or code changes.
 
 Missing context to ask for if needed:
 Ask only for context that is critical to continue the planning round.

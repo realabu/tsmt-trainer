@@ -123,7 +123,7 @@ A Concept Model may be created during Product Discovery, but it must have at lea
 
 A Concept Model should not be promoted as the next active focus merely because it appears next in the Product Development Map.
 
-The Product Development Map should not imply that role/perspective discovery and capability concepts are unrelated dimensions. Future map cleanup may show role/perspective discovery tracks, product capability discovery tracks, and concept model artifacts derived from them.
+The Product Development Map shows role/perspective discovery tracks, product capability discovery tracks, and concept model artifacts derived from discovery understanding.
 
 ## Documentation Philosophy
 
