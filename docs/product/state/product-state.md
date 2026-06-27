@@ -7,24 +7,24 @@ It should help future ChatGPT and Codex threads understand the active planning f
 ## Active Focus
 
 Current planning topic:
-Motivation Toolbox
+Product Development Map / Product State cleanup
 
 Current abstraction level:
-Product Discovery / Concept Model
+Product Discovery / Map-State Cleanup
 
 Current planning round:
-Preparing Motivation Toolbox concept exploration after documenting the Progress Understanding System
+Restructuring the Product Development Map after moving Product State under product documentation
 
 Blocked by:
 None
 
 Next suggested step:
-Explore how optional motivation layers build on the documented Progress Understanding System.
+Clean up Product State and review unresolved discovery tracks before choosing the next product focus.
 
 ## Round State
 
 Current round state:
-Documented
+Documenting
 
 ## Current Best Understanding
 
