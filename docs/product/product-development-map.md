@@ -4,47 +4,188 @@
 
 This document provides a visible high-level map of the route from discovery to implementation.
 
-It is not a delivery roadmap or backlog.
+It is a product development navigation map.
 
-It is a planning navigation map.
+It is not:
+
+- a delivery roadmap
+- a backlog
+- a substitute for Product State
+
+Use this map to show where product planning currently stands, prevent premature jumps across abstraction levels, and keep Product Discovery, Concept Models, UX / Design, Specification, and Engineering in the right order.
+
+This map is governed by the [AI Collaboration Framework](../ai-collaboration/README.md).
+
+Canonical current planning state lives in [Product State](state/product-state.md).
 
 ## Status Legend
 
-- Not Started
-- Exploring
-- Clarifying
-- Ready to Document
-- Documented
-- Closed
-- Blocked
+- Not Started: no meaningful discovery or artifact exists yet
+- Captured: a topic is parked or noted, but not actively explored or documented as an artifact
+- Exploring: active discovery or concept exploration is underway
+- Clarifying: a discovery capture or artifact exists, but important review or synthesis remains
+- Ready to Document: enough understanding exists to create or update an artifact
+- Documented: documented at the current abstraction level
+- Deferred: intentionally postponed and not part of the current planning focus
+- Closed: finished for the current planning phase unless explicitly reopened
+- Blocked: cannot progress without missing information or a product-owner decision
 
-## Map
+## Current Position
 
-### Framework / Collaboration System
+This section summarizes Product State for navigation. It should remain consistent with [Product State](state/product-state.md), but it does not replace it.
 
-- AI Collaboration Framework: Documented
-- Thread Bootstrap System: Documented
-- Planning Cadence System: Documented
-- Discovery Facilitator System: In Progress
+- Current mode: Product Discovery / Framework and map-state cleanup
+- Current cleanup focus: Product Development Map restructure
+- Current product focus: Product Discovery continuation after map/state cleanup
+- Next product focus: decide after Product State cleanup and unresolved discovery track review
+- Do not proceed to Motivation Toolbox concept work, UX, specification, or engineering yet.
 
-### Product Discovery
+## Meta / Collaboration Framework
+
+AI Collaboration Framework documentation lives under `docs/ai-collaboration/`.
+
+Framework maintenance is meta-work, not TSMT Trainer product development progress.
+
+This Product Development Map tracks the TSMT Trainer product development path.
+
+## Product Discovery
+
+Product Discovery remains the controlling phase until relevant discovery tracks are documented, intentionally deferred, explicitly skipped by the product owner, or superseded by a confirmed focus switch.
+
+### Role / Perspective Discovery
 
 - Child Experience Discovery: Documented
+  - Artifact: [Child Experience Discovery](discovery/child-experience-discovery.md)
 - Parent Experience Discovery: Clarifying
-- Trainer Experience Discovery: Not Started
-- Cross-role Interaction Model: Not Started
+  - Artifact: [Parent Experience Discovery](discovery/parent-experience-discovery.md)
+  - Note: discovery capture exists and should be reviewed before being treated as closed.
+- Trainer Experience Discovery: Captured
+  - Source: Product State Parking Lot
+  - Future artifact: `docs/product/discovery/trainer-experience-discovery.md`
+- Cross-role Interaction Discovery: Captured
+  - Source: Product State Parking Lot
+  - Note: clarify child, parent, and trainer connections without overloading role-specific documents.
+
+### Product Capability Discovery
+
+- Progress / Completion / Understanding Discovery: Documented
+  - Support: Child Experience Discovery, Parent Experience Discovery, and [Progress Understanding System](concepts/progress-understanding-system.md)
+- Motivation / Reinforcement Discovery: Captured
+  - Support: Child and Parent discovery notes plus Product State Parking Lot
+  - Note: discovery support must be reviewed before Motivation Toolbox concept work proceeds.
+- Execution / Practice Support Discovery: Captured
+  - Support: Parent Experience Discovery and Guided Training Manager Attention Layer Parking Lot item
+- Meaning / Education Discovery: Not Started
+- Physical / Digital Hybrid Discovery: Not Started
+- Parent Practice Review & Notes Discovery: Captured
+  - Source: Product State Parking Lot and Progress Understanding System related future work
+- Self-Comparison / Progress Quality Discovery: Captured
+  - Source: Product State Parking Lot and Progress Understanding System deferred work
+
+### Product Synthesis
+
 - Product Vision Synthesis: Not Started
-- Product Principles: Not Started
+- Product Principles: Captured
+  - Note: stable principles have emerged, but no dedicated synthesis artifact exists yet.
+- MVP Boundary Synthesis: Not Started
 
-### Concept Models
+## Concept Models
 
-- Progress Understanding System: Documented
-- Motivation Toolbox: Exploring
-- Execution Support System: Not Started
-- Meaning & Education System: Not Started
-- Physical/Digital Hybrid System: Not Started
+Concept Models are discovery-derived product capability artifacts.
 
-### UX / Design
+They are still pre-UX, pre-specification, and pre-engineering.
+
+A Concept Model should have discovery support, belong to a discovery track, or be marked as a cross-cutting synthesis before active concept work begins.
+
+### Progress Understanding System
+
+Concept status:
+Documented
+
+Discovery support:
+Child Experience Discovery, Parent Experience Discovery, and Progress / Completion / Understanding Discovery.
+
+Reopen condition:
+Reopen if Trainer Experience Discovery or Cross-role Interaction Discovery changes progress assumptions.
+
+Artifact:
+[Progress Understanding System](concepts/progress-understanding-system.md)
+
+### Motivation Toolbox
+
+Concept status:
+Captured
+
+Discovery support:
+Child and Parent discovery notes plus the Motivation Layer Model Parking Lot item.
+
+Missing discovery support / reopen condition:
+Review unresolved Product Discovery tracks and Product State before starting active Motivation Toolbox concept work.
+
+Future artifact:
+`docs/product/concepts/motivation-toolbox.md`
+
+### Execution Support System
+
+Concept status:
+Captured
+
+Discovery support:
+Parent Experience Discovery and Guided Training Manager Attention Layer Parking Lot item.
+
+Missing discovery support / reopen condition:
+Requires dedicated Execution / Practice Support Discovery before UX or interaction design.
+
+Future artifact:
+`docs/product/concepts/execution-support-system.md`
+
+### Meaning & Education System
+
+Concept status:
+Not Started
+
+Discovery support:
+Not yet documented.
+
+### Physical / Digital Hybrid System
+
+Concept status:
+Not Started
+
+Discovery support:
+Not yet documented.
+
+### Parent Practice Review & Notes
+
+Concept status:
+Captured
+
+Discovery support:
+Progress Understanding System related future work and Product State Parking Lot.
+
+Missing discovery support / reopen condition:
+Requires future Product Discovery / Concept Model work before any UX exploration.
+
+Future artifact:
+`docs/product/concepts/parent-practice-review-notes.md`
+
+### Self-Comparison / Progress Quality
+
+Concept status:
+Captured
+
+Discovery support:
+Child Experience Discovery, Parent Experience Discovery, Progress Understanding System deferred work, and Product State Parking Lot.
+
+Missing discovery support / reopen condition:
+Requires later Measurement / Progress Quality / Execution Support exploration and may connect to Trainer Experience Discovery.
+
+Future artifact:
+`docs/product/concepts/progress-quality-and-self-comparison.md`
+
+## UX / Design Exploration
+
+UX / Design should not start until Product Discovery and relevant Concept Models are sufficiently documented, deferred, or explicitly skipped by the product owner.
 
 - Journey Discovery: Not Started
 - Child Journey: Not Started
@@ -54,25 +195,50 @@ It is a planning navigation map.
 - Wireframes: Not Started
 - Visual Design Direction: Not Started
 
-### Specification
+## Specification
+
+Specification should not start until relevant Product Discovery and UX / Design work are sufficiently documented, deferred, or explicitly skipped by the product owner.
 
 - MVP Definition: Not Started
 - Functional Specification: Not Started
 - Acceptance Criteria: Not Started
 
-### Engineering
+## Engineering
+
+Engineering planning should not start until committed product and UX direction are available.
 
 - Current Code Mapping: Not Started
 - Implementation Readiness Review: Not Started
 - Engineering Plan: Not Started
+- Backlog Generation: Not Started
+
+Planning readiness toward engineering backlog:
+Early
+
+## Parking Lot Visibility
+
+The detailed Parking Lot lifecycle lives in [Product State](state/product-state.md).
+
+This map should show major captured product areas only when they affect future planning. It should not list every minor idea.
+
+Major captured areas currently visible in the map:
+
+- Trainer Experience Discovery
+- Cross-role Interaction Discovery
+- Motivation Layer Model / Motivation Toolbox
+- Guided Training Manager Attention Layer
+- Parent Practice Review & Notes
+- Self-Comparison / Progress Quality
 
 ## How ChatGPT Should Use This Map
 
 ChatGPT should:
 
-- show a compact status snapshot in planning threads
-- use it to prevent jumping ahead
-- use it to decide the next focus
-- keep it updated when a major phase changes status
+- show a compact status snapshot in planning threads when useful
+- use the map to prevent jumping ahead
+- check Product State before treating active or next focus as stable
+- review unresolved discovery tracks before proposing the next Concept Model
+- keep UX / Design, Specification, and Engineering downstream unless the product owner explicitly confirms a mode/focus switch
+- keep this map updated when a major phase changes status
 
-The map should make the wider product development path visible without turning it into a delivery roadmap.
+The map should make the wider product development path visible without turning it into a delivery roadmap or backlog.
