@@ -50,6 +50,13 @@ The Progress Understanding System is documented at `docs/product/concepts/progre
 
 Motivation Toolbox remains a captured candidate Concept Model. It is not the active next concept focus until discovery support and unresolved Product Discovery tracks are reviewed.
 
+Parent Experience Discovery now distinguishes two essential parent roles:
+
+- Practice Partner during shared home practice
+- Program Owner / Setup & Review Owner outside the shared practice moment
+
+The parent is the bridge between the instructor-provided TSMT plan and a child-understandable, jointly executable digital practice experience.
+
 ## Committed Directions
 
 ### Progress Understanding First
@@ -121,18 +128,31 @@ The system:
 
 Missed practice may delay progress but should not create regression or loss.
 
+### Parent As Program Owner And Practice Partner
+
+The parent has two essential roles in TSMT Trainer.
+
+As Practice Partner, the parent helps the child start, understand, complete, and emotionally manage the shared home practice.
+
+As Program Owner / Setup & Review Owner, the parent helps transfer the instructor-provided TSMT program into the system, configures it for the child, manages child-specific setup, controls child-facing motivational layers, and later reviews or corrects practice information when needed.
+
+This is not an admin-first direction. The setup and review responsibility exists to make the shared child-parent practice experience simpler and more trustworthy.
+
 ## Exploration Zone
 
 - Role / Perspective Discovery review
 - Product Capability Discovery review
 - Product Synthesis candidates
+- Parent Experience Discovery review after parent role split update
+- Program Owner capability boundaries
 - Motivation / Reinforcement Discovery support review
 - Motivation Toolbox as a captured candidate Concept Model, not active concept work
 
 ## Open Questions
 
 - Which Product Discovery track should become the next active focus?
-- Should Parent Experience Discovery remain Clarifying, move toward Documented, or be split between role discovery and future concept work?
+- Should Parent Experience Discovery remain Clarifying or move toward Documented after reviewing the updated Practice Partner / Program Owner role split?
+- Which Program Owner responsibilities belong to parent role discovery, and which should move to future Product Capability Discovery or Concept Model work?
 - Which captured Product Principles should later be synthesized into a dedicated artifact?
 - How should optional motivational tools be recommended to parents?
 
@@ -145,6 +165,8 @@ These principles are captured from prior Product Discovery and concept work. The
 - Positive reinforcement only.
 - No punitive child-facing weekly rhythm.
 - Parent-curated motivation layers.
+- Parent as Program Owner and Practice Partner.
+- Parent setup/review responsibilities exist to support the shared child-parent practice experience, not to make the product admin-first.
 - Product should not become a family calendar.
 - TSMT weekly rhythm matters and cannot simply be compressed later.
 - Child-facing progress should avoid failure and shame pressure.
@@ -168,6 +190,10 @@ Product Capability Discovery:
 - Progress / Completion / Understanding Discovery: Documented
 - Motivation / Reinforcement Discovery: Captured
 - Execution / Practice Support Discovery: Captured
+- Program Setup / Digitization: Captured
+- Child / Family Profile Management: Captured
+- Trainer Connection / Visibility: Captured
+- Motivation Configuration: Captured
 - Meaning / Education Discovery: Not Started
 - Physical / Digital Hybrid Discovery: Not Started
 - Parent Practice Review & Notes Discovery: Captured
@@ -196,7 +222,7 @@ UX / Design, Specification, and Engineering remain Not Started.
 
 Parent Experience Discovery has a documented artifact at `docs/product/discovery/parent-experience-discovery.md`, but its status remains Clarifying.
 
-It should be reviewed before being treated as closed because parent review, notes, correction, shared progress, and motivation-layer concerns may belong partly to Parent Experience Discovery and partly to future Product Capability Discovery or Concept Model work.
+It should be reviewed before being treated as closed because the updated artifact now distinguishes the parent's Practice Partner role from the Program Owner / Setup & Review Owner role. Program setup, profile management, trainer visibility, motivation configuration, and practice review concerns may belong partly to Parent Experience Discovery and partly to future Product Capability Discovery or Concept Model work.
 
 ## Rejected Directions
 
@@ -304,6 +330,95 @@ Suggested future artifact:
 Resolution notes:
 Keep captured. Do not start active Motivation Toolbox concept work until unresolved Product Discovery tracks and discovery support are reviewed.
 
+### Program Setup / Digitization
+
+Status:
+Captured
+
+Why it matters:
+The parent may need to transfer the instructor-provided paper-based TSMT program into the system so it can become a child-understandable, jointly executable digital practice experience.
+
+Source/context:
+Captured during Parent Experience Discovery while clarifying the parent's Program Owner / Setup & Review Owner role.
+
+Current captured understanding:
+
+- The parent may capture or import the instructor-provided TSMT program.
+- The parent may check and correct an automatically suggested task set.
+- The parent may provide weekly repetition count and practice period start/end.
+- The parent may add rhymes/songs, required tools, extra execution instructions, and task purpose notes where relevant.
+- This is not an admin-first product direction.
+- Detailed behavior belongs to later Product Capability Discovery / Concept Model work.
+
+Suggested future mode:
+Product Discovery / Product Capability Discovery
+
+Suggested future artifact:
+_To be determined._
+
+Resolution notes:
+Keep captured until Program Setup / Digitization becomes an active discovery focus.
+
+### Child / Family Profile Management
+
+Status:
+Captured
+
+Why it matters:
+The parent may need to create or edit child profiles and child-specific setup so the practice experience is configured for the child.
+
+Source/context:
+Captured during Parent Experience Discovery while clarifying the parent's Program Owner / Setup & Review Owner role.
+
+Suggested future mode:
+Product Discovery / Product Capability Discovery
+
+Suggested future artifact:
+_To be determined._
+
+Resolution notes:
+Keep captured until profile management becomes an active discovery focus.
+
+### Trainer Connection / Visibility
+
+Status:
+Captured
+
+Why it matters:
+The parent may need to handle instructor visibility or connection at product-principle level, but trainer workflow details should not be specified in Parent Experience Discovery.
+
+Source/context:
+Captured during Parent Experience Discovery while clarifying the parent's Program Owner / Setup & Review Owner role.
+
+Suggested future mode:
+Product Discovery, likely connected to Trainer Experience Discovery and Cross-role Interaction Discovery
+
+Suggested future artifact:
+_To be determined._
+
+Resolution notes:
+Keep captured. Do not turn this into trainer permissions, dashboard, or implementation specification.
+
+### Motivation Configuration
+
+Status:
+Captured
+
+Why it matters:
+The parent controls which child-facing motivational layers are available, such as themes, badges, and story/narrative availability.
+
+Source/context:
+Captured during Parent Experience Discovery while clarifying the parent's Program Owner / Setup & Review Owner role.
+
+Suggested future mode:
+Product Discovery / Product Capability Discovery, then Motivation Toolbox Concept Model only after discovery support is reviewed
+
+Suggested future artifact:
+`docs/product/concepts/motivation-toolbox.md`
+
+Resolution notes:
+Keep captured. Do not start active Motivation Toolbox concept work from this Parking Lot item alone.
+
 ### Guided Training Manager Attention Layer
 
 Status:
@@ -345,10 +460,11 @@ Why it matters:
 Counted but marked practice days may later need parent review. Parents may also need a place to correct task-level completion and preserve lightweight observations without overloading the shared child-facing progress experience.
 
 Source/context:
-Captured during Progress Understanding System concept drafting while clarifying how uncertain or interrupted practice should count toward weekly and cycle progress.
+Captured during Progress Understanding System concept drafting while clarifying how uncertain or interrupted practice should count toward weekly and cycle progress. Reinforced during Parent Experience Discovery while clarifying the parent's Program Owner / Setup & Review Owner role.
 
 Current captured understanding:
 
+- A parent may manually record practice when needed.
 - A parent may later view past practice sessions and open a specific practice session.
 - A parent may review task-level measurements and mark each task completed or not completed.
 - Confirming completion may remove an uncertainty marker.
