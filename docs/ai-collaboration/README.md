@@ -125,6 +125,7 @@ Record stable decisions with:
 - Keep Product Discovery as the controlling phase until relevant discovery tracks are documented, deferred, skipped by the product owner, or superseded by a confirmed focus switch.
 - Treat Concept Models as discovery-derived capability models, not automatic next-focus targets.
 - Check Product State and Product Development Map consistency when planning rounds close or documentation PRs change navigation, status, or focus.
+- Do not leave orphaned open questions in documented artifacts; classify them as blocking, resolved, rejected, deferred, transferred, or stale.
 - Do not invent product features to fill gaps.
 - Do not create technical architecture plans during product discovery.
 - Treat explicit user decisions as authoritative unless reopened.

@@ -20,6 +20,9 @@ Current Best Understanding:
 Committed Directions:
 Exploration Zone:
 Open Questions:
+Open question lifecycle status:
+Transferred / deferred questions relevant to this thread:
+Revisit triggers matched by this active focus:
 Parking Lot items relevant to this thread:
 Rejected Directions:
 Current abstraction level:

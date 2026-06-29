@@ -38,6 +38,9 @@ Do not use this mode to create backend architecture, implementation plans, or de
 - Keep feature ideas separate from product direction until explicitly committed.
 - Keep Product Discovery as the controlling phase until relevant discovery tracks are documented, intentionally deferred, explicitly skipped by the product owner, or superseded by a confirmed focus switch.
 - Do not treat the next Concept Model in the Product Development Map as the automatic next active focus.
+- Do not leave orphaned open questions in documented Product Discovery artifacts.
+- Product Discovery artifacts may be documented with non-blocking transferred or deferred questions only if those questions have lifecycle metadata and revisit triggers.
+- Blocking questions keep the artifact in Clarifying, Exploring, or Ready to Document state.
 
 ## Collaboration Behavior
 
@@ -65,6 +68,8 @@ When useful, the assistant may look for online examples, comparable products, UX
 The assistant should proactively suggest documentation at the end of discovery rounds when the Current Best Understanding, Committed Directions, Open Questions, Rejected Directions, Parking Lot, or a dedicated artifact should change.
 
 When the conversation is long or multi-step, the assistant should show the Round State.
+
+When a Product Discovery round is ready to close, the assistant should classify each open question as blocking, resolved, rejected, deferred, transferred, or stale before recommending that an artifact become Documented.
 
 ## Concept Models During Discovery
 

@@ -107,6 +107,27 @@ ChatGPT should detect when repeated discussion has stabilized into:
 
 Stabilized understanding should be named explicitly before it is treated as committed.
 
+## Open Question Lifecycle Rule
+
+Do not leave orphaned open questions in documented artifacts.
+
+At the end of a planning round, classify each open question as:
+
+- Active / Blocking
+- Resolved
+- Rejected
+- Deferred
+- Transferred
+- Stale / Remove
+
+When proposing that an artifact can become Documented or Closed, explicitly state whether remaining questions are blocking, resolved, rejected, deferred, transferred, or stale.
+
+Blocking questions keep the artifact in Exploring, Clarifying, or Ready to Document state. They should not be hidden inside a generic `Open Questions` section of a Documented artifact.
+
+A non-blocking deferred or transferred question may remain visible only when it includes lifecycle metadata, a revisit trigger or condition, and a required future resolution action.
+
+When starting a new active focus, check prior related artifacts for transferred or deferred questions whose revisit trigger matches the focus. If a transferred question matches the active focus, treat it as part of that round's input and do not close the round without reconciling it.
+
 ## Discovery Sequencing Rule
 
 During Product Discovery, Product Discovery remains the controlling phase until the relevant discovery tracks are documented, intentionally deferred, explicitly skipped by the product owner, or superseded by a confirmed focus switch.
@@ -153,7 +174,9 @@ Before closing a planning round or recommending a documentation PR as complete, 
 
 - Did Current Best Understanding change?
 - Did a Committed Direction change or emerge?
-- Did an Open Question become resolved, rejected, deferred, or stale?
+- Did each Open Question become resolved, rejected, deferred, transferred, stale, or remain blocking?
+- Are any unclassified Open Questions still present in a documented artifact?
+- Does any deferred or transferred question need lifecycle metadata, a revisit trigger, or a target future focus?
 - Did a Parking Lot item change status or become important enough to preserve elsewhere?
 - Did Active Focus change?
 - Did Next Suggested Focus change?

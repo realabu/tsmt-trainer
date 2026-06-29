@@ -111,6 +111,10 @@ Check:
 - whether relevant product artifacts agree with Product State and Product Development Map status
 - whether recently completed documentation or framework cleanup left stale wording in Product State, Product Development Map, bootstrap examples, or related framework docs
 - whether open questions are truly blocking, already resolved, intentionally deferred, or should move to Parking Lot
+- whether any relevant documented artifacts contain transferred or deferred open questions
+- whether any transferred question has a revisit trigger matching the new active focus
+- whether matching transferred or deferred questions must be loaded into the current round
+- whether Product State, Product Development Map, or the current artifact are missing lifecycle metadata for open questions
 - whether any Concept Model is being treated as active next focus without discovery support
 - whether the conversation is about product-development state or framework/documentation cleanup state
 
@@ -120,6 +124,8 @@ If inconsistencies are found:
 - state the inconsistency
 - recommend the smallest safe documentation alignment update
 - only recommend a next planning focus after the state is safe to continue from, or clearly mark the recommendation as provisional
+
+If matching transferred or deferred questions exist, include them in the reconstructed Thread Start Context and treat them as active inputs for the round.
 
 ## Bootstrap Prompt Structure
 
@@ -138,6 +144,9 @@ Current Best Understanding:
 Committed Directions:
 Exploration Zone:
 Open Questions:
+Open question lifecycle status:
+Transferred / deferred questions relevant to this thread:
+Revisit triggers matched by this active focus:
 Parking Lot:
 Rejected Directions:
 Current abstraction level:
@@ -177,6 +186,9 @@ At the start of a new thread, ChatGPT should:
 - summarize Current Best Understanding
 - separate committed decisions from exploratory ideas
 - list open questions
+- classify open question lifecycle status where it is already documented
+- identify transferred or deferred questions relevant to the active focus
+- identify revisit triggers matched by the active focus
 - check Parking Lot for relevant items
 - check whether Product State and Product Development Map are consistent before accepting Active Focus or Next Suggested Focus as stable
 - run the Startup Consistency Gate before starting a new planning round
@@ -257,7 +269,16 @@ Exploration Zone:
 Reconstruct from Product State. Separate active exploration from captured future work.
 
 Open Questions:
-Identify unresolved questions from Product State and relevant artifacts.
+Identify unresolved questions from Product State and relevant artifacts. Classify whether they are blocking, resolved, rejected, deferred, transferred, stale, or unclassified where the source makes this clear.
+
+Open question lifecycle status:
+Report whether relevant open questions have lifecycle metadata. If lifecycle metadata is missing from a documented artifact, flag it as a startup consistency issue.
+
+Transferred / deferred questions relevant to this thread:
+Check relevant documented artifacts for transferred or deferred questions whose revisit trigger matches this active focus. Include matching questions as inputs to this round.
+
+Revisit triggers matched by this active focus:
+List matched triggers, or say none found.
 
 Parking Lot:
 Check Product State for Parking Lot items before starting. Capture new relevant topics there instead of switching focus silently.
@@ -272,7 +293,7 @@ State / map consistency check:
 Before recommending the next step, check whether Product State and Product Development Map agree on active focus, round state, Product Discovery status, captured Concept Models, and downstream UX/spec/engineering status.
 
 Startup consistency check:
-Before starting a new planning round, report whether the documented state is fresh, internally consistent, and safe to continue from. Check Active Focus, Round State, Next Suggested Focus, Product State, Product Development Map, relevant artifacts, Open Questions, Parking Lot, captured Concept Models, and whether the conversation is about product-development state or framework/documentation cleanup state.
+Before starting a new planning round, report whether the documented state is fresh, internally consistent, and safe to continue from. Check Active Focus, Round State, Next Suggested Focus, Product State, Product Development Map, relevant artifacts, Open Questions, Parking Lot, captured Concept Models, transferred/deferred open questions, matched revisit triggers, and whether the conversation is about product-development state or framework/documentation cleanup state.
 
 State freshness:
 State whether Product State and Product Development Map appear current enough to continue from.
@@ -284,7 +305,7 @@ Artifact status mismatches:
 List any mismatch between product artifacts and their recorded status, or say none found.
 
 Documentation update needed before planning:
-If alignment is needed, recommend the smallest safe documentation update before planning. If no update is needed, say that planning can continue from the reconstructed state.
+If alignment or open-question lifecycle metadata is needed, recommend the smallest safe documentation update before planning. If no update is needed, say that planning can continue from the reconstructed state.
 
 Requested output:
 Recommend the next planning step according to the AI Collaboration Framework. If documentation alignment is needed, recommend that before starting the next planning round. If context is incomplete, ask only for critical missing information.
