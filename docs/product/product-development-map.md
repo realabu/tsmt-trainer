@@ -35,9 +35,9 @@ Canonical current planning state lives in [Product State](state/product-state.md
 This section summarizes Product State for navigation. It should remain consistent with [Product State](state/product-state.md), but it does not replace it.
 
 - Current product phase: Product Discovery
-- Product discovery status: discovery tracks require review before choosing the next product focus
-- Current product focus: Product Discovery next-focus selection
-- Next product decision: choose the next Product Discovery track after reviewing Product State, Product Development Map, and unresolved discovery tracks
+- Product discovery status: Parent Experience Discovery is documented; remaining discovery tracks still need sequencing
+- Current product focus: Parent Experience closure + next-focus handoff
+- Next product decision: start Cross-role Interaction Discovery as the next Product Discovery focus
 - Guardrail: do not proceed to Motivation Toolbox concept work, UX, specification, or engineering yet.
 
 Canonical active planning state lives in [Product State](state/product-state.md).
@@ -58,14 +58,17 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
 
 - Child Experience Discovery: Documented
   - Artifact: [Child Experience Discovery](discovery/child-experience-discovery.md)
-- Parent Experience Discovery: Clarifying
+- Parent Experience Discovery: Documented
   - Artifact: [Parent Experience Discovery](discovery/parent-experience-discovery.md)
-  - Note: discovery capture now includes Practice Partner and Program Owner / Setup & Review Owner roles; review before treating as closed.
+  - Note: documented at role / perspective level with Practice Partner and Program Owner / Setup & Review Owner roles.
+  - Transferred input: non-blocking open questions live in the source artifact and should be loaded by matching future tracks.
 - Trainer Experience Discovery: Captured
   - Source: Product State Parking Lot
+  - Transferred input: Parent Experience Discovery
   - Future artifact: `docs/product/discovery/trainer-experience-discovery.md`
 - Cross-role Interaction Discovery: Captured
   - Source: Product State Parking Lot
+  - Transferred input: Parent Experience Discovery
   - Note: clarify child, parent, and trainer connections without overloading role-specific documents.
 
 ### Product Capability Discovery
@@ -77,20 +80,27 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
   - Note: discovery support must be reviewed before Motivation Toolbox concept work proceeds.
 - Execution / Practice Support Discovery: Captured
   - Support: Parent Experience Discovery and Guided Training Manager Attention Layer Parking Lot item
+  - Transferred input: Parent Experience Discovery
 - Program Setup / Digitization: Captured
   - Support: Parent Experience Discovery and Product State Parking Lot
+  - Transferred input: Parent Experience Discovery
 - Child / Family Profile Management: Captured
   - Support: Parent Experience Discovery and Product State Parking Lot
+  - Transferred input: Parent Experience Discovery
 - Trainer Connection / Visibility: Captured
   - Support: Parent Experience Discovery and Product State Parking Lot
+  - Transferred input: Parent Experience Discovery
 - Motivation Configuration: Captured
   - Support: Parent Experience Discovery and Product State Parking Lot
+  - Transferred input: Parent Experience Discovery
 - Meaning / Education Discovery: Not Started
 - Physical / Digital Hybrid Discovery: Not Started
 - Parent Practice Review & Notes Discovery: Captured
   - Source: Product State Parking Lot and Progress Understanding System related future work
+  - Transferred input: Parent Experience Discovery
 - Self-Comparison / Progress Quality Discovery: Captured
   - Source: Product State Parking Lot and Progress Understanding System deferred work
+  - Transferred input: Parent Experience Discovery
 
 ### Product Synthesis
 

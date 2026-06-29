@@ -7,24 +7,24 @@ It should help future ChatGPT and Codex threads understand the active planning f
 ## Active Focus
 
 Current planning topic:
-Product Discovery next-focus selection
+Parent Experience closure + next-focus handoff
 
 Current abstraction level:
 Product Discovery / Planning Navigation
 
 Current planning round:
-Reviewing Product State and Product Development Map after framework cleanup to choose the next Product Discovery focus.
+Parent Experience Discovery closure documented at role / perspective level; next focus handoff prepared.
 
 Blocked by:
 None
 
 Next suggested step:
-Use Product State, Product Development Map, and relevant discovery artifacts to decide whether any discovery track should be closed, continued, or started next. Do not proceed to Motivation Toolbox concept work until unresolved discovery tracks and discovery support are reviewed.
+Start Cross-role Interaction Discovery as the next Product Discovery focus. Do not start it in this PR, and do not proceed to Motivation Toolbox concept work, UX / Design, Specification, or Engineering.
 
 ## Round State
 
 Current round state:
-Documenting
+Documented
 
 ## Current Best Understanding
 
@@ -56,6 +56,8 @@ Parent Experience Discovery now distinguishes two essential parent roles:
 - Program Owner / Setup & Review Owner outside the shared practice moment
 
 The parent is the bridge between the instructor-provided TSMT plan and a child-understandable, jointly executable digital practice experience.
+
+Parent Experience Discovery is documented at role / perspective discovery level. No blocking open questions remain in the Parent Experience artifact; remaining questions were transferred with lifecycle metadata in `docs/product/discovery/parent-experience-discovery.md`.
 
 ## Committed Directions
 
@@ -143,18 +145,17 @@ This is not an admin-first direction. The setup and review responsibility exists
 - Role / Perspective Discovery review
 - Product Capability Discovery review
 - Product Synthesis candidates
-- Parent Experience Discovery review after parent role split update
 - Program Owner capability boundaries
+- Cross-role Interaction Discovery as the recommended next Product Discovery focus
 - Motivation / Reinforcement Discovery support review
 - Motivation Toolbox as a captured candidate Concept Model, not active concept work
 
 ## Open Questions
 
-- Which Product Discovery track should become the next active focus?
-- Should Parent Experience Discovery remain Clarifying or move toward Documented after reviewing the updated Practice Partner / Program Owner role split?
-- Which Program Owner responsibilities belong to parent role discovery, and which should move to future Product Capability Discovery or Concept Model work?
 - Which captured Product Principles should later be synthesized into a dedicated artifact?
 - How should optional motivational tools be recommended to parents?
+
+Parent Experience role / perspective questions are no longer blocking or unclassified here. Transferred Parent Experience questions live in `docs/product/discovery/parent-experience-discovery.md` and should be loaded when their revisit triggers match a future active focus.
 
 ## Emerging Product Principles
 
@@ -181,7 +182,7 @@ Product Discovery remains the controlling phase.
 Role / Perspective Discovery:
 
 - Child Experience Discovery: Documented
-- Parent Experience Discovery: Clarifying
+- Parent Experience Discovery: Documented
 - Trainer Experience Discovery: Captured
 - Cross-role Interaction Discovery: Captured
 
@@ -220,9 +221,11 @@ UX / Design, Specification, and Engineering remain Not Started.
 
 ## Parent Experience Discovery Status
 
-Parent Experience Discovery has a documented artifact at `docs/product/discovery/parent-experience-discovery.md`, but its status remains Clarifying.
+Parent Experience Discovery is documented at role / perspective discovery level in `docs/product/discovery/parent-experience-discovery.md`.
 
-It should be reviewed before being treated as closed because the updated artifact now distinguishes the parent's Practice Partner role from the Program Owner / Setup & Review Owner role. Program setup, profile management, trainer visibility, motivation configuration, and practice review concerns may belong partly to Parent Experience Discovery and partly to future Product Capability Discovery or Concept Model work.
+The artifact now distinguishes the parent's Practice Partner role from the Program Owner / Setup & Review Owner role. No blocking open questions remain in the Parent artifact.
+
+Remaining non-blocking questions were transferred with lifecycle metadata in the source artifact. Check those transferred questions when starting Cross-role Interaction Discovery, Trainer Experience Discovery, Program Setup / Digitization, Child / Family Profile Management, Trainer Connection / Visibility, Motivation Configuration, Parent Practice Review & Notes, Self-Comparison / Progress Quality, relevant Progress / Execution / UX refinements, or MVP Boundary Synthesis.
 
 ## Rejected Directions
 
@@ -515,13 +518,14 @@ Keep parked until measurement, progress quality, or self-comparison becomes an a
 
 ## Next Suggested Focus
 
-Review unresolved Product Discovery tracks and choose the next Product Discovery focus.
+Start Cross-role Interaction Discovery as the next Product Discovery focus.
+
+Do not start Cross-role Interaction Discovery in this documentation cleanup PR.
 
 Candidate next discovery focuses:
 
-- Parent Experience Discovery review / closure decision
-- Trainer Experience Discovery
 - Cross-role Interaction Discovery
+- Trainer Experience Discovery
 - Product Principles synthesis
 - Motivation / Reinforcement Discovery support review
 
