@@ -3,10 +3,10 @@
 ## Status
 
 Current maturity:
-Discovery capture created
+Documented
 
 Confidence:
-Medium
+Medium-High
 
 Mode:
 Product Discovery
@@ -14,6 +14,12 @@ Product Discovery
 ## Scope
 
 This document captures the current shared understanding of the parent experience within TSMT Trainer.
+
+This artifact is documented at role / perspective discovery level.
+
+No open question currently blocks Parent Experience Discovery closure. Remaining non-blocking questions are transferred to future discovery, concept, or UX rounds with lifecycle metadata.
+
+Future rounds whose active focus matches a revisit trigger should load and reconcile the matching transferred question before that target round can close.
 
 It focuses on the parent's two essential roles:
 
@@ -191,7 +197,8 @@ One important child motivation mechanism is competing with oneself:
 
 This should not be framed as competition with other children.
 
-Timing should be treated carefully later during UX/product refinement because timing should not distort movement quality. Keep this as an insight and open question rather than a detailed feature specification.
+Timing should be treated carefully later during UX/product refinement because timing should not distort movement quality. Keep this as an insight and transferred lifecycle question rather than a detailed feature specification.
+The specific timing and personal-best question is transferred in the Open Question Lifecycle section.
 
 ## Shared Training Manager With Child-Owned Actions
 
@@ -287,19 +294,203 @@ This document also does not define:
 
 These responsibilities may be explored later as Product Capability Discovery or Concept Model work.
 
-## Open Questions
+## Open Question Lifecycle
 
-- How much progress information helps parents without making the experience feel analytical or heavy?
-- How should the system communicate whether today's practice matters without becoming a scheduling assistant?
-- How should timing and personal bests support motivation without distorting movement quality?
-- What is the right balance between child-owned actions and parent control during practice?
-- Which parent-facing text is genuinely useful, and which should remain invisible or optional?
-- Which Program Owner responsibilities belong in early product scope, and which should remain later capability work?
-- How should instructor visibility or connection be understood at product-principle level without becoming a trainer workflow specification?
+No open question currently blocks Parent Experience Discovery closure.
+
+The following questions are transferred / non-blocking. They should be loaded and reconciled when their target focus becomes active.
+
+### Parent-facing progress information density
+
+Question:
+How much progress information helps parents without making the experience feel analytical or heavy?
+
+Source artifact:
+`docs/product/discovery/parent-experience-discovery.md`
+
+Status:
+Transferred / non-blocking
+
+Transferred to:
+
+- Progress Understanding UX refinement
+- Parent Journey UX
+- Shared Parent-Child Progress View refinement
+
+Revisit trigger:
+When Parent Journey UX, shared progress view UX, or Progress Understanding UX refinement starts.
+
+Required future resolution action:
+Resolve into UX direction, explicitly defer with a new trigger, transfer to a more specific target, or reject before the target round closes.
+
+Reopen condition:
+Reopen Parent Experience Discovery only if later UX work changes the parent role definition, not merely the amount of information shown.
+
+### Today's practice importance without scheduling
+
+Question:
+How should the system communicate whether today's practice matters without becoming a scheduling assistant?
+
+Source artifact:
+`docs/product/discovery/parent-experience-discovery.md`
+
+Status:
+Transferred / non-blocking
+
+Transferred to:
+
+- Progress Understanding System refinement
+- Cross-role Interaction Discovery
+- Parent Journey UX
+
+Revisit trigger:
+When weekly rhythm, parent-child progress communication, or Parent Journey UX is actively explored.
+
+Required future resolution action:
+Resolve into product or UX direction, explicitly preserve the no-family-calendar boundary, or transfer to a more specific progress/weekly-rhythm artifact before the target round closes.
+
+Reopen condition:
+Reopen Parent Experience Discovery only if the product starts redefining the parent as a scheduling/planning user, which would conflict with the current boundary.
+
+### Timing, personal best, and movement quality
+
+Question:
+How should timing and personal bests support motivation without distorting movement quality?
+
+Source artifact:
+`docs/product/discovery/parent-experience-discovery.md`
+
+Status:
+Transferred / non-blocking
+
+Transferred to:
+
+- Self-Comparison / Progress Quality Discovery
+- Execution / Practice Support Discovery
+- Trainer Experience Discovery, if therapist interpretation becomes relevant
+
+Revisit trigger:
+When Self-Comparison / Progress Quality, Execution Support, timing, measurement, or trainer interpretation becomes active.
+
+Required future resolution action:
+Resolve into product principle or concept model, explicitly defer with a new trigger, or reject timing/personal-best framing as inappropriate before the target round closes.
+
+Reopen condition:
+Reopen Parent Experience Discovery only if the answer changes the parent's role in interpreting or enforcing performance.
+
+### Child-owned actions vs parent control
+
+Question:
+What is the right balance between child-owned actions and parent control during practice?
+
+Source artifact:
+`docs/product/discovery/parent-experience-discovery.md`
+
+Status:
+Transferred / non-blocking
+
+Transferred to:
+
+- Execution / Practice Support Discovery
+- Shared Training Manager concept work
+- Parent Journey UX
+- Child Journey UX
+
+Revisit trigger:
+When Execution Support, Training Manager interaction, Child Journey UX, or Parent Journey UX starts.
+
+Required future resolution action:
+Resolve into interaction/product direction, transfer to UX if still interaction-level, or mark as blocking if the active Training Manager round cannot safely proceed without it.
+
+Reopen condition:
+Reopen Parent Experience Discovery only if later work changes the parent from training partner into primary operator/commander.
+
+### Parent-facing text usefulness
+
+Question:
+Which parent-facing text is genuinely useful, and which should remain invisible or optional?
+
+Source artifact:
+`docs/product/discovery/parent-experience-discovery.md`
+
+Status:
+Transferred / non-blocking
+
+Transferred to:
+
+- Execution / Practice Support Discovery
+- Parent Journey UX
+- Training Manager UX / content guidance exploration
+
+Revisit trigger:
+When parent-facing guidance, Training Manager feedback, or Parent Journey UX starts.
+
+Required future resolution action:
+Resolve into UX/content direction, explicitly defer with a new trigger, or reject parent-facing text patterns before that target round closes.
+
+Reopen condition:
+Reopen Parent Experience Discovery only if text guidance changes the parent role into coaching doctrine, which the current artifact explicitly avoids.
+
+### Program Owner early scope vs later capability
+
+Question:
+Which Program Owner responsibilities belong in early product scope, and which should remain later capability work?
+
+Source artifact:
+`docs/product/discovery/parent-experience-discovery.md`
+
+Status:
+Transferred / non-blocking
+
+Transferred to:
+
+- Program Setup / Digitization Discovery
+- Child / Family Profile Management Discovery
+- Trainer Connection / Visibility Discovery
+- Motivation Configuration Discovery
+- Parent Practice Review & Notes Discovery
+- MVP Boundary Synthesis
+
+Revisit trigger:
+When any Program Owner capability discovery starts, or when MVP Boundary Synthesis starts.
+
+Required future resolution action:
+Resolve scope boundary for the active capability, explicitly defer remaining parts with new triggers, transfer sub-questions to more precise artifacts, or mark as blocking if MVP boundary cannot be defined without it.
+
+Reopen condition:
+Reopen Parent Experience Discovery only if future scope work changes the fundamental two-role parent model.
+
+### Instructor visibility and connection
+
+Question:
+How should instructor visibility or connection be understood at product-principle level without becoming a trainer workflow specification?
+
+Source artifact:
+`docs/product/discovery/parent-experience-discovery.md`
+
+Status:
+Transferred / non-blocking
+
+Transferred to:
+
+- Cross-role Interaction Discovery
+- Trainer Connection / Visibility Discovery
+- Trainer Experience Discovery
+
+Revisit trigger:
+When Cross-role Interaction Discovery, Trainer Connection / Visibility Discovery, or Trainer Experience Discovery starts.
+
+Required future resolution action:
+Resolve into cross-role product principle, transfer to trainer-specific artifact, explicitly defer with a new trigger, or mark as blocking if the active cross-role/trainer round cannot close without it.
+
+Reopen condition:
+Reopen Parent Experience Discovery only if later trainer/cross-role work changes what the parent owns or controls.
 
 ## Discovery Outcome
 
 Parent Experience Discovery reinforces the same product foundation as Child Experience Discovery: progress understanding comes before gamification.
+
+Parent Experience is documented at role / perspective discovery level.
 
 The parent has two essential roles:
 
@@ -315,6 +506,8 @@ The product should reduce the parent's cognitive load so the parent can particip
 The setup/review role exists to support that simple shared practice experience. It is not an admin-first product direction.
 
 Motivational layers remain parent-curated and optional.
+
+Remaining questions are non-blocking and transferred with lifecycle metadata. Future capability, concept, and UX rounds should reconcile matching transferred questions when their revisit triggers become active.
 
 ## Parking Lot Links / Related Future Work
 
