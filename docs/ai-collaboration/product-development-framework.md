@@ -91,7 +91,20 @@ Exploration should not be forced into closure before there is enough confidence 
 
 Important unresolved questions that should guide future exploration.
 
-Open questions should remain visible until resolved, rejected, or intentionally deferred.
+Open questions should remain visible until resolved, rejected, deferred, transferred, or removed as stale.
+
+A documented artifact must not contain orphaned open questions. If a question remains after an artifact is documented or closed, it needs lifecycle metadata that makes future reconciliation mandatory.
+
+Open question lifecycle statuses:
+
+- Active / Blocking: unresolved and blocks documenting or closing the current artifact
+- Resolved: answered and reflected in Current Best Understanding, Committed Directions, the artifact body, or another appropriate document
+- Rejected: intentionally not pursued, with a short reason
+- Deferred: intentionally postponed, with a revisit condition and required future action
+- Transferred: moved to another future focus, artifact, discovery track, concept model, UX round, or engineering round
+- Stale / Remove: no longer useful or relevant and should be removed or archived rather than carried forward
+
+Product State may track transferred or deferred questions when they affect navigation or next focus. Product Development Map may note that a future track has transferred inputs, but the lifecycle rule belongs to the framework and the source or target artifacts.
 
 ### Rejected Directions
 

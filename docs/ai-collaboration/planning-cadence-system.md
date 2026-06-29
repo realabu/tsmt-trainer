@@ -85,6 +85,95 @@ At the end of a planning round, propose which Parking Lot items should be:
 - rejected
 - removed
 
+## Open Question Lifecycle
+
+A documented artifact must not contain orphaned open questions.
+
+Open question statuses:
+
+- Active / Blocking: still unresolved and blocks closing or documenting the current artifact
+- Resolved: answered and reflected in Current Best Understanding, Committed Directions, the artifact body, or another appropriate document
+- Rejected: intentionally not pursued, with a short reason
+- Deferred: intentionally postponed, with a revisit condition
+- Transferred: moved to another future focus, artifact, discovery track, concept model, UX round, or engineering round
+- Stale / Remove: no longer useful or relevant and should be removed or archived rather than carried forward
+
+Before an artifact can be marked Documented, Closed, or equivalent, all open questions in that artifact must be classified.
+
+A Documented artifact may contain non-blocking deferred or transferred questions only when each question has:
+
+- lifecycle status
+- target future focus or artifact, if transferred
+- revisit trigger or condition
+- required future resolution action
+- reopen condition, if relevant
+
+If a question is blocking, the artifact should remain Exploring, Clarifying, or Ready to Document rather than Documented.
+
+Product State may track transferred or deferred questions when they affect navigation or next focus. Product Development Map may note that a future track has transferred inputs, but the detailed lifecycle should live in the source or target artifact rather than overloading the map.
+
+## Transferred And Deferred Questions
+
+A transferred open question must include:
+
+- question
+- source artifact
+- status: Transferred / non-blocking
+- transferred to: target future focus, artifact, discovery track, concept model, UX round, or engineering round
+- revisit trigger
+- required resolution action
+- optional reopen condition
+
+A future planning round whose active focus matches the revisit trigger must load the transferred question at startup and close it by one of:
+
+- resolved into committed direction
+- moved into the active artifact
+- explicitly deferred with a new trigger
+- transferred to a better target
+- rejected as no longer relevant
+- kept blocking, in which case the active round cannot be closed as complete
+
+A deferred question may remain outside the active artifact only if it has:
+
+- reason for deferral
+- revisit condition
+- owner location, such as Product State, source artifact, Parking Lot, or future artifact
+- required future action
+
+Deferred must not mean forgotten.
+
+Example format:
+
+```markdown
+## Transferred Open Questions
+
+### Parent-facing progress information density
+
+Question:
+How much progress information helps parents without making the experience feel analytical or heavy?
+
+Source artifact:
+`docs/product/discovery/parent-experience-discovery.md`
+
+Status:
+Transferred / non-blocking
+
+Transferred to:
+- Parent Journey UX
+- Progress Understanding UX refinement
+
+Revisit trigger:
+When Parent Journey UX or shared progress view UX starts.
+
+Required resolution action:
+Resolve into UX direction, explicitly defer with a new trigger, transfer to a better target, or reject before the target round closes.
+
+Reopen condition:
+Reopen Parent Experience Discovery only if later UX or discovery work changes the parent role definition.
+```
+
+This example is illustrative. It is not a product decision.
+
 ## Product State As Navigation Center
 
 [product-state.md](../product/state/product-state.md) is the navigation center for planning work.
@@ -147,7 +236,15 @@ Before closing a planning round or recommending a documentation PR as complete, 
 
 - Did Current Best Understanding change?
 - Did a Committed Direction change or emerge?
-- Did an Open Question become resolved, rejected, deferred, or stale?
+- Are there any unclassified open questions?
+- Are blocking questions still blocking closure?
+- Which questions were resolved?
+- Which questions were rejected?
+- Which questions were deferred, and with what revisit condition?
+- Which questions were transferred, and to what target or trigger?
+- Does Product State need to track any transferred or deferred question?
+- Does the source artifact need an Open Question Lifecycle or Transferred Questions section?
+- Does the target artifact or future focus need a note that it has transferred input?
 - Did a Parking Lot item change status or become important enough to preserve elsewhere?
 - Did Active Focus change?
 - Did Next Suggested Focus change?
