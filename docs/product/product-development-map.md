@@ -36,8 +36,8 @@ This section summarizes Product State for navigation. It should remain consisten
 
 - Current product phase: Product Discovery
 - Product discovery status: discovery tracks require review before choosing the next product focus
-- Current product focus: Product Discovery continuation after map/state cleanup
-- Next product decision: choose the next Product Discovery track after Product State cleanup and unresolved discovery track review
+- Current product focus: Product Discovery next-focus selection
+- Next product decision: choose the next Product Discovery track after reviewing Product State, Product Development Map, and unresolved discovery tracks
 - Guardrail: do not proceed to Motivation Toolbox concept work, UX, specification, or engineering yet.
 
 Canonical active planning state lives in [Product State](state/product-state.md).
@@ -60,7 +60,7 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
   - Artifact: [Child Experience Discovery](discovery/child-experience-discovery.md)
 - Parent Experience Discovery: Clarifying
   - Artifact: [Parent Experience Discovery](discovery/parent-experience-discovery.md)
-  - Note: discovery capture exists and should be reviewed before being treated as closed.
+  - Note: discovery capture now includes Practice Partner and Program Owner / Setup & Review Owner roles; review before treating as closed.
 - Trainer Experience Discovery: Captured
   - Source: Product State Parking Lot
   - Future artifact: `docs/product/discovery/trainer-experience-discovery.md`
@@ -77,6 +77,14 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
   - Note: discovery support must be reviewed before Motivation Toolbox concept work proceeds.
 - Execution / Practice Support Discovery: Captured
   - Support: Parent Experience Discovery and Guided Training Manager Attention Layer Parking Lot item
+- Program Setup / Digitization: Captured
+  - Support: Parent Experience Discovery and Product State Parking Lot
+- Child / Family Profile Management: Captured
+  - Support: Parent Experience Discovery and Product State Parking Lot
+- Trainer Connection / Visibility: Captured
+  - Support: Parent Experience Discovery and Product State Parking Lot
+- Motivation Configuration: Captured
+  - Support: Parent Experience Discovery and Product State Parking Lot
 - Meaning / Education Discovery: Not Started
 - Physical / Digital Hybrid Discovery: Not Started
 - Parent Practice Review & Notes Discovery: Captured
@@ -229,6 +237,10 @@ Major captured areas currently visible in the map:
 - Cross-role Interaction Discovery
 - Motivation Layer Model / Motivation Toolbox
 - Guided Training Manager Attention Layer
+- Program Setup / Digitization
+- Child / Family Profile Management
+- Trainer Connection / Visibility
+- Motivation Configuration
 - Parent Practice Review & Notes
 - Self-Comparison / Progress Quality
 

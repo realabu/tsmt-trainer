@@ -15,7 +15,12 @@ Product Discovery
 
 This document captures the current shared understanding of the parent experience within TSMT Trainer.
 
-It focuses on the parent's role in helping the child start and complete home practice with less conflict, less cognitive load, and clearer progress understanding.
+It focuses on the parent's two essential roles:
+
+- Practice Partner during shared home practice
+- Program Owner / Setup & Review Owner outside the shared practice moment
+
+The parent is the bridge between the instructor-provided TSMT plan and a child-understandable, jointly executable digital practice experience.
 
 This is not a UX wireframe, screen specification, technical plan, or MVP acceptance document.
 
@@ -27,13 +32,56 @@ The parent is not primarily looking for administration, analytics, or gamificati
 
 The parent also needs to understand whether today's practice is necessary or whether it can still be delayed without harming the weekly or therapy-cycle practice goal.
 
+Outside the shared practice moment, the parent is also responsible for turning the instructor-provided TSMT program into something the system and child can use.
+
+This setup, configuration, and review responsibility is necessary because it enables the simple shared parent-child practice experience. It should not turn the product into an admin-first dashboard, analytics product, or technical import system.
+
 ## Key Insights
 
 - The parent benefits from the same core progress understanding as the child, with additional text and context where needed.
+- The parent has two essential roles: Practice Partner and Program Owner / Setup & Review Owner.
+- The parent bridges the instructor-provided TSMT plan and the child-understandable digital practice experience.
 - The parent should not have to act as the full system operator who remembers every task, repetition, timing need, and next step.
+- Program setup and review matter because they make the shared practice moment simpler, not because the product is admin-first.
 - The product should support a shared parent-child practice moment rather than splitting the experience too early into separate child and parent products.
 - The parent controls motivational tools. The system should not automatically diagnose when to introduce new motivation layers.
 - The parent role is closer to a training partner than an operator or commander.
+
+## Parent Role Split
+
+The parent experience has two connected roles.
+
+### Practice Partner
+
+During practice, the parent helps the child:
+
+- start home practice
+- understand what is happening
+- complete the current task and session
+- stay emotionally regulated
+- share a progress view
+- experience practice as something done together
+
+This role uses a shared orientation and progress surface. The parent is present with the child rather than acting as a separate dashboard operator.
+
+### Program Owner / Setup & Review Owner
+
+Outside the shared practice moment, the parent is responsible for making the instructor-provided TSMT program usable in the product.
+
+At discovery level, this may include:
+
+- capturing or importing the paper-based TSMT program from the instructor
+- checking and correcting an automatically suggested task set
+- providing weekly repetition count and practice period start/end
+- adding rhymes/songs, required tools, extra execution instructions, and task purpose notes where relevant
+- creating or editing child profiles
+- handling instructor visibility/connection requests or initiating a connection
+- configuring child-facing motivational layers such as themes, badges, and story/narrative availability
+- manually recording, correcting, reviewing, or annotating practice when needed
+
+This role is essential but secondary to the shared practice experience. Its purpose is to make the daily parent-child practice understandable, executable, and trustworthy.
+
+Detailed behavior belongs to later Product Capability Discovery / Concept Model work. This document should not define UX flows, screen specifications, import architecture, trainer permissions, data models, or implementation tasks.
 
 ## Parent Progress & Obligation Understanding
 
@@ -200,10 +248,14 @@ The system can naturally support a healthier narrative:
 - "the child does not carry the whole burden alone"
 - "the parent does not carry the whole cognitive load alone"
 
+This principle applies during practice. Outside practice, the parent still has a Program Owner / Setup & Review Owner responsibility so the shared practice experience can stay simple.
+
 ## Motivation Layers
 
 Parent Experience-level principle:
 The parent controls motivational tools. The system should not automatically diagnose when to introduce new motivation layers.
+
+This is part of the parent's Program Owner / Setup & Review Owner role: the parent configures which child-facing motivational layers are available, while detailed Motivation Toolbox behavior remains future concept work.
 
 The detailed Motivation Layer Model belongs later to:
 `docs/product/concepts/motivation-toolbox.md`
@@ -222,6 +274,19 @@ The following should not be included as MVP:
 
 These belong to Parking Lot / later Execution Support System / UX exploration.
 
+This document also does not define:
+
+- parent dashboard UX
+- analytics workflows
+- OCR/import architecture
+- trainer permission models
+- profile management flows
+- practice review screens
+- acceptance criteria
+- API, schema, or data-model behavior
+
+These responsibilities may be explored later as Product Capability Discovery or Concept Model work.
+
 ## Open Questions
 
 - How much progress information helps parents without making the experience feel analytical or heavy?
@@ -229,14 +294,25 @@ These belong to Parking Lot / later Execution Support System / UX exploration.
 - How should timing and personal bests support motivation without distorting movement quality?
 - What is the right balance between child-owned actions and parent control during practice?
 - Which parent-facing text is genuinely useful, and which should remain invisible or optional?
+- Which Program Owner responsibilities belong in early product scope, and which should remain later capability work?
+- How should instructor visibility or connection be understood at product-principle level without becoming a trainer workflow specification?
 
 ## Discovery Outcome
 
 Parent Experience Discovery reinforces the same product foundation as Child Experience Discovery: progress understanding comes before gamification.
 
+The parent has two essential roles:
+
+- Practice Partner during the shared home practice moment
+- Program Owner / Setup & Review Owner outside the shared practice moment
+
+The parent is the bridge between the instructor-provided TSMT plan and a child-understandable, jointly executable digital practice experience.
+
 The parent needs a shared orientation surface that helps both parent and child understand the current task, current session, weekly goal, and nearest meaningful milestone.
 
 The product should reduce the parent's cognitive load so the parent can participate as a training partner rather than a full system operator.
+
+The setup/review role exists to support that simple shared practice experience. It is not an admin-first product direction.
 
 Motivational layers remain parent-curated and optional.
 
@@ -244,5 +320,9 @@ Motivational layers remain parent-curated and optional.
 
 - `Motivation Layer Model`: remains parked for later Motivation Toolbox concept exploration.
 - `Guided Training Manager Attention Layer`: should remain parked until the Training Manager interaction model is actively explored.
+- `Program Setup / Digitization`: future Product Capability Discovery for turning the instructor-provided plan into system-supported practice.
+- `Child / Family Profile Management`: future Product Capability Discovery for managing child-specific setup.
+- `Trainer Connection / Visibility`: future Product Capability Discovery for instructor visibility or connection principles.
+- `Practice Review & Notes`: future Product Capability Discovery / Concept Model work for review, correction, and annotation.
 - `docs/product/concepts/motivation-toolbox.md`: future concept artifact for motivation layers.
 - `docs/product/concepts/execution-support-system.md`: possible future concept artifact for Training Manager attention and guidance.
