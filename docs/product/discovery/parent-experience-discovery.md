@@ -335,19 +335,28 @@ Source artifact:
 `docs/product/discovery/parent-experience-discovery.md`
 
 Status:
-Transferred / non-blocking
+Resolved for Cross-role Interaction Discovery / partially transferred for later UX
+
+Cross-role resolution:
+
+- weekly practice responsibility belongs to the parent
+- the child should understand progress, purpose, and movement toward goals
+- the child should not carry scheduling responsibility or weekly-risk pressure
+- the no-family-calendar boundary remains
+
+Remaining transferred detail:
+How to present this in UX without creating schedule pressure or family-calendar behavior.
 
 Transferred to:
 
-- Progress Understanding System refinement
-- Cross-role Interaction Discovery
 - Parent Journey UX
+- shared progress view UX refinement
 
 Revisit trigger:
-When weekly rhythm, parent-child progress communication, or Parent Journey UX is actively explored.
+When Parent Journey UX or shared progress view UX starts.
 
 Required future resolution action:
-Resolve into product or UX direction, explicitly preserve the no-family-calendar boundary, or transfer to a more specific progress/weekly-rhythm artifact before the target round closes.
+Resolve into UX direction, explicitly preserve the no-family-calendar boundary, or transfer to a more specific UX artifact before the target round closes.
 
 Reopen condition:
 Reopen Parent Experience Discovery only if the product starts redefining the parent as a scheduling/planning user, which would conflict with the current boundary.
@@ -440,7 +449,16 @@ Source artifact:
 `docs/product/discovery/parent-experience-discovery.md`
 
 Status:
-Transferred / non-blocking
+Partially resolved for Cross-role Interaction Discovery / transferred for capability and MVP boundary work
+
+Cross-role resolution:
+
+- the parent faithfully digitizes the paper plan
+- the parent may verify and correct their digitalized version
+- the parent may keep a personal reminder
+- the parent may create retrospective observations
+- the parent may authorize instructor visibility
+- parent-added information must not modify professional plan content
 
 Transferred to:
 
@@ -469,19 +487,29 @@ Source artifact:
 `docs/product/discovery/parent-experience-discovery.md`
 
 Status:
-Transferred / non-blocking
+Resolved for Cross-role product principle / transferred for trainer-specific detail
+
+Cross-role resolution:
+
+- instructor connection is optional and permission-based
+- instructor connection is background and child-invisible
+- instructor visibility is passive in MVP
+- instructor may see the faithful digitalized plan, execution information, timing-related information, practice regularity, and instructor-visible retrospective parent notes
+- MVP does not include active in-system parent-instructor cooperation, chat, reply workflows, instructor approval, or correction workflow
+
+Remaining transferred detail:
+Trainer-side information density, aggregation, time horizons, priorities, and later non-MVP interaction possibilities.
 
 Transferred to:
 
-- Cross-role Interaction Discovery
 - Trainer Connection / Visibility Discovery
 - Trainer Experience Discovery
 
 Revisit trigger:
-When Cross-role Interaction Discovery, Trainer Connection / Visibility Discovery, or Trainer Experience Discovery starts.
+When Trainer Connection / Visibility Discovery or Trainer Experience Discovery starts.
 
 Required future resolution action:
-Resolve into cross-role product principle, transfer to trainer-specific artifact, explicitly defer with a new trigger, or mark as blocking if the active cross-role/trainer round cannot close without it.
+Resolve into trainer-side product understanding, transfer to trainer-specific artifact, explicitly defer with a new trigger, or mark as blocking if the active trainer round cannot close without it.
 
 Reopen condition:
 Reopen Parent Experience Discovery only if later trainer/cross-role work changes what the parent owns or controls.

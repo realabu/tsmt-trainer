@@ -7,19 +7,19 @@ It should help future ChatGPT and Codex threads understand the active planning f
 ## Active Focus
 
 Current planning topic:
-Parent Experience closure + next-focus handoff
+Cross-role Interaction Discovery closure + next-focus handoff
 
 Current abstraction level:
 Product Discovery / Planning Navigation
 
 Current planning round:
-Parent Experience Discovery closure documented at role / perspective level; next focus handoff prepared.
+Cross-role Interaction Discovery documented at role / perspective level; next focus handoff prepared.
 
 Blocked by:
 None
 
 Next suggested step:
-Start Cross-role Interaction Discovery as the next Product Discovery focus. Do not start it in this PR, and do not proceed to Motivation Toolbox concept work, UX / Design, Specification, or Engineering.
+Review Trainer Experience Discovery as the next Product Discovery focus. Do not start it in this PR, and do not proceed to Motivation Toolbox concept work, UX / Design, Specification, or Engineering.
 
 ## Round State
 
@@ -58,6 +58,16 @@ Parent Experience Discovery now distinguishes two essential parent roles:
 The parent is the bridge between the instructor-provided TSMT plan and a child-understandable, jointly executable digital practice experience.
 
 Parent Experience Discovery is documented at role / perspective discovery level. No blocking open questions remain in the Parent Experience artifact; remaining questions were transferred with lifecycle metadata in `docs/product/discovery/parent-experience-discovery.md`.
+
+Cross-role Interaction Discovery is documented at `docs/product/discovery/cross-role-interaction-discovery.md` for the current role / perspective discovery level.
+
+The primary product relationship is parent-child home practice support. The instructor provides the professional TSMT plan and may have optional passive background visibility, but the instructor relationship does not define the child-facing experience.
+
+The parent faithfully digitizes the instructor-provided paper plan, uses it together with the child, remains responsible for weekly practice rhythm, and may add limited personal reminders or retrospective observations.
+
+Digital enrichment may make referenced plan information more usable, but it must not change the professional meaning of the plan.
+
+Cross-role Interaction Discovery reinforces the documented Progress Understanding System. It does not reopen the Progress Understanding concept.
 
 ## Committed Directions
 
@@ -140,13 +150,36 @@ As Program Owner / Setup & Review Owner, the parent helps transfer the instructo
 
 This is not an admin-first direction. The setup and review responsibility exists to make the shared child-parent practice experience simpler and more trustworthy.
 
+### Cross-role Relationship: Parent-child Primary, Instructor Background
+
+TSMT Trainer is primarily a parent-child home practice support tool.
+
+The instructor provides the professional TSMT practice plan and may have optional passive visibility, but the instructor connection is background and child-invisible.
+
+The product should not become a three-role collaboration platform.
+
+### Faithful Digitization Without Professional Reinterpretation
+
+The parent records the instructor-provided TSMT plan faithfully.
+
+Catalog-based or structured enrichment may make referenced information more usable, but it must not change the professional meaning of the plan.
+
+The parent should not redesign, reinterpret, or professionally modify the plan.
+
+### Passive Instructor Visibility Only
+
+Instructor connection in the MVP is optional, permission-based, background, passive, and one-directional.
+
+The MVP does not include in-system parent-instructor chat, instructor reply workflows, active cooperation, instructor approval of digitalized plans, correction workflows, or program negotiation.
+
 ## Exploration Zone
 
 - Role / Perspective Discovery review
 - Product Capability Discovery review
 - Product Synthesis candidates
 - Program Owner capability boundaries
-- Cross-role Interaction Discovery as the recommended next Product Discovery focus
+- Trainer Experience Discovery as the remaining role / perspective discovery track
+- Cross-role follow-up inputs for Trainer Connection / Visibility, Program Setup / Digitization, and Parent Practice Review & Notes
 - Motivation / Reinforcement Discovery support review
 - Motivation Toolbox as a captured candidate Concept Model, not active concept work
 
@@ -156,6 +189,8 @@ This is not an admin-first direction. The setup and review responsibility exists
 - How should optional motivational tools be recommended to parents?
 
 Parent Experience role / perspective questions are no longer blocking or unclassified here. Transferred Parent Experience questions live in `docs/product/discovery/parent-experience-discovery.md` and should be loaded when their revisit triggers match a future active focus.
+
+Cross-role Interaction Discovery has no blocking open questions at the current discovery level. Remaining non-blocking questions are transferred in `docs/product/discovery/cross-role-interaction-discovery.md`.
 
 ## Emerging Product Principles
 
@@ -167,6 +202,9 @@ These principles are captured from prior Product Discovery and concept work. The
 - No punitive child-facing weekly rhythm.
 - Parent-curated motivation layers.
 - Parent as Program Owner and Practice Partner.
+- Parent-child home practice is the primary product relationship.
+- Instructor visibility is optional, passive, background, and child-invisible.
+- Faithful digitization must not become professional reinterpretation.
 - Parent setup/review responsibilities exist to support the shared child-parent practice experience, not to make the product admin-first.
 - Product should not become a family calendar.
 - TSMT weekly rhythm matters and cannot simply be compressed later.
@@ -184,7 +222,7 @@ Role / Perspective Discovery:
 - Child Experience Discovery: Documented
 - Parent Experience Discovery: Documented
 - Trainer Experience Discovery: Captured
-- Cross-role Interaction Discovery: Captured
+- Cross-role Interaction Discovery: Documented
 
 Product Capability Discovery:
 
@@ -225,7 +263,17 @@ Parent Experience Discovery is documented at role / perspective discovery level 
 
 The artifact now distinguishes the parent's Practice Partner role from the Program Owner / Setup & Review Owner role. No blocking open questions remain in the Parent artifact.
 
-Remaining non-blocking questions were transferred with lifecycle metadata in the source artifact. Check those transferred questions when starting Cross-role Interaction Discovery, Trainer Experience Discovery, Program Setup / Digitization, Child / Family Profile Management, Trainer Connection / Visibility, Motivation Configuration, Parent Practice Review & Notes, Self-Comparison / Progress Quality, relevant Progress / Execution / UX refinements, or MVP Boundary Synthesis.
+Remaining non-blocking questions were transferred with lifecycle metadata in the source artifact. Cross-role-related transferred questions have been reconciled in `docs/product/discovery/cross-role-interaction-discovery.md`. Check remaining transferred questions when starting Trainer Experience Discovery, Program Setup / Digitization, Child / Family Profile Management, Trainer Connection / Visibility, Motivation Configuration, Parent Practice Review & Notes, Self-Comparison / Progress Quality, relevant Progress / Execution / UX refinements, or MVP Boundary Synthesis.
+
+## Cross-role Interaction Discovery Status
+
+Cross-role Interaction Discovery is documented at role / perspective discovery level in `docs/product/discovery/cross-role-interaction-discovery.md`.
+
+The artifact documents TSMT Trainer as primarily a parent-child home practice support tool with optional passive instructor visibility in the background.
+
+No blocking Cross-role open questions remain. Remaining non-blocking questions were transferred with lifecycle metadata in the source artifact.
+
+Progress Understanding System does not need reopening because this round reinforces the existing shared parent-child progress world, parent responsibility for weekly rhythm, child understanding without schedule pressure, and instructor as background observer.
 
 ## Rejected Directions
 
@@ -262,7 +310,13 @@ Why it matters:
 Explore how therapists/trainers interact with the system, what value they receive, and how the system supports assignment, tracking, and review.
 
 Source/context:
-Identified as a separate role experience that should not be collapsed into Child Experience Discovery.
+Identified as a separate role experience that should not be collapsed into Child Experience Discovery. Cross-role Interaction Discovery later clarified that instructor connection is optional, passive, background, and child-invisible at MVP direction level.
+
+Current captured understanding:
+
+- Trainer Experience Discovery should explore therapist/trainer perspective and priorities without redefining TSMT Trainer as a three-role collaboration platform.
+- Trainer-side information density, aggregation, time horizons, and priorities remain future discovery questions.
+- Later trainer work should not make instructor supervision part of the child-facing experience unless the product direction is explicitly reopened.
 
 Suggested future mode:
 Product Discovery
@@ -276,7 +330,7 @@ _To be added when this item is scheduled, resolved, rejected, or moved to an art
 ### Cross-role Interaction Discovery
 
 Status:
-Captured
+Moved to Artifact
 
 Why it matters:
 Clarify how child, parent, and trainer experiences connect without overloading the Child Experience document.
@@ -288,10 +342,10 @@ Suggested future mode:
 Product Discovery
 
 Suggested future artifact:
-_To be determined._
+`docs/product/discovery/cross-role-interaction-discovery.md`
 
 Resolution notes:
-_To be added when this item is scheduled, resolved, rejected, or moved to an artifact._
+Discovery artifact created at `docs/product/discovery/cross-role-interaction-discovery.md`. Keep this Parking Lot entry as lifecycle history and use the artifact for future Cross-role Interaction Discovery updates.
 
 ### Motivation Layer Model / Motivation Toolbox
 
@@ -350,6 +404,9 @@ Current captured understanding:
 - The parent may check and correct an automatically suggested task set.
 - The parent may provide weekly repetition count and practice period start/end.
 - The parent may add rhymes/songs, required tools, extra execution instructions, and task purpose notes where relevant.
+- The parent should faithfully digitize the paper plan without professional reinterpretation.
+- Catalog enrichment may make referenced information more usable, but must not change the professional meaning of the plan.
+- Error prevention is more important than building an instructor-parent correction and approval workflow.
 - This is not an admin-first product direction.
 - Detailed behavior belongs to later Product Capability Discovery / Concept Model work.
 
@@ -392,6 +449,13 @@ The parent may need to handle instructor visibility or connection at product-pri
 
 Source/context:
 Captured during Parent Experience Discovery while clarifying the parent's Program Owner / Setup & Review Owner role.
+
+Current captured understanding:
+
+- Instructor connection is optional, permission-based, background, passive, and child-invisible at MVP direction level.
+- If a supervision relationship exists, the instructor may passively see the digitalized plan, execution information, timing-related information, practice regularity, and instructor-visible retrospective parent notes.
+- The MVP does not include active in-system parent-instructor cooperation, chat, reply workflows, instructor approval, correction workflow, or program negotiation.
+- Trainer-side information density, aggregation, time horizons, and priorities remain future discovery questions.
 
 Suggested future mode:
 Product Discovery, likely connected to Trainer Experience Discovery and Cross-role Interaction Discovery
@@ -468,6 +532,10 @@ Captured during Progress Understanding System concept drafting while clarifying 
 Current captured understanding:
 
 - A parent may manually record practice when needed.
+- A parent may keep a private personal reminder that is not part of the professional plan.
+- A parent may create retrospective observations based on actual practice experience.
+- Retrospective observations may be private or instructor-visible.
+- The MVP is not intended to become a detailed practice diary or documentation system.
 - A parent may later view past practice sessions and open a specific practice session.
 - A parent may review task-level measurements and mark each task completed or not completed.
 - Confirming completion may remove an uncertainty marker.
@@ -518,14 +586,15 @@ Keep parked until measurement, progress quality, or self-comparison becomes an a
 
 ## Next Suggested Focus
 
-Start Cross-role Interaction Discovery as the next Product Discovery focus.
+Review Trainer Experience Discovery as the next Product Discovery focus.
 
-Do not start Cross-role Interaction Discovery in this documentation cleanup PR.
+Do not start Trainer Experience Discovery in this documentation cleanup PR.
 
 Candidate next discovery focuses:
 
-- Cross-role Interaction Discovery
 - Trainer Experience Discovery
+- Program Setup / Digitization Discovery
+- Trainer Connection / Visibility Discovery
 - Product Principles synthesis
 - Motivation / Reinforcement Discovery support review
 
