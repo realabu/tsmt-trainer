@@ -35,9 +35,9 @@ Canonical current planning state lives in [Product State](state/product-state.md
 This section summarizes Product State for navigation. It should remain consistent with [Product State](state/product-state.md), but it does not replace it.
 
 - Current product phase: Product Discovery
-- Product discovery status: Parent Experience Discovery is documented; remaining discovery tracks still need sequencing
-- Current product focus: Parent Experience closure + next-focus handoff
-- Next product decision: start Cross-role Interaction Discovery as the next Product Discovery focus
+- Product discovery status: Cross-role Interaction Discovery is documented; remaining discovery tracks still need sequencing
+- Current product focus: Cross-role Interaction Discovery closure + next-focus handoff
+- Next product decision: review Trainer Experience Discovery as the next Product Discovery focus
 - Guardrail: do not proceed to Motivation Toolbox concept work, UX, specification, or engineering yet.
 
 Canonical active planning state lives in [Product State](state/product-state.md).
@@ -64,12 +64,12 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
   - Transferred input: non-blocking open questions live in the source artifact and should be loaded by matching future tracks.
 - Trainer Experience Discovery: Captured
   - Source: Product State Parking Lot
-  - Transferred input: Parent Experience Discovery
+  - Transferred input: Parent Experience Discovery and Cross-role Interaction Discovery
   - Future artifact: `docs/product/discovery/trainer-experience-discovery.md`
-- Cross-role Interaction Discovery: Captured
-  - Source: Product State Parking Lot
+- Cross-role Interaction Discovery: Documented
+  - Artifact: [Cross-role Interaction Discovery](discovery/cross-role-interaction-discovery.md)
   - Transferred input: Parent Experience Discovery
-  - Note: clarify child, parent, and trainer connections without overloading role-specific documents.
+  - Note: documents the parent-child home practice relationship as primary, with optional passive instructor visibility in the background.
 
 ### Product Capability Discovery
 
@@ -82,14 +82,14 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
   - Support: Parent Experience Discovery and Guided Training Manager Attention Layer Parking Lot item
   - Transferred input: Parent Experience Discovery
 - Program Setup / Digitization: Captured
-  - Support: Parent Experience Discovery and Product State Parking Lot
-  - Transferred input: Parent Experience Discovery
+  - Support: Parent Experience Discovery, Cross-role Interaction Discovery, and Product State Parking Lot
+  - Transferred input: Parent Experience Discovery and Cross-role Interaction Discovery
 - Child / Family Profile Management: Captured
   - Support: Parent Experience Discovery and Product State Parking Lot
   - Transferred input: Parent Experience Discovery
 - Trainer Connection / Visibility: Captured
-  - Support: Parent Experience Discovery and Product State Parking Lot
-  - Transferred input: Parent Experience Discovery
+  - Support: Parent Experience Discovery, Cross-role Interaction Discovery, and Product State Parking Lot
+  - Transferred input: Parent Experience Discovery and Cross-role Interaction Discovery
 - Motivation Configuration: Captured
   - Support: Parent Experience Discovery and Product State Parking Lot
   - Transferred input: Parent Experience Discovery
@@ -97,7 +97,7 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
 - Physical / Digital Hybrid Discovery: Not Started
 - Parent Practice Review & Notes Discovery: Captured
   - Source: Product State Parking Lot and Progress Understanding System related future work
-  - Transferred input: Parent Experience Discovery
+  - Transferred input: Parent Experience Discovery and Cross-role Interaction Discovery
 - Self-Comparison / Progress Quality Discovery: Captured
   - Source: Product State Parking Lot and Progress Understanding System deferred work
   - Transferred input: Parent Experience Discovery
@@ -126,7 +126,7 @@ Discovery support:
 Child Experience Discovery, Parent Experience Discovery, and Progress / Completion / Understanding Discovery.
 
 Reopen condition:
-Reopen if Trainer Experience Discovery or Cross-role Interaction Discovery changes progress assumptions.
+Reopen if Trainer Experience Discovery changes progress assumptions. Cross-role Interaction Discovery reinforced the existing assumptions and did not reopen this concept.
 
 Artifact:
 [Progress Understanding System](concepts/progress-understanding-system.md)
@@ -241,7 +241,7 @@ The detailed Parking Lot lifecycle lives in [Product State](state/product-state.
 
 This map should show major captured product areas only when they affect future planning. It should not list every minor idea.
 
-Major captured areas currently visible in the map:
+Major captured and documented areas currently visible in the map:
 
 - Trainer Experience Discovery
 - Cross-role Interaction Discovery
