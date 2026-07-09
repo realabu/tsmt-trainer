@@ -35,9 +35,9 @@ Canonical current planning state lives in [Product State](state/product-state.md
 This section summarizes Product State for navigation. It should remain consistent with [Product State](state/product-state.md), but it does not replace it.
 
 - Current product phase: Product Discovery
-- Product discovery status: Cross-role Interaction Discovery is documented; remaining discovery tracks still need sequencing
-- Current product focus: Cross-role Interaction Discovery closure + next-focus handoff
-- Next product decision: review Trainer Experience Discovery as the next Product Discovery focus
+- Product discovery status: Trainer Experience Discovery is documented; remaining capability and synthesis tracks still need sequencing
+- Current product focus: Trainer Experience Discovery closure + next-focus review
+- Next product decision: run a Product Discovery next-focus review before selecting the next active focus
 - Guardrail: do not proceed to Motivation Toolbox concept work, UX, specification, or engineering yet.
 
 Canonical active planning state lives in [Product State](state/product-state.md).
@@ -62,10 +62,10 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
   - Artifact: [Parent Experience Discovery](discovery/parent-experience-discovery.md)
   - Note: documented at role / perspective level with Practice Partner and Program Owner / Setup & Review Owner roles.
   - Transferred input: non-blocking open questions live in the source artifact and should be loaded by matching future tracks.
-- Trainer Experience Discovery: Captured
-  - Source: Product State Parking Lot
+- Trainer Experience Discovery: Documented
+  - Artifact: [Trainer Experience Discovery](discovery/trainer-experience-discovery.md)
   - Transferred input: Parent Experience Discovery and Cross-role Interaction Discovery
-  - Future artifact: `docs/product/discovery/trainer-experience-discovery.md`
+  - Note: documented at role / perspective level as reactive professional context reconstruction, not continuous monitoring.
 - Cross-role Interaction Discovery: Documented
   - Artifact: [Cross-role Interaction Discovery](discovery/cross-role-interaction-discovery.md)
   - Transferred input: Parent Experience Discovery
@@ -88,8 +88,8 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
   - Support: Parent Experience Discovery and Product State Parking Lot
   - Transferred input: Parent Experience Discovery
 - Trainer Connection / Visibility: Captured
-  - Support: Parent Experience Discovery, Cross-role Interaction Discovery, and Product State Parking Lot
-  - Transferred input: Parent Experience Discovery and Cross-role Interaction Discovery
+  - Support: Parent Experience Discovery, Cross-role Interaction Discovery, Trainer Experience Discovery, and Product State Parking Lot
+  - Transferred input: Parent Experience Discovery, Cross-role Interaction Discovery, and Trainer Experience Discovery
 - Motivation Configuration: Captured
   - Support: Parent Experience Discovery and Product State Parking Lot
   - Transferred input: Parent Experience Discovery
@@ -100,7 +100,7 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
   - Transferred input: Parent Experience Discovery and Cross-role Interaction Discovery
 - Self-Comparison / Progress Quality Discovery: Captured
   - Source: Product State Parking Lot and Progress Understanding System deferred work
-  - Transferred input: Parent Experience Discovery
+  - Transferred input: Parent Experience Discovery and Trainer Experience Discovery
 
 ### Product Synthesis
 
@@ -126,7 +126,7 @@ Discovery support:
 Child Experience Discovery, Parent Experience Discovery, and Progress / Completion / Understanding Discovery.
 
 Reopen condition:
-Reopen if Trainer Experience Discovery changes progress assumptions. Cross-role Interaction Discovery reinforced the existing assumptions and did not reopen this concept.
+Reopen if later Measurement / Progress Quality work changes progress assumptions. Cross-role and Trainer Experience Discovery reinforced the existing assumptions and did not reopen this concept.
 
 Artifact:
 [Progress Understanding System](concepts/progress-understanding-system.md)

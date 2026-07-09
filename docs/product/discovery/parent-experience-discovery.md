@@ -370,16 +370,24 @@ Source artifact:
 `docs/product/discovery/parent-experience-discovery.md`
 
 Status:
-Transferred / non-blocking
+Resolved for Trainer Experience / transferred for remaining motivation, self-comparison, measurement, movement-quality, and execution-support aspects
+
+Trainer Experience resolution:
+
+- timing is not a primary trainer progress metric
+- timing is secondary contextual information
+- professional interpretation is required
+- faster does not automatically mean better
+- unchanged execution time is not inherently a problem
+- timing alone cannot determine difficulty or incorrect execution
 
 Transferred to:
 
 - Self-Comparison / Progress Quality Discovery
 - Execution / Practice Support Discovery
-- Trainer Experience Discovery, if therapist interpretation becomes relevant
 
 Revisit trigger:
-When Self-Comparison / Progress Quality, Execution Support, timing, measurement, or trainer interpretation becomes active.
+When Self-Comparison / Progress Quality, Execution Support, timing, measurement, or movement-quality exploration becomes active.
 
 Required future resolution action:
 Resolve into product principle or concept model, explicitly defer with a new trigger, or reject timing/personal-best framing as inappropriate before the target round closes.
@@ -487,7 +495,7 @@ Source artifact:
 `docs/product/discovery/parent-experience-discovery.md`
 
 Status:
-Resolved for Cross-role product principle / transferred for trainer-specific detail
+Resolved for Cross-role product principle and Trainer Experience role-perspective / transferred for Trainer Connection / Visibility capability detail
 
 Cross-role resolution:
 
@@ -498,18 +506,17 @@ Cross-role resolution:
 - MVP does not include active in-system parent-instructor cooperation, chat, reply workflows, instructor approval, or correction workflow
 
 Remaining transferred detail:
-Trainer-side information density, aggregation, time horizons, priorities, and later non-MVP interaction possibilities.
+Trainer Connection / Visibility capability detail and later non-MVP interaction possibilities.
 
 Transferred to:
 
 - Trainer Connection / Visibility Discovery
-- Trainer Experience Discovery
 
 Revisit trigger:
-When Trainer Connection / Visibility Discovery or Trainer Experience Discovery starts.
+When Trainer Connection / Visibility Discovery starts.
 
 Required future resolution action:
-Resolve into trainer-side product understanding, transfer to trainer-specific artifact, explicitly defer with a new trigger, or mark as blocking if the active trainer round cannot close without it.
+Resolve into trainer-side capability understanding, transfer to a more specific artifact, explicitly defer with a new trigger, or mark as blocking if the active capability round cannot close without it.
 
 Reopen condition:
 Reopen Parent Experience Discovery only if later trainer/cross-role work changes what the parent owns or controls.
