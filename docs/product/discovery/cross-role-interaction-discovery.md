@@ -291,18 +291,28 @@ Source artifact:
 `docs/product/discovery/cross-role-interaction-discovery.md`
 
 Status:
-Transferred / non-blocking
+Resolved for Trainer Experience Discovery / transferred for capability and UX detail
+
+Trainer Experience resolution:
+
+- density: concise context first
+- aggregation: practice frequency and regularity are primary aggregated understanding
+- time horizons: current task set / current practice period plus chronological task-set history
+- priority: child context -> current task set -> practice frequency / regularity -> historical context -> human observations -> detailed problem-driven measurements
+
+Remaining transferred detail:
+Capability and UX decisions about exact information presentation, interaction, and trainer-side visibility behavior.
 
 Transferred to:
 
 - Trainer Connection / Visibility Discovery
-- Trainer Experience Discovery
+- later Trainer UX work
 
 Revisit trigger:
-When Trainer Connection / Visibility Discovery or Trainer Experience Discovery starts.
+When Trainer Connection / Visibility Discovery or later Trainer UX starts.
 
 Required future resolution action:
-Resolve into trainer-side product understanding, explicitly defer with a new trigger, transfer to a more specific trainer artifact, or reject before the target round closes.
+Resolve capability or UX detail, explicitly defer with a new trigger, transfer to a more specific trainer artifact, or reject before the target round closes.
 
 Reopen condition:
 Reopen Cross-role Interaction Discovery only if later trainer work changes the background, passive, child-invisible instructor role.

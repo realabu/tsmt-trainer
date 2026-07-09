@@ -7,19 +7,19 @@ It should help future ChatGPT and Codex threads understand the active planning f
 ## Active Focus
 
 Current planning topic:
-Cross-role Interaction Discovery closure + next-focus handoff
+Trainer Experience Discovery closure + next-focus review
 
 Current abstraction level:
 Product Discovery / Planning Navigation
 
 Current planning round:
-Cross-role Interaction Discovery documented at role / perspective level; next focus handoff prepared.
+Trainer Experience Discovery documented at role / perspective level; next-focus review prepared.
 
 Blocked by:
 None
 
 Next suggested step:
-Review Trainer Experience Discovery as the next Product Discovery focus. Do not start it in this PR, and do not proceed to Motivation Toolbox concept work, UX / Design, Specification, or Engineering.
+Run a Product Discovery next-focus review across remaining captured Product Capability Discovery, Product Synthesis, and transferred-question inputs. Do not automatically start Trainer Connection / Visibility, Motivation Toolbox, Program Setup / Digitization, UX / Design, Specification, or Engineering.
 
 ## Round State
 
@@ -68,6 +68,14 @@ The parent faithfully digitizes the instructor-provided paper plan, uses it toge
 Digital enrichment may make referenced plan information more usable, but it must not change the professional meaning of the plan.
 
 Cross-role Interaction Discovery reinforces the documented Progress Understanding System. It does not reopen the Progress Understanding concept.
+
+Trainer Experience Discovery is documented at `docs/product/discovery/trainer-experience-discovery.md` for the current role / perspective discovery level.
+
+The trainer is fundamentally reactive. The core value is rapid professional context reconstruction when attention is already directed toward a child because of a parent contact, problem, control / assessment, or another professional decision point.
+
+Current and historical task sets are professionally meaningful. Practice frequency, regularity, distribution, and gaps provide core home-practice context.
+
+Measured practice data complements parent report and trainer observation. It does not replace either, and professional interpretation stays with the trainer.
 
 ## Committed Directions
 
@@ -172,13 +180,23 @@ Instructor connection in the MVP is optional, permission-based, background, pass
 
 The MVP does not include in-system parent-instructor chat, instructor reply workflows, active cooperation, instructor approval of digitalized plans, correction workflows, or program negotiation.
 
+### Trainer Experience As Reactive Context Reconstruction
+
+The trainer is not a continuous monitor or active participant in daily home practice.
+
+The core trainer value is rapid reconstruction of professional context and home-practice reality when trainer attention is already directed toward a child.
+
+Current and historical task sets, practice frequency, practice regularity, parent-reported experience, optional notes, and problem-driven detailed measurements may support that context.
+
+Measured data complements parent report and trainer observation. It does not replace either, and professional interpretation stays with the trainer.
+
 ## Exploration Zone
 
 - Role / Perspective Discovery review
 - Product Capability Discovery review
 - Product Synthesis candidates
 - Program Owner capability boundaries
-- Trainer Experience Discovery as the remaining role / perspective discovery track
+- Trainer Experience follow-up inputs for Trainer Connection / Visibility and Self-Comparison / Progress Quality
 - Cross-role follow-up inputs for Trainer Connection / Visibility, Program Setup / Digitization, and Parent Practice Review & Notes
 - Motivation / Reinforcement Discovery support review
 - Motivation Toolbox as a captured candidate Concept Model, not active concept work
@@ -192,6 +210,8 @@ Parent Experience role / perspective questions are no longer blocking or unclass
 
 Cross-role Interaction Discovery has no blocking open questions at the current discovery level. Remaining non-blocking questions are transferred in `docs/product/discovery/cross-role-interaction-discovery.md`.
 
+Trainer Experience Discovery has no blocking open questions at the current discovery level. Trainer-side information needs are resolved at role / perspective level; Trainer Connection / Visibility capability detail remains future work. Timing is resolved for Trainer Experience, while motivation, self-comparison, measurement quality, movement quality, and execution support remain later discovery topics.
+
 ## Emerging Product Principles
 
 These principles are captured from prior Product Discovery and concept work. They are not yet a dedicated Product Principles artifact.
@@ -204,6 +224,8 @@ These principles are captured from prior Product Discovery and concept work. The
 - Parent as Program Owner and Practice Partner.
 - Parent-child home practice is the primary product relationship.
 - Instructor visibility is optional, passive, background, and child-invisible.
+- Trainer support should be reactive context reconstruction, not continuous monitoring.
+- Measured practice data complements parent report and trainer observation; it does not replace either.
 - Faithful digitization must not become professional reinterpretation.
 - Parent setup/review responsibilities exist to support the shared child-parent practice experience, not to make the product admin-first.
 - Product should not become a family calendar.
@@ -221,7 +243,7 @@ Role / Perspective Discovery:
 
 - Child Experience Discovery: Documented
 - Parent Experience Discovery: Documented
-- Trainer Experience Discovery: Captured
+- Trainer Experience Discovery: Documented
 - Cross-role Interaction Discovery: Documented
 
 Product Capability Discovery:
@@ -275,6 +297,16 @@ No blocking Cross-role open questions remain. Remaining non-blocking questions w
 
 Progress Understanding System does not need reopening because this round reinforces the existing shared parent-child progress world, parent responsibility for weekly rhythm, child understanding without schedule pressure, and instructor as background observer.
 
+## Trainer Experience Discovery Status
+
+Trainer Experience Discovery is documented at role / perspective discovery level in `docs/product/discovery/trainer-experience-discovery.md`.
+
+The artifact documents the trainer as a reactive professional context user, not a continuous monitor.
+
+No blocking Trainer Experience open questions remain at role / perspective level.
+
+Trainer-side information needs are resolved for Trainer Experience Discovery. Trainer Connection / Visibility capability details, Measurement / Progress Quality, Execution / Practice Support, and later trainer UX remain future work.
+
 ## Rejected Directions
 
 _To be added when options are explicitly rejected._
@@ -304,7 +336,7 @@ Discovery artifact created at `docs/product/discovery/parent-experience-discover
 ### Trainer Experience Discovery
 
 Status:
-Captured
+Moved to Artifact
 
 Why it matters:
 Explore how therapists/trainers interact with the system, what value they receive, and how the system supports assignment, tracking, and review.
@@ -315,7 +347,8 @@ Identified as a separate role experience that should not be collapsed into Child
 Current captured understanding:
 
 - Trainer Experience Discovery should explore therapist/trainer perspective and priorities without redefining TSMT Trainer as a three-role collaboration platform.
-- Trainer-side information density, aggregation, time horizons, and priorities remain future discovery questions.
+- Trainer-side information density, aggregation, time horizons, and priorities are resolved at role / perspective level in the Trainer Experience artifact.
+- Trainer Connection / Visibility capability details remain future work.
 - Later trainer work should not make instructor supervision part of the child-facing experience unless the product direction is explicitly reopened.
 
 Suggested future mode:
@@ -325,7 +358,7 @@ Suggested future artifact:
 `docs/product/discovery/trainer-experience-discovery.md`
 
 Resolution notes:
-_To be added when this item is scheduled, resolved, rejected, or moved to an artifact._
+Discovery artifact created at `docs/product/discovery/trainer-experience-discovery.md`. Keep this Parking Lot entry as lifecycle history and use the artifact for future Trainer Experience Discovery updates.
 
 ### Cross-role Interaction Discovery
 
@@ -455,7 +488,8 @@ Current captured understanding:
 - Instructor connection is optional, permission-based, background, passive, and child-invisible at MVP direction level.
 - If a supervision relationship exists, the instructor may passively see the digitalized plan, execution information, timing-related information, practice regularity, and instructor-visible retrospective parent notes.
 - The MVP does not include active in-system parent-instructor cooperation, chat, reply workflows, instructor approval, correction workflow, or program negotiation.
-- Trainer-side information density, aggregation, time horizons, and priorities remain future discovery questions.
+- Trainer-side information density, aggregation, time horizons, and priorities are resolved at role / perspective level: concise context first, practice frequency and regularity as primary aggregated understanding, current task set / current practice period plus chronological task-set history as main time horizons, and detailed data as problem-driven deeper context.
+- Capability detail remains future work for Trainer Connection / Visibility Discovery.
 
 Suggested future mode:
 Product Discovery, likely connected to Trainer Experience Discovery and Cross-role Interaction Discovery
@@ -573,7 +607,9 @@ Current captured understanding:
 - It may later support trainer/therapist interpretation.
 - It must avoid unhealthy pressure, shame, speed-chasing, and movement-quality distortion.
 - It likely belongs to later Measurement / Progress Quality / Execution Support exploration and may connect to Trainer Experience Discovery.
-- It does not block closing the current Progress Understanding System concept round.
+- Trainer Experience Discovery resolved that timing is not a primary trainer progress metric and requires professional interpretation.
+- Motivation, self-comparison, measurement quality, movement quality, and execution support remain later discovery topics.
+- It does not block closing the current Progress Understanding System concept round or Trainer Experience Discovery.
 
 Suggested future mode:
 Product Discovery / Concept Model, with later UX / Design Exploration only after the concept is clarified
@@ -586,15 +622,16 @@ Keep parked until measurement, progress quality, or self-comparison becomes an a
 
 ## Next Suggested Focus
 
-Review Trainer Experience Discovery as the next Product Discovery focus.
+Run a Product Discovery next-focus review before selecting the next active focus.
 
-Do not start Trainer Experience Discovery in this documentation cleanup PR.
+No single next focus is sufficiently determined by repository state alone after Trainer Experience Discovery closure.
 
 Candidate next discovery focuses:
 
-- Trainer Experience Discovery
 - Program Setup / Digitization Discovery
 - Trainer Connection / Visibility Discovery
+- Parent Practice Review & Notes Discovery
+- Self-Comparison / Progress Quality Discovery
 - Product Principles synthesis
 - Motivation / Reinforcement Discovery support review
 
