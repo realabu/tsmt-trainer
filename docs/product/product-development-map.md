@@ -58,6 +58,7 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
 
 - Child Experience Discovery: Documented
   - Artifact: [Child Experience Discovery](discovery/child-experience-discovery.md)
+  - Transferred input: non-blocking open questions live in the source artifact and should be loaded by matching future tracks.
 - Parent Experience Discovery: Documented
   - Artifact: [Parent Experience Discovery](discovery/parent-experience-discovery.md)
   - Note: documented at role / perspective level with Practice Partner and Program Owner / Setup & Review Owner roles.
@@ -77,6 +78,7 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
   - Support: Child Experience Discovery, Parent Experience Discovery, and [Progress Understanding System](concepts/progress-understanding-system.md)
 - Motivation / Reinforcement Discovery: Captured
   - Support: Child and Parent discovery notes plus Product State Parking Lot
+  - Transferred input: Child Experience Discovery motivation-tool-fit and theme-evolution questions
   - Note: discovery support must be reviewed before Motivation Toolbox concept work proceeds.
 - Execution / Practice Support Discovery: Captured
   - Support: Parent Experience Discovery and Guided Training Manager Attention Layer Parking Lot item
@@ -92,7 +94,7 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
   - Transferred input: Parent Experience Discovery, Cross-role Interaction Discovery, and Trainer Experience Discovery
 - Motivation Configuration: Captured
   - Support: Parent Experience Discovery and Product State Parking Lot
-  - Transferred input: Parent Experience Discovery
+  - Transferred input: Child Experience Discovery theme-evolution question and Parent Experience Discovery
 - Meaning / Education Discovery: Not Started
 - Physical / Digital Hybrid Discovery: Not Started
 - Parent Practice Review & Notes Discovery: Captured
@@ -100,7 +102,7 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
   - Transferred input: Parent Experience Discovery and Cross-role Interaction Discovery
 - Self-Comparison / Progress Quality Discovery: Captured
   - Source: Product State Parking Lot and Progress Understanding System deferred work
-  - Transferred input: Parent Experience Discovery and Trainer Experience Discovery
+  - Transferred input: Child Experience Discovery personal-best question, Parent Experience Discovery, and Trainer Experience Discovery
 
 ### Product Synthesis
 
@@ -140,7 +142,7 @@ Discovery support:
 Child and Parent discovery notes plus the Motivation Layer Model Parking Lot item.
 
 Missing discovery support / reopen condition:
-Review unresolved Product Discovery tracks and Product State before starting active Motivation Toolbox concept work.
+Review unresolved Product Discovery tracks, Product State, and transferred Child Experience motivation questions before starting active Motivation Toolbox concept work.
 
 Future artifact:
 `docs/product/concepts/motivation-toolbox.md`
@@ -207,8 +209,11 @@ Future artifact:
 
 UX / Design should not start until Product Discovery and relevant Concept Models are sufficiently documented, deferred, or explicitly skipped by the product owner.
 
+Progress Understanding UX refinement and Shared Parent-Child Progress View refinement are represented here as future UX refinement inputs, not standalone map nodes. Their detailed transferred-question lifecycle remains in the source discovery artifacts.
+
 - Journey Discovery: Not Started
 - Child Journey: Not Started
+  - Transferred input: Child Experience Discovery age-appropriate progress indicators, personal-best representation, and progress-information-density questions
 - Parent Journey: Not Started
 - Trainer Journey: Not Started
 - Screen Architecture: Not Started
