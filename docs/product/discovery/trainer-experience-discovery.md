@@ -336,13 +336,13 @@ Detailed data should be available as deeper context when needed, not assumed to 
 - mandatory parent practice diary
 - mandatory trainer documentation
 - automatic professional scoring
-- automatic classification of practice quality or regularity
+- automatic professional classification or judgment of practice quality, regularity, sufficiency, treatment implication, or recommended intervention
 - automatic treatment-change suggestions
 - automatic difficulty-adjustment recommendations
 - system-generated clinical or therapeutic conclusions
 - dashboards, screens, flows, permission models, notifications, workflows, APIs, schemas, acceptance criteria, implementation plans, or backlog items
 
-These boundaries preserve the low-hanging-fruit, context-oriented trainer role.
+These boundaries reject the system making professional judgments. They do not reject later neutral descriptive pattern signals that expose observable practice patterns without scoring, clinical meaning, or recommended action.
 
 ## Open Question Lifecycle
 
@@ -460,7 +460,7 @@ Status:
 Deferred / non-blocking
 
 Reason for deferral:
-Pattern qualification may be useful later, but it could create false professional authority if explored before trainer-side meaning, measurement validity, and UX framing are clarified.
+Neutral descriptive pattern signals may be useful later, but they must expose observable patterns without professional scoring, clinical meaning, or recommended action. This remains deferred because even simple pattern signals could create false professional authority if explored before trainer-side meaning, measurement validity, and UX framing are clarified.
 
 Owner location:
 `docs/product/discovery/trainer-experience-discovery.md`
