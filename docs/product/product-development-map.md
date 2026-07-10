@@ -35,9 +35,9 @@ Canonical current planning state lives in [Product State](state/product-state.md
 This section summarizes Product State for navigation. It should remain consistent with [Product State](state/product-state.md), but it does not replace it.
 
 - Current product phase: Product Discovery
-- Product discovery status: Trainer Experience Discovery is documented; remaining capability and synthesis tracks still need sequencing
-- Current product focus: Trainer Experience Discovery closure + next-focus review
-- Next product decision: run a Product Discovery next-focus review before selecting the next active focus
+- Product discovery status: Program Setup / Digitization Discovery is the one active Product Capability Discovery focus
+- Current product focus: Program Setup / Digitization Discovery
+- Next product step: start the Program Setup / Digitization Discovery round at Product Capability Discovery level
 - Guardrail: do not proceed to Motivation Toolbox concept work, UX, specification, or engineering yet.
 
 Canonical active planning state lives in [Product State](state/product-state.md).
@@ -83,9 +83,12 @@ Product Discovery remains the controlling phase until relevant discovery tracks 
 - Execution / Practice Support Discovery: Captured
   - Support: Parent Experience Discovery and Guided Training Manager Attention Layer Parking Lot item
   - Transferred input: Parent Experience Discovery
-- Program Setup / Digitization: Captured
+- Program Setup / Digitization: Exploring
   - Support: Parent Experience Discovery, Cross-role Interaction Discovery, and Product State Parking Lot
-  - Transferred input: Parent Experience Discovery and Cross-role Interaction Discovery
+  - Active focus: clarify the product-level capability boundary for faithful plan digitization without import UX, technical architecture, professional reinterpretation, or instructor approval workflows.
+  - Active transferred input: Parent Experience Discovery Program Owner early-scope question, limited to Program Setup / Digitization.
+  - Active transferred input: Cross-role Interaction Discovery Program Setup capability-scope question about faithful digitization, enrichment, error prevention, parent correction, and early product scope boundary.
+  - Guardrail: other Program Owner transferred targets remain inactive future work unless explicitly transferred or deferred again during this round.
 - Child / Family Profile Management: Captured
   - Support: Parent Experience Discovery and Product State Parking Lot
   - Transferred input: Parent Experience Discovery
@@ -266,6 +269,7 @@ ChatGPT should:
 - show a compact status snapshot in planning threads when useful
 - use the map to prevent jumping ahead
 - check Product State before treating active or next focus as stable
+- treat Program Setup / Digitization Discovery as the one active Product Discovery focus until the product owner changes it or the round is closed
 - review unresolved discovery tracks before proposing the next Concept Model
 - keep UX / Design, Specification, and Engineering downstream unless the product owner explicitly confirms a mode/focus switch
 - keep this map updated when a major phase changes status
