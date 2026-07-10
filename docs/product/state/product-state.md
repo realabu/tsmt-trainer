@@ -195,6 +195,7 @@ Measured data complements parent report and trainer observation. It does not rep
 - Role / Perspective Discovery review
 - Product Capability Discovery review
 - Product Synthesis candidates
+- Child Experience transferred inputs for Motivation / Reinforcement, Motivation Configuration, Self-Comparison / Progress Quality, Motivation Toolbox, and later Child Journey / progress UX refinement
 - Program Owner capability boundaries
 - Trainer Experience follow-up inputs for Trainer Connection / Visibility and Self-Comparison / Progress Quality
 - Cross-role follow-up inputs for Trainer Connection / Visibility, Program Setup / Digitization, and Parent Practice Review & Notes
@@ -205,6 +206,8 @@ Measured data complements parent report and trainer observation. It does not rep
 
 - Which captured Product Principles should later be synthesized into a dedicated artifact?
 - How should optional motivational tools be recommended to parents?
+
+Child Experience Discovery has no blocking open questions at the current role / perspective discovery level. Remaining non-blocking questions are transferred with lifecycle metadata in `docs/product/discovery/child-experience-discovery.md`. Check matching transferred questions when starting Motivation / Reinforcement Discovery, Motivation Configuration Discovery, Self-Comparison / Progress Quality Discovery, Motivation Toolbox concept support review, Child Journey UX, Progress Understanding UX refinement, or Shared Parent-Child Progress View refinement.
 
 Parent Experience role / perspective questions are no longer blocking or unclassified here. Transferred Parent Experience questions live in `docs/product/discovery/parent-experience-discovery.md` and should be loaded when their revisit triggers match a future active focus.
 
@@ -286,6 +289,14 @@ Parent Experience Discovery is documented at role / perspective discovery level 
 The artifact now distinguishes the parent's Practice Partner role from the Program Owner / Setup & Review Owner role. No blocking open questions remain in the Parent artifact.
 
 Remaining non-blocking questions were transferred with lifecycle metadata in the source artifact. Cross-role-related transferred questions have been reconciled in `docs/product/discovery/cross-role-interaction-discovery.md`. Check remaining transferred questions when starting Trainer Experience Discovery, Program Setup / Digitization, Child / Family Profile Management, Trainer Connection / Visibility, Motivation Configuration, Parent Practice Review & Notes, Self-Comparison / Progress Quality, relevant Progress / Execution / UX refinements, or MVP Boundary Synthesis.
+
+## Child Experience Discovery Status
+
+Child Experience Discovery is documented at role / perspective discovery level in `docs/product/discovery/child-experience-discovery.md`.
+
+No blocking Child Experience open questions remain at role / perspective level.
+
+Remaining non-blocking questions were transferred with lifecycle metadata in the source artifact. Check matching transferred questions when starting Motivation / Reinforcement Discovery, Motivation Configuration Discovery, Self-Comparison / Progress Quality Discovery, Motivation Toolbox concept support review, Child Journey UX, Progress Understanding UX refinement, or Shared Parent-Child Progress View refinement.
 
 ## Cross-role Interaction Discovery Status
 
