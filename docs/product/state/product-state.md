@@ -7,24 +7,24 @@ It should help future ChatGPT and Codex threads understand the active planning f
 ## Active Focus
 
 Current planning topic:
-Trainer Experience Discovery closure + next-focus review
+Program Setup / Digitization Discovery
 
 Current abstraction level:
-Product Discovery / Planning Navigation
+Product Discovery / Product Capability Discovery
 
 Current planning round:
-Trainer Experience Discovery documented at role / perspective level; next-focus review prepared.
+Program Setup / Digitization Discovery activated as the one active Product Discovery focus. The next-focus review is complete.
 
 Blocked by:
 None
 
 Next suggested step:
-Run a Product Discovery next-focus review across remaining captured Product Capability Discovery, Product Synthesis, and transferred-question inputs. Do not automatically start Trainer Connection / Visibility, Motivation Toolbox, Program Setup / Digitization, UX / Design, Specification, or Engineering.
+Start the Program Setup / Digitization Discovery round at Product Capability Discovery level. Do not perform UX / Design, Specification, Engineering, implementation planning, backlog generation, or parallel discovery tracks.
 
 ## Round State
 
 Current round state:
-Documented
+Exploring
 
 ## Current Best Understanding
 
@@ -192,14 +192,14 @@ Measured data complements parent report and trainer observation. It does not rep
 
 ## Exploration Zone
 
-- Role / Perspective Discovery review
-- Product Capability Discovery review
-- Product Synthesis candidates
-- Child Experience transferred inputs for Motivation / Reinforcement, Motivation Configuration, Self-Comparison / Progress Quality, Motivation Toolbox, and later Child Journey / progress UX refinement
-- Program Owner capability boundaries
-- Trainer Experience follow-up inputs for Trainer Connection / Visibility and Self-Comparison / Progress Quality
-- Cross-role follow-up inputs for Trainer Connection / Visibility, Program Setup / Digitization, and Parent Practice Review & Notes
-- Motivation / Reinforcement Discovery support review
+- Program Setup / Digitization Discovery as the one active Product Capability Discovery focus
+- Parent Experience transferred input for Program Owner early scope vs later capability, limited to Program Setup / Digitization
+- Cross-role Interaction transferred input for faithful digitization, enrichment, error prevention, parent correction, and early product scope boundary
+- Product Synthesis candidates as inactive future work
+- Child Experience transferred inputs for Motivation / Reinforcement, Motivation Configuration, Self-Comparison / Progress Quality, Motivation Toolbox, and later Child Journey / progress UX refinement as inactive future work
+- Trainer Experience follow-up inputs for Trainer Connection / Visibility and Self-Comparison / Progress Quality as inactive future work
+- Cross-role follow-up inputs for Trainer Connection / Visibility and Parent Practice Review & Notes as inactive future work
+- Motivation / Reinforcement Discovery support review as inactive future work
 - Motivation Toolbox as a captured candidate Concept Model, not active concept work
 
 ## Open Questions
@@ -214,6 +214,8 @@ Parent Experience role / perspective questions are no longer blocking or unclass
 Cross-role Interaction Discovery has no blocking open questions at the current discovery level. Remaining non-blocking questions are transferred in `docs/product/discovery/cross-role-interaction-discovery.md`.
 
 Trainer Experience Discovery has no blocking open questions at the current discovery level. Trainer-side information needs are resolved at role / perspective level; Trainer Connection / Visibility capability detail remains future work. Timing is resolved for Trainer Experience, while motivation, self-comparison, measurement quality, movement quality, and execution support remain later discovery topics.
+
+Program Setup / Digitization Discovery must load and reconcile the Program Setup-relevant transferred inputs from Parent Experience Discovery and Cross-role Interaction Discovery before the active round closes. Other transferred targets remain future work unless this round explicitly transfers or defers them again.
 
 ## Emerging Product Principles
 
@@ -254,7 +256,7 @@ Product Capability Discovery:
 - Progress / Completion / Understanding Discovery: Documented
 - Motivation / Reinforcement Discovery: Captured
 - Execution / Practice Support Discovery: Captured
-- Program Setup / Digitization: Captured
+- Program Setup / Digitization: Exploring
 - Child / Family Profile Management: Captured
 - Trainer Connection / Visibility: Captured
 - Motivation Configuration: Captured
@@ -281,6 +283,57 @@ Concept Models:
 
 Downstream phases:
 UX / Design, Specification, and Engineering remain Not Started.
+
+## Program Setup / Digitization Discovery Status
+
+Program Setup / Digitization Discovery is the active Product Capability Discovery focus.
+
+Active discovery purpose:
+Clarify the product-level capability boundary for faithfully turning an instructor-provided TSMT plan into a trustworthy digital practice program that the parent and child can use together, without designing import UX, technical architecture, professional reinterpretation, or instructor approval workflows.
+
+Active transferred inputs:
+
+- Parent Experience Discovery: the Program Owner early scope vs later capability question, limited to Program Setup / Digitization responsibilities.
+- Cross-role Interaction Discovery: the Program Setup capability-scope question about faithful digitization, enrichment, error prevention, parent correction, and early product scope boundary.
+
+Inactive future candidates:
+
+- Trainer Connection / Visibility
+- Parent Practice Review & Notes
+- Self-Comparison / Progress Quality
+- Motivation / Reinforcement
+- Motivation Configuration
+- Product Principles synthesis
+- Motivation Toolbox concept work
+
+Input constraints and non-reopen boundaries:
+
+- The instructor owns the professional TSMT plan.
+- The parent faithfully digitizes the received plan.
+- The parent must not professionally reinterpret the plan.
+- Digital enrichment may improve usability but must not change professional meaning.
+- The parent may verify and correct their own digitalized version.
+- Error prevention is preferred over instructor-parent approval or correction workflows.
+- Parent-child home practice remains the primary product relationship.
+- Instructor visibility remains optional, passive, background, and child-invisible.
+- Progress Understanding System is not reopened merely because Program Setup / Digitization is active.
+
+Out of scope for this discovery round:
+
+- OCR pipeline design
+- import flow design
+- screen design
+- interaction flow design
+- catalog schema design
+- task field specification
+- database or data model design
+- API design
+- permission model design
+- instructor approval workflows
+- instructor-parent correction workflows
+- professional reinterpretation logic
+- implementation planning
+- backlog generation
 
 ## Parent Experience Discovery Status
 
@@ -434,7 +487,7 @@ Keep captured. Do not start active Motivation Toolbox concept work until unresol
 ### Program Setup / Digitization
 
 Status:
-Captured
+In Progress
 
 Why it matters:
 The parent may need to transfer the instructor-provided paper-based TSMT program into the system so it can become a child-understandable, jointly executable digital practice experience.
@@ -461,7 +514,7 @@ Suggested future artifact:
 _To be determined._
 
 Resolution notes:
-Keep captured until Program Setup / Digitization becomes an active discovery focus.
+Active Product Capability Discovery focus. Load and reconcile the matching Parent Experience and Cross-role Interaction transferred inputs during this round. Do not perform UX, specification, engineering, implementation planning, or backlog generation.
 
 ### Child / Family Profile Management
 
@@ -633,17 +686,8 @@ Keep parked until measurement, progress quality, or self-comparison becomes an a
 
 ## Next Suggested Focus
 
-Run a Product Discovery next-focus review before selecting the next active focus.
+Start the Program Setup / Digitization Discovery round at Product Capability Discovery level.
 
-No single next focus is sufficiently determined by repository state alone after Trainer Experience Discovery closure.
+The next-focus review is complete. Program Setup / Digitization Discovery is the one active focus.
 
-Candidate next discovery focuses:
-
-- Program Setup / Digitization Discovery
-- Trainer Connection / Visibility Discovery
-- Parent Practice Review & Notes Discovery
-- Self-Comparison / Progress Quality Discovery
-- Product Principles synthesis
-- Motivation / Reinforcement Discovery support review
-
-Motivation Toolbox may remain a captured candidate Concept Model, but it is not the next active concept focus until discovery support is reviewed.
+Do not start Trainer Connection / Visibility, Parent Practice Review & Notes, Self-Comparison / Progress Quality, Motivation / Reinforcement, Motivation Configuration, Product Principles synthesis, Motivation Toolbox concept work, UX / Design, Specification, or Engineering in parallel.
